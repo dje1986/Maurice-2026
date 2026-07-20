@@ -56,6 +56,108 @@
             --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
         }
 
+        .hero-section {
+            position: relative;
+            height: 300px;
+            background: url('https://images.unsplash.com/photo-1554152784-6019a16f2c00?auto=format&fit=crop&q=80&w=1000') center/cover no-repeat;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            margin: -80px -20px 20px -20px;
+            border-bottom-left-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(10, 17, 40, 0.05) 0%, rgba(10, 17, 40, 0.8) 100%);
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            width: 100%;
+        }
+        .hero-title { font-size: 2.2rem; font-weight: 900; line-height: 1.1; margin-bottom: 8px; text-transform: uppercase; letter-spacing: -0.5px;}
+        .hero-subtitle { font-size: 1rem; font-weight: 500; opacity: 0.9; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        
+        .card {
+            background-color: var(--surface-color);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .card-full { grid-column: span 2; }
+        
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .card-icon {
+            background: rgba(0, 78, 124, 0.1);
+            color: var(--blue-lagon);
+            width: 44px; height: 44px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        [data-theme="dark"] .card-icon { background: rgba(77, 168, 218, 0.15); color: var(--nav-icon-active); }
+        .card-icon .material-symbols-rounded { font-size: 24px; }
+        
+        .card-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-value { font-size: 1.8rem; font-weight: 900; color: var(--text-main); font-family: 'Urbanist', sans-serif;}
+        .card-subtext { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; font-weight: 500;}
+        
+        .countdown-grid { display: flex; justify-content: space-between; text-align: center; margin-top: 5px; }
+        .countdown-item { display: flex; flex-direction: column; flex: 1; position: relative;}
+        .countdown-item:not(:last-child)::after { content: ':'; position: absolute; right: -4px; top: 0; font-size: 1.5rem; color: var(--text-muted); font-weight: 800; font-family: 'Urbanist', sans-serif;}
+        .countdown-value { font-size: 2rem; font-weight: 900; color: var(--blue-lagon); font-family: 'Urbanist', sans-serif; line-height: 1;}
+        .countdown-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 4px;}
+        [data-theme="dark"] .countdown-value { color: var(--nav-icon-active); }
+
+        .info-badges { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;}
+        .badge { background: var(--blue-lagon); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px;}
+        [data-theme="dark"] .badge { background: var(--nav-icon-active); color: var(--blue-abysse); }
+        .badge .material-symbols-rounded { font-size: 18px; }
+
+        .anecdote-text { font-size: 1.1rem; font-style: italic; line-height: 1.5; color: var(--text-main); font-weight: 500; margin-top: 8px;}
+        .anecdote-text::before { content: '"'; font-size: 1.5rem; color: var(--blue-lagon); font-family: 'Urbanist', sans-serif; margin-right: 4px;}
+        .anecdote-text::after { content: '"'; font-size: 1.5rem; color: var(--blue-lagon); font-family: 'Urbanist', sans-serif; margin-left: 4px;}
+
+        .emergency-list { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 12px;}
+        .emergency-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-color); border-radius: 16px; border: 1px solid var(--border-color);}
+        .emergency-name { font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; font-size: 0.95rem;}
+        .emergency-name .material-symbols-rounded { color: #E63946; font-size: 22px; background: rgba(230, 57, 70, 0.1); padding: 6px; border-radius: 10px;}
+        .emergency-number { font-family: 'Urbanist', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--blue-lagon); text-decoration: none; display: flex; align-items: center; gap: 4px;}
+        [data-theme="dark"] .emergency-number { color: var(--nav-icon-active); }
+
+        /* Styles du Pull to refresh */
+        .ptr-container {
+            text-align: center; padding: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 600;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            height: 0; overflow: hidden; transition: height 0.3s ease, padding 0.3s ease;
+        }
+        .ptr-container.active { height: 60px; padding: 15px; }
+        .ptr-icon { transition: transform 0.3s ease; }
+        .ptr-container.refreshing .ptr-icon { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Notification Toast (mise à jour) */
+        .update-toast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: var(--blue-lagon); color: white;
+            padding: 12px 24px; border-radius: 30px;
+            box-shadow: var(--shadow-lg); z-index: 2000;
+            display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem;
+            transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .update-toast.show { top: 80px; }
+        [data-theme="dark"] .update-toast { background: var(--nav-icon-active); color: var(--blue-abysse); }
+
         /* ================= RESET & BASE ================= */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -75,38 +177,57 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 60px;
-            background-color: var(--header-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: transparent;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
             z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid transparent;
             transition: all 0.3s ease;
         }
 
+        header.scrolled {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
         .header-title {
-            font-size: 1.2rem;
-            font-weight: 800;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: white;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        header.scrolled .header-title {
+            opacity: 1;
+            transform: translateY(0);
             color: var(--blue-abysse);
         }
 
-        [data-theme="dark"] .header-title { color: var(--white); }
+        [data-theme="dark"] header.scrolled .header-title { color: var(--white); }
 
         /* Toggle Mode Sombre */
         .theme-toggle {
-            background: none;
+            background: rgba(0,0,0,0.3);
             border: none;
-            color: var(--text-main);
+            color: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 8px;
             border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        header.scrolled .theme-toggle {
             background-color: var(--surface-color);
+            color: var(--text-main);
         }
 
         /* ================= MAIN CONTENT AREA ================= */
@@ -187,13 +308,104 @@
         </button>
     </header>
 
+    <!-- Notification de mise à jour -->
+    <div id="update-toast" class="update-toast">
+        <span class="material-symbols-rounded">system_update</span>
+        Données synchronisées !
+    </div>
+
     <!-- MAIN CONTENT -->
-    <main>
+    <main id="main-container">
+        
+        <!-- Indicateur Pull to Refresh -->
+        <div id="ptr-container" class="ptr-container">
+            <span class="material-symbols-rounded ptr-icon" id="ptr-icon">arrow_downward</span>
+            <span id="ptr-text">Tirez pour rafraîchir</span>
+        </div>
+
         <!-- Page Home -->
         <section id="page-home" class="page-section active">
-            <div class="placeholder-card">
-                <h2>Bienvenue à l'île Maurice !</h2>
-                <p>Page d'accueil en cours de construction (Sprint 1).<br>Bientôt ici : Compte à rebours, Météo, Change, et Anecdotes.</p>
+            <!-- Hero Header avec belle photo de la mer mauricienne -->
+            <div class="hero-section">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1 class="hero-title">Bienvenue à l'île Maurice !</h1>
+                    <div class="hero-subtitle">Votre aventure en famille commence ici</div>
+                </div>
+            </div>
+
+            <!-- Grille du tableau de bord -->
+            <div class="dashboard-grid">
+                
+                <!-- Carte Compte à rebours -->
+                <div class="card card-full">
+                    <div class="card-header">
+                        <span class="card-title">Départ le 19 Octobre 2026</span>
+                        <div class="card-icon"><span class="material-symbols-rounded">flight_takeoff</span></div>
+                    </div>
+                    <div class="countdown-grid" id="countdown">
+                        <div class="countdown-item"><span class="countdown-value" id="cd-days">00</span><span class="countdown-label">Jours</span></div>
+                        <div class="countdown-item"><span class="countdown-value" id="cd-hours">00</span><span class="countdown-label">Heures</span></div>
+                        <div class="countdown-item"><span class="countdown-value" id="cd-mins">00</span><span class="countdown-label">Min</span></div>
+                        <div class="countdown-item"><span class="countdown-value" id="cd-secs">00</span><span class="countdown-label">Sec</span></div>
+                    </div>
+                    <div class="info-badges">
+                        <div class="badge"><span class="material-symbols-rounded">sunny</span> 10 Jours</div>
+                        <div class="badge"><span class="material-symbols-rounded">group</span> 17 Personnes</div>
+                    </div>
+                </div>
+
+                <!-- Carte Météo -->
+                <div class="card">
+                    <div class="card-header" style="margin-bottom:0;">
+                        <span class="card-title">Port-Louis</span>
+                        <div class="card-icon"><span class="material-symbols-rounded" id="weather-icon">cloud</span></div>
+                    </div>
+                    <div class="card-value" id="weather-temp">--°C</div>
+                    <div class="card-subtext" id="weather-desc">Chargement...</div>
+                </div>
+
+                <!-- Carte Change -->
+                <div class="card">
+                    <div class="card-header" style="margin-bottom:0;">
+                        <span class="card-title">Taux EUR/MUR</span>
+                        <div class="card-icon"><span class="material-symbols-rounded">currency_exchange</span></div>
+                    </div>
+                    <div class="card-value" id="currency-rate">-- Rs</div>
+                    <div class="card-subtext">Pour 1 Euro</div>
+                </div>
+
+                <!-- Carte Anecdote -->
+                <div class="card card-full">
+                    <div class="card-header">
+                        <span class="card-title">Le saviez-vous ?</span>
+                        <div class="card-icon"><span class="material-symbols-rounded">lightbulb</span></div>
+                    </div>
+                    <div class="anecdote-text" id="daily-anecdote">
+                        L'île Maurice abritait le Dodo, un oiseau endémique qui n'avait pas de prédateurs naturels avant l'arrivée des humains au 17ème siècle.
+                    </div>
+                </div>
+
+                <!-- Carte Urgences -->
+                <div class="card card-full" style="border-color: rgba(230, 57, 70, 0.3);">
+                    <div class="card-header">
+                        <span class="card-title" style="color: #E63946;">Numéros d'Urgence</span>
+                    </div>
+                    <ul class="emergency-list">
+                        <li class="emergency-item">
+                            <span class="emergency-name"><span class="material-symbols-rounded">local_police</span> Police / Secours</span>
+                            <a href="tel:999" class="emergency-number">999</a>
+                        </li>
+                        <li class="emergency-item">
+                            <span class="emergency-name"><span class="material-symbols-rounded">medical_services</span> SAMU (Médical)</span>
+                            <a href="tel:114" class="emergency-number">114</a>
+                        </li>
+                        <li class="emergency-item">
+                            <span class="emergency-name"><span class="material-symbols-rounded">account_balance</span> Ambassade FR</span>
+                            <a href="tel:+2302020100" class="emergency-number">+230 202 0100</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </section>
 
@@ -311,18 +523,206 @@
                 });
             });
 
-
             // 3. EFFET HEADER AU SCROLL
             const header = document.getElementById('main-header');
             window.addEventListener('scroll', () => {
-                if (window.scrollY > 10) {
-                    header.style.boxShadow = 'var(--shadow-sm)';
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
                 } else {
-                    header.style.boxShadow = 'none';
+                    header.classList.remove('scrolled');
                 }
             });
 
-            // 4. PREPARATION DU CACHE OFFLINE (Mocking Service Worker pour fichier unique)
+            // 4. CONFIGURATION API & VARIABLES GLOBALES
+            const API_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxK1vBGBEoPdnndqGybpEaI4CEDZBs-raPzGuLu4wHAtxE0KpqEYydF-mZej3WqdZ4EtQ/exec';
+            let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || null;
+
+            // 5. LOGIQUE DU COMPTE A REBOURS
+            function initCountdown() {
+                const targetDate = new Date('2026-10-19T10:00:00').getTime();
+                
+                const updateCD = () => {
+                    const now = new Date().getTime();
+                    const diff = targetDate - now;
+
+                    if (diff <= 0) {
+                        document.getElementById('cd-days').textContent = '00';
+                        document.getElementById('cd-hours').textContent = '00';
+                        document.getElementById('cd-mins').textContent = '00';
+                        document.getElementById('cd-secs').textContent = '00';
+                        return;
+                    }
+
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
+                    document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+                    document.getElementById('cd-mins').textContent = String(minutes).padStart(2, '0');
+                    document.getElementById('cd-secs').textContent = String(seconds).padStart(2, '0');
+                };
+                
+                updateCD();
+                setInterval(updateCD, 1000);
+            }
+
+            // 6. RECUPERATION DE LA METEO (API Open-Meteo)
+            async function fetchWeather() {
+                try {
+                    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-20.1609&longitude=57.5011&current_weather=true');
+                    const data = await res.json();
+                    
+                    if (data && data.current_weather) {
+                        const temp = Math.round(data.current_weather.temperature);
+                        const code = data.current_weather.weathercode;
+                        
+                        document.getElementById('weather-temp').textContent = `${temp}°C`;
+                        
+                        // Icône selon le weathercode
+                        let icon = 'sunny'; let desc = 'Ensoleillé';
+                        if (code >= 1 && code <= 3) { icon = 'partly_cloudy_day'; desc = 'Peu nuageux'; }
+                        if (code >= 45 && code <= 48) { icon = 'foggy'; desc = 'Brouillard'; }
+                        if (code >= 51 && code <= 67) { icon = 'rainy'; desc = 'Pluvieux'; }
+                        if (code >= 71 && code <= 77) { icon = 'ac_unit'; desc = 'Froid'; }
+                        if (code >= 80 && code <= 82) { icon = 'water_drop'; desc = 'Averses'; }
+                        if (code >= 95) { icon = 'thunderstorm'; desc = 'Orages'; }
+
+                        document.getElementById('weather-icon').textContent = icon;
+                        document.getElementById('weather-desc').textContent = desc;
+                    }
+                } catch (err) {
+                    console.error("Erreur Météo :", err);
+                    document.getElementById('weather-desc').textContent = 'Hors ligne';
+                }
+            }
+
+            // 7. RECUPERATION DU CHANGE (API Fawazahmed)
+            async function fetchCurrency() {
+                try {
+                    const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json');
+                    const data = await res.json();
+                    if (data && data.eur && data.eur.mur) {
+                        const rate = data.eur.mur.toFixed(2);
+                        document.getElementById('currency-rate').textContent = `${rate} Rs`;
+                    }
+                } catch (err) {
+                    console.error("Erreur Change :", err);
+                    document.getElementById('currency-rate').textContent = '≈ 50.10 Rs';
+                }
+            }
+
+            // 8. SYNCHRONISATION BASE DE DONNEES (Apps Script)
+            async function fetchAppData(forceRefresh = false) {
+                try {
+                    // Utiliser le cache si existant et non forcé
+                    if (appData && !forceRefresh) {
+                        renderAnecdote();
+                        return;
+                    }
+
+                    const response = await fetch(`${API_APPS_SCRIPT}?action=getAllData`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data && !data.error) {
+                        appData = data;
+                        localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+                        renderAnecdote();
+                        
+                        if (forceRefresh) showToast("Données synchronisées !");
+                    } else {
+                        throw new Error(data.error || "Format de données invalide");
+                    }
+                } catch (err) {
+                    console.error("Erreur détaillée récupération BDD :", err);
+                    if (forceRefresh) showToast("Erreur de synchronisation");
+                }
+            }
+
+            // 9. AFFICHAGE ANECDOTE DU JOUR
+            function renderAnecdote() {
+                const anecdoteEl = document.getElementById('daily-anecdote');
+                if (!appData || !appData.anecdotes || appData.anecdotes.length === 0) return;
+
+                const today = new Date();
+                const todayStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth()+1).padStart(2, '0')}/${today.getFullYear()}`;
+
+                let anecdote = appData.anecdotes.find(a => a.Jour === todayStr);
+                
+                // Fallback aléatoire si aucune anecdote ne correspond à la date
+                if (!anecdote) {
+                    anecdote = appData.anecdotes[Math.floor(Math.random() * appData.anecdotes.length)];
+                }
+
+                if (anecdote && anecdote.Texte) anecdoteEl.textContent = anecdote.Texte;
+            }
+
+            // 10. IMPLEMENTATION DU PULL-TO-REFRESH
+            const mainContainer = document.getElementById('main-container');
+            const ptrContainer = document.getElementById('ptr-container');
+            const ptrIcon = document.getElementById('ptr-icon');
+            const ptrText = document.getElementById('ptr-text');
+            
+            let startY = 0; let currentY = 0; let isPulling = false; let isRefreshing = false;
+
+            document.addEventListener('touchstart', (e) => {
+                if (window.scrollY === 0) { startY = e.touches[0].clientY; isPulling = true; }
+            }, { passive: true });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isPulling || isRefreshing) return;
+                currentY = e.touches[0].clientY;
+                const pullDistance = currentY - startY;
+                
+                if (pullDistance > 0 && window.scrollY === 0) {
+                    ptrContainer.classList.add('active');
+                    if (pullDistance > 80) {
+                        ptrIcon.style.transform = 'rotate(180deg)'; ptrText.textContent = "Relâchez pour mettre à jour";
+                    } else {
+                        ptrIcon.style.transform = 'rotate(0deg)'; ptrText.textContent = "Tirez pour rafraîchir";
+                    }
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', async (e) => {
+                if (!isPulling || isRefreshing) return;
+                isPulling = false;
+                
+                const pullDistance = currentY - startY;
+                if (pullDistance > 80 && window.scrollY === 0) {
+                    isRefreshing = true;
+                    ptrContainer.classList.add('refreshing'); ptrText.textContent = "Mise à jour en cours...";
+                    
+                    // Appels API en parallèle
+                    await Promise.all([ fetchWeather(), fetchCurrency(), fetchAppData(true) ]);
+                    
+                    ptrContainer.classList.remove('refreshing'); ptrContainer.classList.remove('active');
+                    setTimeout(() => { isRefreshing = false; ptrIcon.style.transform = 'rotate(0deg)'; }, 300);
+                } else {
+                    ptrContainer.classList.remove('active');
+                }
+            });
+
+            function showToast(message) {
+                const toast = document.getElementById('update-toast');
+                toast.innerHTML = `<span class="material-symbols-rounded">check_circle</span> ${message}`;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+
+            // LANCEMENT DES SCRIPTS INITIAUX
+            initCountdown();
+            fetchWeather();
+            fetchCurrency();
+            fetchAppData();
+
+            // 11. PREPARATION DU CACHE OFFLINE (Mocking Service Worker pour fichier unique)
             // Dans les prochains sprints, la récupération API et la sauvegarde Offline
             // se feront via LocalStorage/IndexedDB ici-même.
             console.log("🚀 Sprint 0 initialisé : Architecture PWA prête.");
