@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Maurice 2026</title>
+    
+    <!-- Polices Google : Urbanist & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Urbanist:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icônes Material -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+
+    <style>
+        /* ================= VARIABLES CSS (Mode Techno-Lagon) ================= */
+        :root {
+            /* Mode Clair par défaut */
+            --bg-color: #FFFFFF; /* Pure White */
+            --surface-color: #F8F9FA;
+            --text-main: #0A1128; /* Bleu Abysse (très foncé) */
+            --text-muted: #6C757D;
+            
+            /* Couleurs de la charte */
+            --blue-abysse: #0A1128;
+            --blue-lagon: #004E7C; /* Lagon profond */
+            --white: #FFFFFF;
+            
+            --nav-bg: #FFFFFF;
+            --nav-icon: #0A1128;
+            --nav-icon-active: #004E7C;
+            --header-bg: rgba(255, 255, 255, 0.9);
+            
+            --border-color: #E9ECEF;
+            
+            --shadow-sm: 0 2px 8px rgba(10, 17, 40, 0.05);
+            --shadow-lg: 0 8px 24px rgba(10, 17, 40, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Mode Sombre */
+            --bg-color: #121212; /* Gris très foncé */
+            --surface-color: #1E1E1E;
+            --text-main: #F8F9FA; /* Texte clair */
+            --text-muted: #A3A3A3;
+            
+            --nav-bg: #1A1A1A;
+            --nav-icon: #A3A3A3;
+            --nav-icon-active: #4DA8DA; /* Bleu lagon plus clair pour le contraste */
+            --header-bg: rgba(18, 18, 18, 0.9);
+            
+            --border-color: #2D2D2D;
+            --blue-lagon: #005B94;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        /* ================= RESET & BASE ================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+            padding-bottom: 90px; /* Espace pour le menu bas */
+        }
+
+        h1, h2, h3, h4, h5, h6 { font-family: 'Urbanist', sans-serif; }
+
+        /* ================= HEADER ================= */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--blue-abysse);
+        }
+
+        [data-theme="dark"] .header-title { color: var(--white); }
+
+        /* Toggle Mode Sombre */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 50%;
+            background-color: var(--surface-color);
+        }
+
+        /* ================= MAIN CONTENT AREA ================= */
+        main {
+            padding: 80px 20px 20px 20px; /* Espace pour le header */
+            min-height: 100vh;
+        }
+        
+        .page-section { display: none; animation: fadeIn 0.4s ease; }
+        .page-section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Placeholder pour le contenu du Sprint 1 */
+        .placeholder-card {
+            background-color: var(--surface-color);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .placeholder-card h2 { color: var(--blue-lagon); margin-bottom: 10px; font-size: 1.5rem; }
+        .placeholder-card p { color: var(--text-muted); font-size: 1rem; line-height: 1.5; }
+
+        /* ================= NAVIGATION BAS (MENU) ================= */
+        nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 70px;
+            background-color: var(--nav-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+            padding-bottom: env(safe-area-inset-bottom); /* Support iPhone notch */
+            z-index: 1000;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--nav-icon);
+            width: 20%;
+            height: 100%;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-item .material-symbols-rounded {
+            font-size: 26px;
+            margin-bottom: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-item.active { color: var(--nav-icon-active); }
+        .nav-item.active .material-symbols-rounded { transform: translateY(-2px); font-variation-settings: 'FILL' 1; }
+
+    </style>
+</head>
+<body>
+
+    <!-- HEADER SCROLLABLE -->
+    <header id="main-header">
+        <div class="header-title">Maurice 2026</div>
+        <button class="theme-toggle" id="theme-toggle-btn" aria-label="Basculer le mode sombre">
+            <span class="material-symbols-rounded" id="theme-icon">dark_mode</span>
+        </button>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- Page Home -->
+        <section id="page-home" class="page-section active">
+            <div class="placeholder-card">
+                <h2>Bienvenue à l'île Maurice !</h2>
+                <p>Page d'accueil en cours de construction (Sprint 1).<br>Bientôt ici : Compte à rebours, Météo, Change, et Anecdotes.</p>
+            </div>
+        </section>
+
+        <!-- Page Agenda -->
+        <section id="page-agenda" class="page-section">
+            <div class="placeholder-card">
+                <h2>Agenda</h2>
+                <p>Le programme détaillé du voyage s'affichera ici (Sprint 2).</p>
+            </div>
+        </section>
+
+        <!-- Page Carte (Lieux) -->
+        <section id="page-map" class="page-section">
+            <div class="placeholder-card">
+                <h2>Exploration</h2>
+                <p>La carte hors-ligne Leaflet sera intégrée ici (Sprint 3).</p>
+            </div>
+        </section>
+
+        <!-- Page Checklist -->
+        <section id="page-checklist" class="page-section">
+            <div class="placeholder-card">
+                <h2>Check-list</h2>
+                <p>Tes valises et tâches par famille s'afficheront ici (Sprint 4).</p>
+            </div>
+        </section>
+
+        <!-- Page Transports -->
+        <section id="page-transport" class="page-section">
+            <div class="placeholder-card">
+                <h2>Transports</h2>
+                <p>Suivi des vols et contacts logistiques (Sprint 4).</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- MENU DE NAVIGATION -->
+    <nav>
+        <a href="#" class="nav-item active" data-target="page-home">
+            <span class="material-symbols-rounded">home</span>
+            Accueil
+        </a>
+        <a href="#" class="nav-item" data-target="page-agenda">
+            <span class="material-symbols-rounded">calendar_month</span>
+            Agenda
+        </a>
+        <a href="#" class="nav-item" data-target="page-map">
+            <span class="material-symbols-rounded">map</span>
+            Carte
+        </a>
+        <a href="#" class="nav-item" data-target="page-checklist">
+            <span class="material-symbols-rounded">checklist</span>
+            Check-list
+        </a>
+        <a href="#" class="nav-item" data-target="page-transport">
+            <span class="material-symbols-rounded">flight</span>
+            Transports
+        </a>
+    </nav>
+
+    <!-- LOGIQUE JAVASCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. GESTION DU MODE CLAIR/SOMBRE
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            const themeIcon = document.getElementById('theme-icon');
+            const htmlTag = document.documentElement;
+            
+            // Vérifier les préférences enregistrées ou le système
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                htmlTag.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                htmlTag.setAttribute('data-theme', 'dark');
+                updateThemeIcon('dark');
+            }
+
+            themeBtn.addEventListener('click', () => {
+                const currentTheme = htmlTag.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                htmlTag.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                themeIcon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+            }
+
+
+            // 2. GESTION DE LA NAVIGATION
+            const navItems = document.querySelectorAll('.nav-item');
+            const pages = document.querySelectorAll('.page-section');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Retirer l'état actif de tous les boutons et pages
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    pages.forEach(page => page.classList.remove('active'));
+                    
+                    // Ajouter l'état actif au bouton cliqué
+                    item.classList.add('active');
+                    
+                    // Afficher la page correspondante
+                    const targetId = item.getAttribute('data-target');
+                    document.getElementById(targetId).classList.add('active');
+                    
+                    // Remonter en haut de page lors du changement
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+
+
+            // 3. EFFET HEADER AU SCROLL
+            const header = document.getElementById('main-header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    header.style.boxShadow = 'var(--shadow-sm)';
+                } else {
+                    header.style.boxShadow = 'none';
+                }
+            });
+
+            // 4. PREPARATION DU CACHE OFFLINE (Mocking Service Worker pour fichier unique)
+            // Dans les prochains sprints, la récupération API et la sauvegarde Offline
+            // se feront via LocalStorage/IndexedDB ici-même.
+            console.log("🚀 Sprint 0 initialisé : Architecture PWA prête.");
+        });
+    </script>
+</body>
+</html>
