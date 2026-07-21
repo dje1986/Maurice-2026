@@ -501,18 +501,26 @@
         let currentAnecdoteIdx = 0;
         function renderAnecdote() {
             if (!appData.anecdotes || !appData.anecdotes.length) return;
+
             appData.anecdotes.sort((a,b) => {
-                const [da, ma, ya] = a.Jour.split('/'); const [db, mb, yb] = b.Jour.split('/');
-                return new Date(ya, ma-1, da) - new Date(yb, mb-1, db);
+                // Gestion sécurisée des dates
+                const dateA = a.Jour ? new Date(a.Jour.replace(/(\d+)\/(\d+)\/(\d+)/, '$2/$1/$3')) : new Date(0);
+                const dateB = b.Jour ? new Date(b.Jour.replace(/(\d+)\/(\d+)\/(\d+)/, '$2/$1/$3')) : new Date(0);
+                return dateB - dateA; // Du plus récent au plus ancien
             });
-            currentAnecdoteIdx = appData.anecdotes.length - 1; // Le plus récent par défaut
+
+            currentAnecdoteIdx = appData.anecdotes.length - 1;
             updateAnecdoteUI();
         }
         function updateAnecdoteUI() {
-            if (!appData.anecdotes || !appData.anecdotes.length) return;
+            if (!appData.anecdotes || !appData.anecdotes.length) {
+                document.getElementById('anecdote-text').innerText = 'Aucune anecdote disponible';
+                document.getElementById('anecdote-date').innerText = '';
+                return;
+            }
             const a = appData.anecdotes[currentAnecdoteIdx];
-            document.getElementById('anecdote-text').innerText = a.Texte || '';
-            document.getElementById('anecdote-date').innerText = a.Jour || '';
+            document.getElementById('anecdote-text').innerText = a.Texte || 'Aucun texte';
+            document.getElementById('anecdote-date').innerText = a.Jour ? a.Jour : 'Date inconnue';
         }
         function prevAnecdote() { if(currentAnecdoteIdx > 0) { currentAnecdoteIdx--; updateAnecdoteUI(); } }
         function nextAnecdote() { if(currentAnecdoteIdx < appData.anecdotes.length - 1) { currentAnecdoteIdx++; updateAnecdoteUI(); } }
