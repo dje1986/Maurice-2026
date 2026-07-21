@@ -1,877 +1,733 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="light">
+<html lang="fr" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Maurice 2026</title>
-    
-    <!-- Polices Google : Urbanist & Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Urbanist:wght@700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Icônes Material -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ================= VARIABLES CSS (Mode Techno-Lagon) ================= */
         :root {
-            /* Mode Clair par défaut */
-            --bg-color: #FFFFFF; /* Pure White */
-            --surface-color: #F8F9FA;
-            --text-main: #0A1128; /* Bleu Abysse (très foncé) */
-            --text-muted: #6C757D;
-            
-            /* Couleurs de la charte */
-            --blue-abysse: #0A1128;
-            --blue-lagon: #004E7C; /* Lagon profond */
-            --white: #FFFFFF;
-            
-            --nav-bg: #FFFFFF;
-            --nav-icon: #0A1128;
-            --nav-icon-active: #004E7C;
-            --header-bg: rgba(255, 255, 255, 0.9);
-            
-            --border-color: #E9ECEF;
-            
-            --shadow-sm: 0 2px 8px rgba(10, 17, 40, 0.05);
-            --shadow-lg: 0 8px 24px rgba(10, 17, 40, 0.1);
+            /* Mode Clair : "Techno-Lagon" */
+            --color-bg: #F0F4F8;
+            --color-surface: #FFFFFF;
+            --color-text: #1F2937;
+            --color-accent: #0A1128; /* Bleu lagon profond */
+            --color-accent-light: #004E7C;
         }
 
-        [data-theme="dark"] {
+        .dark {
             /* Mode Sombre */
-            --bg-color: #121212; /* Gris très foncé */
-            --surface-color: #1E1E1E;
-            --text-main: #F8F9FA; /* Texte clair */
-            --text-muted: #A3A3A3;
-            
-            --nav-bg: #1A1A1A;
-            --nav-icon: #A3A3A3;
-            --nav-icon-active: #4DA8DA; /* Bleu lagon plus clair pour le contraste */
-            --header-bg: rgba(18, 18, 18, 0.9);
-            
-            --border-color: #2D2D2D;
-            --blue-lagon: #005B94;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+            --color-bg: #121212;
+            --color-surface: #1E1E1E;
+            --color-text: #E0E0E0;
+            --color-accent: #26A69A;
+            --color-accent-light: #004D40;
         }
 
-        .hero-section {
-            position: relative;
-            height: 100vh;
-            background: url('https://images.unsplash.com/photo-1513415431848-a433b3de449f?q=80&w=5384&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            margin: -80px -20px 20px -20px;
-            border-bottom-left-radius: 40px;
-            border-bottom-right-radius: 40px;
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-            transition: opacity 0.1s ease-out, transform 0.1s ease-out;
-            will-change: opacity, transform;
-        }
-        .hero-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to bottom, rgba(10, 17, 40, 0.2) 0%, rgba(10, 17, 40, 0.7) 100%);
-        }
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            color: white;
-            width: 100%;
-            transform: translateY(20px);
-        }
-        .hero-title { font-size: 3rem; font-weight: 900; line-height: 1.1; margin-bottom: 12px; text-transform: uppercase; letter-spacing: -0.5px; text-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-        .hero-subtitle { font-size: 1.2rem; font-weight: 500; opacity: 0.9; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
-        
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-        
-        .card {
-            background-color: var(--surface-color);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        .card-full { grid-column: span 2; }
-        
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .card-icon {
-            background: rgba(0, 78, 124, 0.1);
-            color: var(--blue-lagon);
-            width: 44px; height: 44px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        [data-theme="dark"] .card-icon { background: rgba(77, 168, 218, 0.15); color: var(--nav-icon-active); }
-        .card-icon .material-symbols-rounded { font-size: 24px; }
-        
-        .card-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .card-value { font-size: 1.8rem; font-weight: 900; color: var(--text-main); font-family: 'Urbanist', sans-serif;}
-        .card-subtext { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; font-weight: 500;}
-        
-        .countdown-grid { display: flex; justify-content: space-between; text-align: center; margin-top: 5px; }
-        .countdown-item { display: flex; flex-direction: column; flex: 1; position: relative;}
-        .countdown-item:not(:last-child)::after { content: ':'; position: absolute; right: -4px; top: 0; font-size: 1.5rem; color: var(--text-muted); font-weight: 800; font-family: 'Urbanist', sans-serif;}
-        .countdown-value { font-size: 2rem; font-weight: 900; color: var(--blue-lagon); font-family: 'Urbanist', sans-serif; line-height: 1;}
-        .countdown-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 4px;}
-        [data-theme="dark"] .countdown-value { color: var(--nav-icon-active); }
-
-        .info-badges { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;}
-        .badge { background: var(--blue-lagon); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px;}
-        [data-theme="dark"] .badge { background: var(--nav-icon-active); color: var(--blue-abysse); }
-        .badge .material-symbols-rounded { font-size: 18px; }
-
-        .anecdote-carousel { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; width: 100%; }
-        .anecdote-text-container { flex: 1; text-align: center; }
-        .anecdote-text { font-size: 1.1rem; font-style: italic; line-height: 1.5; color: var(--text-main); font-weight: 500; transition: opacity 0.2s ease;}
-        .anecdote-text::before { content: '"'; font-size: 1.5rem; color: var(--blue-lagon); font-family: 'Urbanist', sans-serif; margin-right: 4px;}
-        .anecdote-text::after { content: '"'; font-size: 1.5rem; color: var(--blue-lagon); font-family: 'Urbanist', sans-serif; margin-left: 4px;}
-        .carousel-btn { background: rgba(0, 78, 124, 0.1); border: none; color: var(--blue-lagon); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0;}
-        [data-theme="dark"] .carousel-btn { background: rgba(77, 168, 218, 0.15); color: var(--nav-icon-active); }
-        .carousel-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        .emergency-list { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 12px;}
-        .emergency-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-color); border-radius: 16px; border: 1px solid var(--border-color);}
-        .emergency-name { font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 10px; font-size: 0.95rem;}
-        .emergency-name .material-symbols-rounded { color: #E63946; font-size: 22px; background: rgba(230, 57, 70, 0.1); padding: 6px; border-radius: 10px;}
-        .emergency-number { font-family: 'Urbanist', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--blue-lagon); text-decoration: none; display: flex; align-items: center; gap: 4px;}
-        [data-theme="dark"] .emergency-number { color: var(--nav-icon-active); }
-
-        /* Styles du Pull to refresh */
-        .ptr-container {
-            text-align: center; padding: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 600;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-            height: 0; overflow: hidden; transition: height 0.3s ease, padding 0.3s ease;
-        }
-        .ptr-container.active { height: 60px; padding: 15px; }
-        .ptr-icon { transition: transform 0.3s ease; }
-        .ptr-container.refreshing .ptr-icon { animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* Notification Toast (mise à jour) */
-        .update-toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--blue-lagon); color: white;
-            padding: 12px 24px; border-radius: 30px;
-            box-shadow: var(--shadow-lg); z-index: 2000;
-            display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem;
-            transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .update-toast.show { top: 80px; }
-        [data-theme="dark"] .update-toast { background: var(--nav-icon-active); color: var(--blue-abysse); }
-
-        /* ================= RESET & BASE ================= */
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
         body {
+            font-family: 'Urbanist', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1, h2, h3, h4, .font-heading {
             font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            overflow-x: hidden;
-            padding-bottom: calc(75px + env(safe-area-inset-bottom)); /* Correction iPhone */
         }
 
-        h1, h2, h3, h4, h5, h6 { font-family: 'Urbanist', sans-serif; }
-
-        /* ================= HEADER ================= */
-        header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 60px;
-            background-color: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
-            border-bottom: 1px solid transparent;
-            transition: all 0.3s ease;
+        /* Masquer la scrollbar tout en gardant le scroll possible */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
 
-        header.scrolled {
-            background-color: var(--header-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
+        /* Animation Pull-to-refresh visuelle */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-
-        .header-title {
-            font-size: 1.3rem;
-            font-weight: 900;
-            color: white;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
+        .loading-spin {
+            animation: spin 1s linear infinite;
         }
-
-        header.scrolled .header-title {
-            opacity: 1;
-            transform: translateY(0);
-            color: var(--blue-abysse);
-        }
-
-        [data-theme="dark"] header.scrolled .header-title { color: var(--white); }
-
-        /* Toggle Mode Sombre */
-        .theme-toggle {
-            background: rgba(0,0,0,0.3);
-            border: none;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-        
-        header.scrolled .theme-toggle {
-            background-color: var(--surface-color);
-            color: var(--text-main);
-        }
-
-        /* ================= MAIN CONTENT AREA ================= */
-        main {
-            padding: 80px 20px 20px 20px; /* Espace pour le header */
-            min-height: 100vh;
-        }
-        
-        .page-section { display: none; animation: fadeIn 0.4s ease; }
-        .page-section.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Placeholder pour le contenu du Sprint 1 */
-        .placeholder-card {
-            background-color: var(--surface-color);
-            border-radius: 16px;
-            padding: 30px 20px;
-            text-align: center;
-            box-shadow: var(--shadow-sm);
-            margin-top: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .placeholder-card h2 { color: var(--blue-lagon); margin-bottom: 10px; font-size: 1.5rem; }
-        .placeholder-card p { color: var(--text-muted); font-size: 1rem; line-height: 1.5; }
-
-        /* ================= NAVIGATION BAS (MENU) ================= */
-        nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: calc(65px + env(safe-area-inset-bottom));
-            background-color: var(--nav-bg);
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-start;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
-            padding-bottom: env(safe-area-inset-bottom); /* Support iPhone notch */
-            z-index: 1000;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: var(--nav-icon);
-            width: 20%;
-            height: 65px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-
-        .nav-item .material-symbols-rounded {
-            font-size: 26px;
-            margin-bottom: 4px;
-            transition: transform 0.2s ease;
-        }
-
-        .nav-item.active { color: var(--nav-icon-active); }
-        .nav-item.active .material-symbols-rounded { transform: translateY(-2px); font-variation-settings: 'FILL' 1; }
-
     </style>
 </head>
-<body>
+<body class="antialiased selection:bg-[var(--color-accent)] selection:text-white pb-safe">
 
-    <!-- HEADER SCROLLABLE -->
-    <header id="main-header">
-        <div class="header-title">Maurice 2026</div>
-        <button class="theme-toggle" id="theme-toggle-btn" aria-label="Basculer le mode sombre">
-            <span class="material-symbols-rounded" id="theme-icon">dark_mode</span>
-        </button>
-    </header>
-
-    <!-- Notification de mise à jour -->
-    <div id="update-toast" class="update-toast">
-        <span class="material-symbols-rounded">system_update</span>
-        Données synchronisées !
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <main id="main-container">
+    <div class="max-w-md mx-auto min-h-screen relative bg-[var(--color-bg)] shadow-2xl overflow-hidden flex flex-col" id="app-container">
         
-        <!-- Indicateur Pull to Refresh -->
-        <div id="ptr-container" class="ptr-container">
-            <span class="material-symbols-rounded ptr-icon" id="ptr-icon">arrow_downward</span>
-            <span id="ptr-text">Tirez pour rafraîchir</span>
+        <!-- Header Image (pour la page Home) -->
+        <div id="home-header" class="relative h-64 w-full shrink-0 rounded-b-[40px] overflow-hidden shadow-lg transition-all duration-300">
+            <img src="https://images.unsplash.com/photo-1513415431848-a433b3de449f?q=80&w=4142&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?auto=format&fit=crop&q=80&w=1000" alt="Ile Maurice" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+            <div class="absolute bottom-6 left-6 text-white">
+                <h1 class="text-4xl font-bold font-heading mb-1 shadow-sm">Maurice 2026</h1>
+                <p class="text-sm font-medium opacity-90 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    17 Aventuriers
+                </p>
+            </div>
+            <!-- Bouton Rafraichir Manuel -->
+            <button onclick="manualRefresh()" class="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-transform">
+                <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+            <!-- Bouton Thème -->
+            <button onclick="toggleTheme()" class="absolute top-4 left-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-transform">
+                <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
         </div>
 
-        <!-- Page Home -->
-        <section id="page-home" class="page-section active">
-            <!-- Hero Header avec belle photo de la mer mauricienne -->
-            <div class="hero-section" id="hero">
-                <div class="hero-overlay"></div>
-                <div class="hero-content">
-                    <h1 class="hero-title">Bienvenue à l'île Maurice !</h1>
-                    <div class="hero-subtitle">Votre aventure en famille commence ici</div>
-                </div>
-            </div>
-
-            <!-- Grille du tableau de bord -->
-            <div class="dashboard-grid">
-                
-                <!-- Carte Compte à rebours -->
-                <div class="card card-full">
-                    <div class="card-header">
-                        <span class="card-title">Départ le 20 Octobre 2026 à 18h50</span>
-                        <div class="card-icon"><span class="material-symbols-rounded">flight_takeoff</span></div>
+        <!-- Zone de Contenu Principal (Scrollable) -->
+        <main id="main-content" class="flex-1 overflow-y-auto relative scroll-smooth">
+            
+            <div id="page-home" class="page block px-4 pt-6 pb-28">
+                <!-- Compte à rebours -->
+                <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm mb-6 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)] mb-1">Départ dans</h3>
+                        <div class="flex gap-3 text-center">
+                            <div><span id="cd-days" class="block text-2xl font-heading font-bold">--</span><span class="text-[10px] opacity-70">Jours</span></div>
+                            <div class="text-2xl font-bold opacity-30">:</div>
+                            <div><span id="cd-hours" class="block text-2xl font-heading font-bold">--</span><span class="text-[10px] opacity-70">Heures</span></div>
+                            <div class="text-2xl font-bold opacity-30">:</div>
+                            <div><span id="cd-mins" class="block text-2xl font-heading font-bold">--</span><span class="text-[10px] opacity-70">Min</span></div>
+                        </div>
                     </div>
-                    <div class="countdown-grid" id="countdown">
-                        <div class="countdown-item"><span class="countdown-value" id="cd-days">00</span><span class="countdown-label">Jours</span></div>
-                        <div class="countdown-item"><span class="countdown-value" id="cd-hours">00</span><span class="countdown-label">Heures</span></div>
-                        <div class="countdown-item"><span class="countdown-value" id="cd-mins">00</span><span class="countdown-label">Min</span></div>
-                        <div class="countdown-item"><span class="countdown-value" id="cd-secs">00</span><span class="countdown-label">Sec</span></div>
-                    </div>
-                    <div class="info-badges">
-                        <div class="badge"><span class="material-symbols-rounded">sunny</span> 10 Jours</div>
-                        <div class="badge"><span class="material-symbols-rounded">group</span> 17 Personnes</div>
+                    <div class="h-12 w-12 rounded-full bg-[var(--color-accent-light)] flex items-center justify-center text-[var(--color-accent)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     </div>
                 </div>
 
-                <!-- Carte Météo -->
-                <div class="card">
-                    <div class="card-header" style="margin-bottom:0;">
-                        <span class="card-title">Port-Louis</span>
-                        <div class="card-icon"><span class="material-symbols-rounded" id="weather-icon">cloud</span></div>
+                <!-- Widgets Météo & Devise -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <!-- Météo Port-Louis -->
+                    <div class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <span class="text-xs font-bold opacity-70">Port-Louis</span>
+                            <span id="weather-icon" class="text-xl">☀️</span>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-heading font-bold inline-block" id="weather-temp">--°C</div>
+                            <div class="text-xs opacity-60 mt-1" id="weather-desc">Chargement...</div>
+                        </div>
                     </div>
-                    <div class="card-value" id="weather-temp">--°C</div>
-                    <div class="card-subtext" id="weather-desc">Chargement...</div>
+                    <!-- Taux de Change -->
+                    <div class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <span class="text-xs font-bold opacity-70">Taux EUR/MUR</span>
+                            <span class="text-xl">💶</span>
+                        </div>
+                        <div>
+                            <div class="flex items-end gap-1">
+                                <span class="text-2xl font-heading font-bold" id="currency-rate">--</span>
+                                <span class="text-sm font-bold opacity-70 mb-1">Rs</span>
+                            </div>
+                            <div class="text-xs opacity-60 mt-1">Pour 1 €</div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Carte Change -->
-                <div class="card" id="currency-card" style="cursor: pointer;">
-                    <div class="card-header" style="margin-bottom:0;">
-                        <span class="card-title">Taux Change</span>
-                        <div class="card-icon"><span class="material-symbols-rounded">swap_horiz</span></div>
+                <!-- Anecdote du jour -->
+                <div class="bg-gradient-to-br from-[var(--color-accent)] to-[#004E7C] text-white rounded-3xl p-5 shadow-lg mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
                     </div>
-                    <div class="card-value" id="currency-rate" style="transition: opacity 0.2s;">-- Rs</div>
-                    <div class="card-subtext" id="currency-subtext">Pour 1 Euro</div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-sm font-bold tracking-wide flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Le Saviez-Vous ?
+                            </h3>
+                            <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded-lg" id="anecdote-date">--/--</span>
+                        </div>
+                        <p class="text-lg font-heading font-medium leading-tight mt-3 mb-4" id="anecdote-text">
+                            Chargement de la découverte du jour...
+                        </p>
+                        <div class="flex justify-between items-center border-t border-white/20 pt-3">
+                            <button onclick="prevAnecdote()" class="text-xs font-bold hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors active:scale-95">← Précédent</button>
+                            <button onclick="nextAnecdote()" class="text-xs font-bold hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors active:scale-95">Suivant →</button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Carte Anecdote -->
-                <div class="card card-full">
-                    <div class="card-header">
-                        <span class="card-title">Le saviez-vous ?</span>
-                        <span class="card-subtext" id="anecdote-date" style="margin: 0; font-size: 0.8rem;"></span>
-                    </div>
-                    <div class="anecdote-carousel" id="anecdote-carousel">
-                        <button class="carousel-btn" id="anecdote-prev"><span class="material-symbols-rounded">chevron_left</span></button>
-                        <div class="anecdote-text-container">
-                            <div class="anecdote-text" id="daily-anecdote">
-                                L'île Maurice abritait le Dodo, un oiseau endémique qui n'avait pas de prédateurs naturels.
+                <!-- Section Urgences -->
+                <h3 class="text-lg font-bold font-heading mb-3 pl-2 opacity-90">Contacts d'Urgence</h3>
+                <div class="bg-[var(--color-surface)] rounded-3xl p-4 shadow-sm space-y-3">
+                    <a href="tel:999" class="flex items-center justify-between p-2 rounded-xl active:bg-[var(--color-bg)] transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-full bg-red-100 text-red-500 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div>
+                            <div>
+                                <div class="font-bold text-sm">Police / Urgences</div>
+                                <div class="text-xs opacity-60">999 ou 112</div>
                             </div>
                         </div>
-                        <button class="carousel-btn" id="anecdote-next"><span class="material-symbols-rounded">chevron_right</span></button>
-                    </div>
-                </div>
-
-                <!-- Carte Urgences -->
-                <div class="card card-full" style="border-color: rgba(230, 57, 70, 0.3);">
-                    <div class="card-header">
-                        <span class="card-title" style="color: #E63946;">Numéros d'Urgence</span>
-                    </div>
-                    <ul class="emergency-list">
-                        <li class="emergency-item">
-                            <span class="emergency-name"><span class="material-symbols-rounded">local_police</span> Police / Secours</span>
-                            <a href="tel:999" class="emergency-number">999</a>
-                        </li>
-                        <li class="emergency-item">
-                            <span class="emergency-name"><span class="material-symbols-rounded">medical_services</span> SAMU (Médical)</span>
-                            <a href="tel:114" class="emergency-number">114</a>
-                        </li>
-                        <li class="emergency-item">
-                            <span class="emergency-name"><span class="material-symbols-rounded">account_balance</span> Ambassade FR</span>
-                            <a href="tel:+2302020100" class="emergency-number">+230 202 0100</a>
-                        </li>
-                    </ul>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="tel:114" class="flex items-center justify-between p-2 rounded-xl active:bg-[var(--color-bg)] transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-full bg-red-100 text-red-500 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div>
+                            <div>
+                                <div class="font-bold text-sm">SAMU (Ambulance)</div>
+                                <div class="text-xs opacity-60">114</div>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
                 </div>
             </div>
-        </section>
 
-        <!-- Page Agenda -->
-        <section id="page-agenda" class="page-section">
-            <div class="placeholder-card">
-                <h2>Agenda</h2>
-                <p>Le programme détaillé du voyage s'affichera ici (Sprint 2).</p>
+            <div id="page-agenda" class="page hidden px-4 pt-8 pb-28 min-h-screen">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold font-heading">Agenda</h2>
+                        <p class="opacity-70 text-sm mt-1">Le programme du séjour</p>
+                    </div>
+                    <button onclick="openModal('modal-add-activity')" class="bg-[var(--color-accent)] text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-lg active:scale-95 transition-transform flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Ajouter
+                    </button>
+                </div>
+
+                <div id="activities-container" class="space-y-6">
+                    <!-- Les activités seront injectées ici par JS -->
+                </div>
             </div>
-        </section>
 
-        <!-- Page Carte (Lieux) -->
-        <section id="page-map" class="page-section">
-            <div class="placeholder-card">
-                <h2>Exploration</h2>
-                <p>La carte hors-ligne Leaflet sera intégrée ici (Sprint 3).</p>
+            <!-- PAGE LIEUX -->
+            <div id="page-lieux" class="page hidden px-4 pt-8 pb-28 min-h-screen">
+                <h2 class="text-3xl font-bold font-heading mb-6">Carte & Lieux</h2>
+                <div class="bg-[var(--color-surface)] rounded-3xl p-8 shadow-sm text-center">
+                    <span class="text-4xl mb-4 block">🗺️</span>
+                    <p class="font-bold opacity-80">En cours de construction...</p>
+                    <p class="text-sm opacity-60 mt-2">Bientôt : Carte interactive Leaflet offline !</p>
+                </div>
             </div>
-        </section>
 
-        <!-- Page Checklist -->
-        <section id="page-checklist" class="page-section">
-            <div class="placeholder-card">
-                <h2>Check-list</h2>
-                <p>Tes valises et tâches par famille s'afficheront ici (Sprint 4).</p>
+            <!-- PAGE TRANSPORTS -->
+            <div id="page-transports" class="page hidden px-4 pt-8 pb-28 min-h-screen">
+                <h2 class="text-3xl font-bold font-heading mb-6">Transports</h2>
+                <div class="bg-[var(--color-surface)] rounded-3xl p-8 shadow-sm text-center">
+                    <span class="text-4xl mb-4 block">✈️</span>
+                    <p class="font-bold opacity-80">En cours de construction...</p>
+                </div>
             </div>
-        </section>
 
-        <!-- Page Transports -->
-        <section id="page-transport" class="page-section">
-            <div class="placeholder-card">
-                <h2>Transports</h2>
-                <p>Suivi des vols et contacts logistiques (Sprint 4).</p>
+            <!-- PAGE CHECKLIST -->
+            <div id="page-checklist" class="page hidden px-4 pt-8 pb-28 min-h-screen">
+                <h2 class="text-3xl font-bold font-heading mb-6">Valises & Checklist</h2>
+                <div class="bg-[var(--color-surface)] rounded-3xl p-8 shadow-sm text-center">
+                    <span class="text-4xl mb-4 block">✅</span>
+                    <p class="font-bold opacity-80">En cours de construction...</p>
+                </div>
             </div>
-        </section>
-    </main>
+        </main>
 
-    <!-- MENU DE NAVIGATION -->
-    <nav>
-        <a href="#" class="nav-item active" data-target="page-home">
-            <span class="material-symbols-rounded">home</span>
-            Accueil
-        </a>
-        <a href="#" class="nav-item" data-target="page-agenda">
-            <span class="material-symbols-rounded">calendar_month</span>
-            Agenda
-        </a>
-        <a href="#" class="nav-item" data-target="page-map">
-            <span class="material-symbols-rounded">map</span>
-            Carte
-        </a>
-        <a href="#" class="nav-item" data-target="page-checklist">
-            <span class="material-symbols-rounded">checklist</span>
-            Check-list
-        </a>
-        <a href="#" class="nav-item" data-target="page-transport">
-            <span class="material-symbols-rounded">flight</span>
-            Transports
-        </a>
-    </nav>
+        <!-- MODAL : DÉTAIL ACTIVITÉ -->
+        <div id="modal-activity-details" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
+            <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl" id="activity-modal-content">
+                <!-- Contenu injecté via JS -->
+            </div>
+        </div>
 
-    <!-- LOGIQUE JAVASCRIPT -->
+        <!-- MODAL : AJOUTER UNE ACTIVITÉ -->
+        <div id="modal-add-activity" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
+            <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl" id="add-activity-content">
+                <button onclick="closeModal('modal-add-activity')" class="absolute top-4 right-4 p-2 bg-[var(--color-bg)] rounded-full active:scale-90 z-10 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <h3 class="text-2xl font-bold font-heading mb-4">Nouvelle Activité</h3>
+                <form id="form-add-activity" onsubmit="submitActivity(event)" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Titre *</label>
+                            <input type="text" name="Titre" required class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Date (JJ/MM/AAAA) *</label>
+                            <input type="text" name="Jour" placeholder="20/10/2026" required class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Heure (HH:MM)</label>
+                            <input type="time" name="Heure" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Participants</label>
+                            <input type="text" name="Participants" placeholder="Tous, ou Boué..." class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Prix</label>
+                            <input type="text" name="Prix" placeholder="ex: 1500 Rs" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">URL de l'image (Optionnelle)</label>
+                            <input type="url" name="PhotoURL" placeholder="https://..." class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Description rapide</label>
+                            <textarea name="Descriptif" rows="2" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></textarea>
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Statut</label>
+                            <select name="Statut" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm">
+                                <option value="En attente">En attente</option>
+                                <option value="Confirmé">Confirmé</option>
+                                <option value="Annulé">Annulé</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-[var(--color-accent)] text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-transform mt-6">
+                        Enregistrer l'activité
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- NAVIGATION BAR (FIXE EN BAS) -->
+        <nav class="absolute bottom-0 w-full bg-[var(--color-surface)] border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 px-6 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-50">
+            <ul class="flex justify-between items-center h-16">
+                <!-- Accueil -->
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-home', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity text-[var(--color-accent)] active">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <span class="text-[10px] font-bold">Accueil</span>
+                    </button>
+                </li>
+                <!-- Agenda -->
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-agenda', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="text-[10px] font-bold">Agenda</span>
+                    </button>
+                </li>
+                <!-- Carte -->
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-lieux', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        <span class="text-[10px] font-bold">Carte</span>
+                    </button>
+                </li>
+                <!-- Transports -->
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-transports', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                        <span class="text-[10px] font-bold">Vols</span>
+                    </button>
+                </li>
+                <!-- Checklist -->
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-checklist', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        <span class="text-[10px] font-bold">Valises</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- TOAST NOTIFICATION -->
+        <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-[70] transform -translate-y-4">
+            Notification
+        </div>
+    </div>
+
     <script>
+        // 1. CONFIGURATION API & VARIABLES GLOBALES
+        // REMPLACE par l'URL de déploiement de ton Apps Script si celle-ci change !
+        const API_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxK1vBGBEoPdnndqGybpEaI4CEDZBs-raPzGuLu4wHAtxE0KpqEYydF-mZej3WqdZ4EtQ/exec';
+        
+        const DEFAULT_DATA = {
+            anecdotes: [
+                { Jour: '20/10/2026', Texte: "L'île Maurice abritait le Dodo, un oiseau endémique emblématique qui a disparu au XVIIe siècle." },
+                { Jour: '21/10/2026', Texte: "Le Morne Brabant est classé au patrimoine mondial de l'UNESCO et servait autrefois de refuge." }
+            ],
+            activites: [
+                {
+                    ID: "ACT-DEMO",
+                    Titre: "Arrivée Aéroport SSR",
+                    Jour: "19/10/2026",
+                    Heure: "10:30",
+                    Descriptif: "Récupération des bagages et prise en charge des vans.",
+                    PhotoURL: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=500&auto=format&fit=crop",
+                    Statut: "Confirmé",
+                    Participants: "Tous",
+                }
+            ],
+            lieux: [],
+            checklist: [],
+            participants: []
+        };
+
+        let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || DEFAULT_DATA;
+
+        // 2. THEME & INITIALISATION
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('maurice2026_theme', isDark ? 'dark' : 'light');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // 1. GESTION DU MODE CLAIR/SOMBRE
-            const themeBtn = document.getElementById('theme-toggle-btn');
-            const themeIcon = document.getElementById('theme-icon');
-            const htmlTag = document.documentElement;
-            
-            // Vérifier les préférences enregistrées ou le système
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                htmlTag.setAttribute('data-theme', savedTheme);
-                updateThemeIcon(savedTheme);
-            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                htmlTag.setAttribute('data-theme', 'dark');
-                updateThemeIcon('dark');
+            // Appliquer le thème sauvegardé
+            if (localStorage.getItem('maurice2026_theme') === 'dark') {
+                document.documentElement.classList.add('dark');
             }
 
-            themeBtn.addEventListener('click', () => {
-                const currentTheme = htmlTag.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                htmlTag.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                updateThemeIcon(newTheme);
-            });
-
-            function updateThemeIcon(theme) {
-                themeIcon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
-            }
-
-
-            // 2. GESTION DE LA NAVIGATION
-            const navItems = document.querySelectorAll('.nav-item');
-            const pages = document.querySelectorAll('.page-section');
-
-            navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    
-                    // Retirer l'état actif de tous les boutons et pages
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    pages.forEach(page => page.classList.remove('active'));
-                    
-                    // Ajouter l'état actif au bouton cliqué
-                    item.classList.add('active');
-                    
-                    // Afficher la page correspondante
-                    const targetId = item.getAttribute('data-target');
-                    document.getElementById(targetId).classList.add('active');
-                    
-                    // Remonter en haut de page lors du changement
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-            });
-
-            // 3. EFFET HEADER AU SCROLL
-            const header = document.getElementById('main-header');
-            const heroSection = document.getElementById('hero');
-            
-            window.addEventListener('scroll', () => {
-                const scrollY = window.scrollY;
-                
-                if (scrollY > 50) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                }
-
-                // Effet de réduction et disparition du Hero Header
-                if (heroSection) {
-                    if (scrollY <= window.innerHeight) {
-                        heroSection.style.opacity = 1 - (scrollY / (window.innerHeight * 0.6));
-                        heroSection.style.transform = `scale(${1 - (scrollY * 0.0003)})`;
-                    }
-                }
-            });
-
-            // 4. CONFIGURATION API & VARIABLES GLOBALES
-            const API_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxK1vBGBEoPdnndqGybpEaI4CEDZBs-raPzGuLu4wHAtxE0KpqEYydF-mZej3WqdZ4EtQ/exec';
-            
-            // Données de secours (Fallback si l'API est indisponible ou mal configurée)
-            const DEFAULT_DATA = {
-                anecdotes: [
-                    { Jour: '20/10/2026', Texte: "L'île Maurice abritait le Dodo, un oiseau endémique emblématique qui a disparu au XVIIe siècle." },
-                    { Jour: '21/10/2026', Texte: "Le Morne Brabant est classé au patrimoine mondial de l'UNESCO et servait autrefois de refuge." },
-                    { Jour: '22/10/2026', Texte: "La terre des 7 couleurs de Chamarel est une curiosité géologique aux nuances ocre, rouge et violacées." }
-                ],
-                activites: [],
-                lieux: [],
-                checklist: [],
-                participants: []
-            };
-
-            let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || DEFAULT_DATA;
-
-            // 5. LOGIQUE DU COMPTE A REBOURS
-            function initCountdown() {
-                const targetDate = new Date('2026-10-20T18:50:00').getTime();
-                
-                const updateCD = () => {
-                    const now = new Date().getTime();
-                    const diff = targetDate - now;
-
-                    if (diff <= 0) {
-                        document.getElementById('cd-days').textContent = '00';
-                        document.getElementById('cd-hours').textContent = '00';
-                        document.getElementById('cd-mins').textContent = '00';
-                        document.getElementById('cd-secs').textContent = '00';
-                        return;
-                    }
-
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                    document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
-                    document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
-                    document.getElementById('cd-mins').textContent = String(minutes).padStart(2, '0');
-                    document.getElementById('cd-secs').textContent = String(seconds).padStart(2, '0');
-                };
-                
-                updateCD();
-                setInterval(updateCD, 1000);
-            }
-
-            // 6. RECUPERATION DE LA METEO (API Open-Meteo)
-            async function fetchWeather() {
-                try {
-                    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-20.1609&longitude=57.5011&current_weather=true');
-                    const data = await res.json();
-                    
-                    if (data && data.current_weather) {
-                        const temp = Math.round(data.current_weather.temperature);
-                        const code = data.current_weather.weathercode;
-                        
-                        document.getElementById('weather-temp').textContent = `${temp}°C`;
-                        
-                        // Icône selon le weathercode
-                        let icon = 'sunny'; let desc = 'Ensoleillé';
-                        if (code >= 1 && code <= 3) { icon = 'partly_cloudy_day'; desc = 'Peu nuageux'; }
-                        if (code >= 45 && code <= 48) { icon = 'foggy'; desc = 'Brouillard'; }
-                        if (code >= 51 && code <= 67) { icon = 'rainy'; desc = 'Pluvieux'; }
-                        if (code >= 71 && code <= 77) { icon = 'ac_unit'; desc = 'Froid'; }
-                        if (code >= 80 && code <= 82) { icon = 'water_drop'; desc = 'Averses'; }
-                        if (code >= 95) { icon = 'thunderstorm'; desc = 'Orages'; }
-
-                        document.getElementById('weather-icon').textContent = icon;
-                        document.getElementById('weather-desc').textContent = desc;
-                    }
-                } catch (err) {
-                    console.error("Erreur Météo :", err);
-                    document.getElementById('weather-desc').textContent = 'Hors ligne';
-                }
-            }
-
-            // 7. RECUPERATION DU CHANGE (API Fawazahmed)
-            let exchangeRate = null;
-            let showEurToMur = true;
-
-            async function fetchCurrency() {
-                try {
-                    const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json');
-                    const data = await res.json();
-                    if (data && data.eur && data.eur.mur) {
-                        exchangeRate = data.eur.mur;
-                        updateCurrencyUI();
-                    }
-                } catch (err) {
-                    console.error("Erreur Change :", err);
-                    exchangeRate = 50.10; // Fallback
-                    updateCurrencyUI();
-                }
-            }
-
-            function updateCurrencyUI() {
-                if (!exchangeRate) return;
-                const valueEl = document.getElementById('currency-rate');
-                const subEl = document.getElementById('currency-subtext');
-                
-                valueEl.style.opacity = 0; // Animation
-                
-                setTimeout(() => {
-                    if (showEurToMur) {
-                        valueEl.textContent = `${exchangeRate.toFixed(2)} Rs`;
-                        subEl.textContent = 'Pour 1 Euro';
-                    } else {
-                        const murToEur = (1 / exchangeRate).toFixed(3);
-                        valueEl.textContent = `${murToEur} €`;
-                        subEl.textContent = 'Pour 1 Roupie';
-                    }
-                    valueEl.style.opacity = 1;
-                }, 150);
-            }
-
-            document.getElementById('currency-card').addEventListener('click', () => {
-                showEurToMur = !showEurToMur;
-                updateCurrencyUI();
-            });
-
-            // 8. SYNCHRONISATION BASE DE DONNEES (Apps Script)
-            async function fetchAppData(isManualRefresh = false) {
-                try {
-                    const response = await fetch(`${API_APPS_SCRIPT}?action=getAllData`);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    if (data && !data.error) {
-                        appData = data;
-                        localStorage.setItem('maurice2026_data', JSON.stringify(appData));
-                        renderAnecdote(); // Mise à jour de l'affichage des anecdotes
-                        
-                        if (isManualRefresh) {
-                            showToast("Données synchronisées !");
-                        }
-                    } else {
-                        console.warn("Réponse API invalide ou erreur Apps Script :", data ? data.error : "Données vides");
-                        if (isManualRefresh) showToast("Erreur de données Apps Script");
-                        renderAnecdote();
-                    }
-                } catch (error) {
-                    // Capture propre de l'erreur réseau / CORS (Load failed)
-                    console.warn("API Apps Script non joignable (mode hors-ligne ou script à redéployer) :", error.message || error);
-                    
-                    if (isManualRefresh) showToast("Mode hors-ligne / API non connectée");
-                    
-                    if (!appData) {
-                        appData = DEFAULT_DATA;
-                    }
-                    renderAnecdote(); 
-                }
-            }
-            // 9. AFFICHAGE ANECDOTE DU JOUR (Avec Carrousel)
-            let validAnecdotes = [];
-            let currentAnecdoteIdx = 0;
-
-            function parseDateString(dateStr) {
-                // Parse JJ/MM/AAAA
-                if(!dateStr) return new Date(0);
-                const parts = String(dateStr).split('/');
-                if(parts.length === 3) {
-                    return new Date(parts[2], parts[1] - 1, parts[0]);
-                }
-                return new Date(0);
-            }
-
-            function renderAnecdote() {
-                if (!appData || !appData.anecdotes || appData.anecdotes.length === 0) {
-                    if (DEFAULT_DATA && DEFAULT_DATA.anecdotes) {
-                        validAnecdotes = DEFAULT_DATA.anecdotes;
-                        currentAnecdoteIdx = 0;
-                        updateAnecdoteUI();
-                    }
-                    return;
-                }
-
-                const today = new Date();
-                today.setHours(23, 59, 59, 999);
-
-                // Filtrer les anecdotes jusqu'à aujourd'hui et les trier chronologiquement
-                validAnecdotes = appData.anecdotes.filter(a => {
-                    const d = parseDateString(a.Jour);
-                    return d <= today;
-                }).sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour));
-
-                if (validAnecdotes.length === 0) {
-                    // Fallback sur toutes les anecdotes disponibles
-                    validAnecdotes = appData.anecdotes;
-                }
-
-                // Démarrer sur la plus récente
-                currentAnecdoteIdx = validAnecdotes.length - 1;
-                updateAnecdoteUI();
-            }
-
-            function updateAnecdoteUI() {
-                if(validAnecdotes.length === 0) return;
-                const a = validAnecdotes[currentAnecdoteIdx];
-                const el = document.getElementById('daily-anecdote');
-                const dateEl = document.getElementById('anecdote-date');
-                const prevBtn = document.getElementById('anecdote-prev');
-                const nextBtn = document.getElementById('anecdote-next');
-                
-                el.style.opacity = 0;
-                setTimeout(() => {
-                    el.textContent = a.Texte;
-                    dateEl.textContent = a.Jour || "Le saviez-vous ?";
-                    el.style.opacity = 1;
-                }, 200);
-
-                prevBtn.disabled = currentAnecdoteIdx === 0;
-                nextBtn.disabled = currentAnecdoteIdx === validAnecdotes.length - 1;
-            }
-
-            document.getElementById('anecdote-prev').addEventListener('click', () => {
-                if(currentAnecdoteIdx > 0) { currentAnecdoteIdx--; updateAnecdoteUI(); }
-            });
-            document.getElementById('anecdote-next').addEventListener('click', () => {
-                if(currentAnecdoteIdx < validAnecdotes.length - 1) { currentAnecdoteIdx++; updateAnecdoteUI(); }
-            });
-
-            // Swipe Logic
-            let touchStartX = 0;
-            const carouselEl = document.getElementById('anecdote-carousel');
-            
-            carouselEl.addEventListener('touchstart', e => { 
-                touchStartX = e.changedTouches[0].screenX; 
-            }, {passive: true});
-            
-            carouselEl.addEventListener('touchend', e => { 
-                const touchEndX = e.changedTouches[0].screenX; 
-                if (touchStartX - touchEndX > 50) {
-                    // Swipe gauche -> Suivant
-                    if(currentAnecdoteIdx < validAnecdotes.length - 1) { currentAnecdoteIdx++; updateAnecdoteUI(); }
-                } else if (touchEndX - touchStartX > 50) {
-                    // Swipe droite -> Précédent
-                    if(currentAnecdoteIdx > 0) { currentAnecdoteIdx--; updateAnecdoteUI(); }
-                }
-            }, {passive: true});
-
-            // 10. IMPLEMENTATION DU PULL-TO-REFRESH
-            const mainContainer = document.getElementById('main-container');
-            const ptrContainer = document.getElementById('ptr-container');
-            const ptrIcon = document.getElementById('ptr-icon');
-            const ptrText = document.getElementById('ptr-text');
-            
-            let startY = 0; let currentY = 0; let isPulling = false; let isRefreshing = false;
-
-            document.addEventListener('touchstart', (e) => {
-                if (window.scrollY === 0) { startY = e.touches[0].clientY; isPulling = true; }
-            }, { passive: true });
-
-            document.addEventListener('touchmove', (e) => {
-                if (!isPulling || isRefreshing) return;
-                currentY = e.touches[0].clientY;
-                const pullDistance = currentY - startY;
-                
-                if (pullDistance > 0 && window.scrollY === 0) {
-                    ptrContainer.classList.add('active');
-                    if (pullDistance > 80) {
-                        ptrIcon.style.transform = 'rotate(180deg)'; ptrText.textContent = "Relâchez pour mettre à jour";
-                    } else {
-                        ptrIcon.style.transform = 'rotate(0deg)'; ptrText.textContent = "Tirez pour rafraîchir";
-                    }
-                }
-            }, { passive: true });
-
-            document.addEventListener('touchend', async (e) => {
-                if (!isPulling || isRefreshing) return;
-                isPulling = false;
-                
-                const pullDistance = currentY - startY;
-                if (pullDistance > 80 && window.scrollY === 0) {
-                    isRefreshing = true;
-                    ptrContainer.classList.add('refreshing'); ptrText.textContent = "Mise à jour en cours...";
-                    
-                    // Appels API en parallèle
-                    await Promise.all([ fetchWeather(), fetchCurrency(), fetchAppData(true) ]);
-                    
-                    ptrContainer.classList.remove('refreshing'); ptrContainer.classList.remove('active');
-                    setTimeout(() => { isRefreshing = false; ptrIcon.style.transform = 'rotate(0deg)'; }, 300);
-                } else {
-                    ptrContainer.classList.remove('active');
-                }
-            });
-
-            function showToast(message) {
-                const toast = document.getElementById('update-toast');
-                toast.innerHTML = `<span class="material-symbols-rounded">check_circle</span> ${message}`;
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 3000);
-            }
-
-            // LANCEMENT DES SCRIPTS INITIAUX
-            initCountdown();
+            // Initialiser les composants
+            updateCountdown();
+            setInterval(updateCountdown, 60000); // maj toutes les minutes
             fetchWeather();
             fetchCurrency();
-            fetchAppData();
+            renderAnecdote();
+            renderActivities();
 
-            // 11. PREPARATION DU CACHE OFFLINE (Mocking Service Worker pour fichier unique)
-            // Dans les prochains sprints, la récupération API et la sauvegarde Offline
-            // se feront via LocalStorage/IndexedDB ici-même. 
-            console.log("🚀 Sprint 0 initialisé : Architecture PWA prête.");
+            // Lancer une synchro silencieuse
+            fetchAppData();
         });
+
+        // 3. NAVIGATION (TABS)
+        function switchTab(pageId, btnElement) {
+            // Masquer toutes les pages
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+
+            // Gérer l'état actif des boutons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-[var(--color-accent)]', 'opacity-100');
+                btn.classList.add('opacity-40');
+            });
+            
+            btnElement.classList.add('text-[var(--color-accent)]', 'opacity-100');
+            btnElement.classList.remove('opacity-40');
+
+            // Afficher/Masquer le header dynamique sur la page home
+            const header = document.getElementById('home-header');
+            if (pageId === 'page-home') {
+                header.style.height = '16rem'; // h-64
+                header.style.opacity = '1';
+                header.style.pointerEvents = 'auto';
+            } else {
+                header.style.height = '0';
+                header.style.opacity = '0';
+                header.style.pointerEvents = 'none';
+            }
+        }
+
+        // 4. TOAST
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('opacity-0', '-translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-4');
+            }, 3000);
+        }
+
+        // 5. SYNCHRONISATION (FETCH API)
+        async function fetchAppData(isManualRefresh = false) {
+            const icon = document.getElementById('refresh-icon');
+            if(isManualRefresh && icon) icon.classList.add('loading-spin');
+
+            try {
+                const response = await fetch(`${API_APPS_SCRIPT}?action=getAllData`);
+                if (!response.ok) throw new Error(`Erreur réseau: ${response.status}`);
+                
+                const data = await response.json();
+                
+                if (data && !data.error) {
+                    appData = data;
+                    localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+                    renderAnecdote(); 
+                    renderActivities();
+                    
+                    if (isManualRefresh) showToast("Données synchronisées !");
+                } else {
+                    console.warn("Erreur API:", data?.error);
+                    if (isManualRefresh) showToast("Erreur API serveur");
+                }
+            } catch (error) {
+                console.warn("Mode hors-ligne :", error);
+                if (isManualRefresh) showToast("Mode hors-ligne / Réseau indisponible");
+                if (!appData) appData = DEFAULT_DATA;
+                renderAnecdote();
+                renderActivities();
+            } finally {
+                if(isManualRefresh && icon) icon.classList.remove('loading-spin');
+            }
+        }
+
+        function manualRefresh() {
+            fetchAppData(true);
+        }
+
+        // 6. COMPTE À REBOURS
+        function updateCountdown() {
+            const targetDate = new Date('2026-10-19T10:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                document.getElementById('cd-days').innerText = "0";
+                document.getElementById('cd-hours').innerText = "0";
+                document.getElementById('cd-mins').innerText = "0";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+            document.getElementById('cd-days').innerText = days;
+            document.getElementById('cd-hours').innerText = hours;
+            document.getElementById('cd-mins').innerText = minutes;
+        }
+
+        // 7. WIDGETS API MOCKS (Météo & Devise)
+        async function fetchWeather() {
+            // Mock de l'API OpenWeather (remplacer par vrai fetch si clé dispo)
+            setTimeout(() => {
+                document.getElementById('weather-temp').innerText = "28°C";
+                document.getElementById('weather-desc').innerText = "Ensoleillé";
+            }, 1000);
+        }
+
+        async function fetchCurrency() {
+            try {
+                // API gratuite Exchange Rates
+                const res = await fetch('https://open.er-api.com/v6/latest/EUR');
+                const data = await res.json();
+                const rate = data.rates.MUR;
+                if(rate) {
+                    document.getElementById('currency-rate').innerText = rate.toFixed(1);
+                }
+            } catch (e) {
+                document.getElementById('currency-rate').innerText = "50.5"; // Valeur de secours
+            }
+        }
+
+        // 8. ANECDOTES (Carrousel)
+        let validAnecdotes = [];
+        let currentAnecdoteIdx = 0;
+
+        function parseDateString(dateStr) {
+            if(!dateStr) return new Date(0);
+            const parts = String(dateStr).split('/');
+            if(parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
+            return new Date(0);
+        }
+
+        function renderAnecdote() {
+            const srcList = (appData.anecdotes && appData.anecdotes.length > 0) ? appData.anecdotes : DEFAULT_DATA.anecdotes;
+            
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+
+            validAnecdotes = srcList.filter(a => parseDateString(a.Jour) <= today)
+                                    .sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour));
+            
+            if (validAnecdotes.length === 0) validAnecdotes = srcList;
+            
+            currentAnecdoteIdx = validAnecdotes.length - 1; // La plus récente
+            updateAnecdoteUI();
+        }
+
+        function updateAnecdoteUI() {
+            if (validAnecdotes.length === 0) return;
+            const a = validAnecdotes[currentAnecdoteIdx];
+            
+            const textEl = document.getElementById('anecdote-text');
+            const dateEl = document.getElementById('anecdote-date');
+            
+            textEl.style.opacity = 0;
+            setTimeout(() => {
+                textEl.innerText = a.Texte || 'Pas d\'anecdote.';
+                dateEl.innerText = a.Jour || '--/--';
+                textEl.style.opacity = 1;
+            }, 200);
+        }
+
+        function prevAnecdote() {
+            if (currentAnecdoteIdx > 0) {
+                currentAnecdoteIdx--;
+                updateAnecdoteUI();
+            }
+        }
+
+        function nextAnecdote() {
+            if (currentAnecdoteIdx < validAnecdotes.length - 1) {
+                currentAnecdoteIdx++;
+                updateAnecdoteUI();
+            }
+        }
+
+        // 9. AGENDA & ACTIVITES
+        function getStatusColor(status) {
+            const s = String(status).toLowerCase();
+            if (s.includes('confirm')) return 'bg-green-500/20 text-green-600 dark:text-green-400';
+            if (s.includes('annul')) return 'bg-red-500/20 text-red-600 dark:text-red-400';
+            return 'bg-orange-500/20 text-orange-600 dark:text-orange-400';
+        }
+
+        function renderActivities() {
+            const container = document.getElementById('activities-container');
+            if (!container) return;
+            
+            if (!appData.activites || appData.activites.length === 0) {
+                container.innerHTML = `<div class="text-center opacity-50 py-10 flex flex-col items-center"><svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Aucune activité programmée.</div>`;
+                return;
+            }
+
+            // Tri chronologique
+            const sorted = [...appData.activites].sort((a, b) => {
+                return parseDateString(a.Jour) - parseDateString(b.Jour) || String(a.Heure).localeCompare(String(b.Heure));
+            });
+
+            // Groupement par date
+            const grouped = {};
+            sorted.forEach(act => {
+                const date = act.Jour || 'Date à définir';
+                if (!grouped[date]) grouped[date] = [];
+                grouped[date].push(act);
+            });
+
+            let html = '';
+            for (const [date, acts] of Object.entries(grouped)) {
+                let displayDate = date;
+                const d = parseDateString(date);
+                if (d.getTime() > 0) {
+                    displayDate = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+                    displayDate = displayDate.charAt(0).toUpperCase() + displayDate.slice(1);
+                }
+
+                html += `<div class="mb-3 mt-8 font-bold text-lg opacity-90 pl-1">${displayDate}</div>`;
+                
+                acts.forEach(act => {
+                    const defaultImg = "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=500&auto=format&fit=crop";
+                    html += `
+                    <div onclick="openActivityDetails('${act.ID}')" class="bg-[var(--color-surface)] p-3 rounded-2xl flex shadow-sm mb-3 items-center space-x-4 active:scale-[0.98] transition-transform cursor-pointer border border-transparent dark:border-white/5 hover:border-[var(--color-accent-light)]">
+                        <img src="${act.PhotoURL || defaultImg}" alt="${act.Titre}" class="w-16 h-16 rounded-xl object-cover" onerror="this.src='${defaultImg}'"/>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold font-heading text-lg leading-tight truncate">${act.Titre || 'Sans titre'}</h4>
+                            <div class="text-sm opacity-70 mt-0.5">${act.Heure || '--:--'} ${act.Participants ? '• ' + act.Participants : ''}</div>
+                        </div>
+                        <div class="text-[10px] px-2.5 py-1 rounded-full ${getStatusColor(act.Statut)} font-bold whitespace-nowrap">
+                            ${act.Statut || 'En attente'}
+                        </div>
+                    </div>`;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        // 10. MODALS
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const content = modal.querySelector('div');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                if (content) content.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const content = modal.querySelector('div');
+            modal.classList.add('opacity-0');
+            if (content) content.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function openActivityDetails(id) {
+            const act = appData.activites.find(a => a.ID === id);
+            if (!act) return;
+
+            const defaultImg = "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1000&auto=format&fit=crop";
+            const modalContent = document.getElementById('activity-modal-content');
+            
+            modalContent.innerHTML = `
+                <button onclick="closeModal('modal-activity-details')" class="absolute top-4 right-4 p-2.5 bg-black/50 text-white rounded-full z-10 backdrop-blur-md active:scale-90 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <img src="${act.PhotoURL || defaultImg}" alt="Photo" class="w-full h-56 sm:rounded-t-3xl object-cover" onerror="this.src='${defaultImg}'"/>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-3xl font-bold font-heading leading-tight pr-4">${act.Titre || 'Activité'}</h3>
+                        <span class="text-[10px] px-2.5 py-1 rounded-full ${getStatusColor(act.Statut)} font-bold mt-1 whitespace-nowrap">${act.Statut || 'En attente'}</span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4 mb-6 opacity-80 text-sm font-medium">
+                        <div class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> ${act.Jour || 'A définir'}</div>
+                        <div class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> ${act.Heure || '--:--'}</div>
+                        ${act.Prix ? `<div class="flex items-center gap-1 font-bold text-[var(--color-accent)]"> ${act.Prix}</div>` : ''}
+                    </div>
+
+                    ${act.Descriptif ? `<p class="mb-6 leading-relaxed opacity-90 text-sm">${act.Descriptif}</p>` : ''}
+                    
+                    <div class="space-y-3 bg-[var(--color-bg)] p-4 rounded-2xl text-sm border border-transparent dark:border-white/5">
+                        ${act.Adresse ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">📍 Adresse</span>${act.Adresse}</div>` : ''}
+                        ${act.Participants ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">👥 Participants</span>${act.Participants}</div>` : ''}
+                        ${act.ReservePar ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">🎫 Réservé par</span>${act.ReservePar}</div>` : ''}
+                        ${act.Commentaires ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">💬 Commentaires</span>${act.Commentaires}</div>` : ''}
+                    </div>
+                    
+                    ${act.Lien ? `<a href="${act.Lien}" target="_blank" class="mt-6 block w-full text-center border-2 border-[var(--color-accent)] text-[var(--color-accent)] font-bold py-3.5 rounded-xl active:scale-95 transition-transform">Voir le lien Web</a>` : ''}
+                </div>
+            `;
+            
+            openModal('modal-activity-details');
+        }
+
+        // 11. POST NOUVELLE ACTIVITÉ
+        async function submitActivity(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+            
+            // 1. Mise à jour Optimiste (Immédiate)
+            const tempActivity = {
+                ID: 'TEMP-' + Date.now(),
+                ...payload
+            };
+            
+            if(!appData.activites) appData.activites = [];
+            appData.activites.push(tempActivity);
+            localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+            
+            renderActivities();
+            closeModal('modal-add-activity');
+            form.reset();
+            showToast('Activité sauvegardée en local (Synchro en cours...)');
+
+            // 2. Envoi Serveur
+            try {
+                const response = await fetch(API_APPS_SCRIPT, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addActivity', payload: payload }),
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8', // Empêche CORS preflight parfois problématique
+                    }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Activité synchronisée avec le serveur !');
+                    fetchAppData(); // Rafraichit pour avoir le vrai ID généré par le Sheet
+                } else {
+                    showToast('Erreur serveur lors de la synchronisation.');
+                }
+            } catch (error) {
+                console.warn("Erreur réseau (post activity) :", error);
+                showToast('Mode hors-ligne : Sauvegardé en local.');
+            }
+        }
     </script>
 </body>
 </html>
