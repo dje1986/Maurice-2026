@@ -326,10 +326,22 @@
                     });
                     
                     const result = await response.json();
+                    console.log("Réponse du serveur:", result);
                     if (result.success) {
                         // Supprime de la queue originale si succès
                         syncQueue = syncQueue.filter(qItem => qItem.tempId !== item.tempId);
                         queueChanged = true;
+
+                        // ⭐ NOUVEAU : Met à jour l'ID temporaire avec l'ID réel du serveur
+                        if (result.generatedId && result.tempId) {
+                            appData.activites = appData.activites.map(act => {
+                                if (act.ID === result.tempId) {
+                                    act.ID = result.generatedId;
+                                }
+                                return act;
+                            });
+                            localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+                        }
                     }
                 } catch (e) {
                     console.warn("Échec d'envoi d'un item de la file, on réessaiera plus tard.", e);
