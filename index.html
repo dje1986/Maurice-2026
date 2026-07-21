@@ -428,6 +428,7 @@
         }
 
         // 5. SYNCHRONISATION (FETCH API)
+        // 5. SYNCHRONISATION (FETCH API)
         async function fetchAppData(isManualRefresh = false) {
             const icon = document.getElementById('refresh-icon');
             if(isManualRefresh && icon) icon.classList.add('loading-spin');
@@ -436,17 +437,69 @@
                 const response = await fetch(`${API_APPS_SCRIPT}?action=getAllData`);
                 if (!response.ok) throw new Error(`Erreur réseau: ${response.status}`);
                 
-                const data = await response.json();
+                const rawData = await response.json();
                 
-                if (data && !data.error) {
-                    appData = data;
+                if (rawData && !rawData.error) {
+                    // --- CORRECTION DES DONNÉES (NORMALISATION) ---
+                    // Sécurise les clés et les dates pour correspondre exactement à ce qu'attend le front-end
+                    const cleanArray = (arr) => {
+                        if (!Array.isArray(arr)) return [];
+                        return arr.map(item => {
+                            const cleanItem = {};
+                            for (const key in item) {
+                                const lowerKey = key.trim().toLowerCase();
+                                if (lowerKey === 'id') cleanItem['ID'] = item[key];
+                                else if (lowerKey === 'titre') cleanItem['Titre'] = item[key];
+                                else if (lowerKey === 'jour') cleanItem['Jour'] = item[key];
+                                else if (lowerKey === 'heure') cleanItem['Heure'] = item[key];
+                                else if (lowerKey === 'statut') cleanItem['Statut'] = item[key];
+                                else if (lowerKey === 'photourl') cleanItem['PhotoURL'] = item[key];
+                                else if (lowerKey === 'descriptif') cleanItem['Descriptif'] = item[key];
+                                else if (lowerKey === 'participants') cleanItem['Participants'] = item[key];
+                                else if (lowerKey === 'prix') cleanItem['Prix'] = item[key];
+                                else if (lowerKey === 'adresse') cleanItem['Adresse'] = item[key];
+                                else if (lowerKey === 'reservepar') cleanItem['ReservePar'] = item[key];
+                                else if (lowerKey === 'commentaires') cleanItem['Commentaires'] = item[key];
+                                else if (lowerKey === 'lien') cleanItem['Lien'] = item[key];
+                                else if (lowerKey === 'texte') cleanItem['Texte'] = item[key]; 
+                                else cleanItem[key.trim()] = item[key];
+                            }
+                            
+                            // Sécurisation si Google a renvoyé une date au format informatique ISO (ex: "2026-10-19T...")
+                            if (cleanItem.Jour && cleanItem.Jour.includes('T')) {
+                                const d = new Date(cleanItem.Jour);
+                                if (!isNaN(d.getTime())) cleanItem.Jour = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+                            }
+                            // Sécurisation pour l'heure
+                            if (cleanItem.Heure && cleanItem.Heure.includes('T')) {
+                                const d = new Date(cleanItem.Heure);
+                                if (!isNaN(d.getTime())) cleanItem.Heure = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                            }
+                            // Sécurisation si l'heure arrive au format "10:30:00"
+                            if (cleanItem.Heure && cleanItem.Heure.split(':').length === 3) {
+                                cleanItem.Heure = cleanItem.Heure.substring(0, 5);
+                            }
+                            
+                            return cleanItem;
+                        });
+                    };
+
+                    appData = {
+                        activites: cleanArray(rawData.activites),
+                        anecdotes: cleanArray(rawData.anecdotes),
+                        lieux: cleanArray(rawData.lieux) || [],
+                        checklist: cleanArray(rawData.checklist) || [],
+                        participants: rawData.participants || []
+                    };
+                    // ----------------------------------------------
+
                     localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                     renderAnecdote(); 
                     renderActivities();
                     
                     if (isManualRefresh) showToast("Données synchronisées !");
                 } else {
-                    console.warn("Erreur API:", data?.error);
+                    console.warn("Erreur API:", rawData?.error);
                     if (isManualRefresh) showToast("Erreur API serveur");
                 }
             } catch (error) {
