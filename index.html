@@ -563,7 +563,21 @@
 
             // 4. CONFIGURATION API & VARIABLES GLOBALES
             const API_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxK1vBGBEoPdnndqGybpEaI4CEDZBs-raPzGuLu4wHAtxE0KpqEYydF-mZej3WqdZ4EtQ/exec';
-            let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || null;
+            
+            // Données de secours (Fallback si l'API est indisponible ou mal configurée)
+            const DEFAULT_DATA = {
+                anecdotes: [
+                    { Jour: '20/10/2026', Texte: "L'île Maurice abritait le Dodo, un oiseau endémique emblématique qui a disparu au XVIIe siècle." },
+                    { Jour: '21/10/2026', Texte: "Le Morne Brabant est classé au patrimoine mondial de l'UNESCO et servait autrefois de refuge." },
+                    { Jour: '22/10/2026', Texte: "La terre des 7 couleurs de Chamarel est une curiosité géologique aux nuances ocre, rouge et violacées." }
+                ],
+                activites: [],
+                lieux: [],
+                checklist: [],
+                participants: []
+            };
+
+            let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || DEFAULT_DATA;
 
             // 5. LOGIQUE DU COMPTE A REBOURS
             function initCountdown() {
@@ -671,6 +685,41 @@
             });
 
             // 8. SYNCHRONISATION BASE DE DONNEES (Apps Script)
+            async function fetchAppData(isManualRefresh = false) {
+                try {
+                    const response = await fetch(`${API_APPS_SCRIPT}?action=getAllData`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data && !data.error) {
+                        appData = data;
+                        localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+                        renderAnecdote(); // Mise à jour de l'affichage des anecdotes
+                        
+                        if (isManualRefresh) {
+                            showToast("Données synchronisées !");
+                        }
+                    } else {
+                        console.warn("Réponse API invalide ou erreur Apps Script :", data ? data.error : "Données vides");
+                        if (isManualRefresh) showToast("Erreur de données Apps Script");
+                        renderAnecdote();
+                    }
+                } catch (error) {
+                    // Capture propre de l'erreur réseau / CORS (Load failed)
+                    console.warn("API Apps Script non joignable (mode hors-ligne ou script à redéployer) :", error.message || error);
+                    
+                    if (isManualRefresh) showToast("Mode hors-ligne / API non connectée");
+                    
+                    if (!appData) {
+                        appData = DEFAULT_DATA;
+                    }
+                    renderAnecdote(); 
+                }
+            }
             // 9. AFFICHAGE ANECDOTE DU JOUR (Avec Carrousel)
             let validAnecdotes = [];
             let currentAnecdoteIdx = 0;
@@ -686,7 +735,14 @@
             }
 
             function renderAnecdote() {
-                if (!appData || !appData.anecdotes || appData.anecdotes.length === 0) return;
+                if (!appData || !appData.anecdotes || appData.anecdotes.length === 0) {
+                    if (DEFAULT_DATA && DEFAULT_DATA.anecdotes) {
+                        validAnecdotes = DEFAULT_DATA.anecdotes;
+                        currentAnecdoteIdx = 0;
+                        updateAnecdoteUI();
+                    }
+                    return;
+                }
 
                 const today = new Date();
                 today.setHours(23, 59, 59, 999);
@@ -698,8 +754,8 @@
                 }).sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour));
 
                 if (validAnecdotes.length === 0) {
-                    // Fallback
-                    validAnecdotes = [appData.anecdotes[0]];
+                    // Fallback sur toutes les anecdotes disponibles
+                    validAnecdotes = appData.anecdotes;
                 }
 
                 // Démarrer sur la plus récente
