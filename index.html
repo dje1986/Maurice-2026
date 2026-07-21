@@ -309,34 +309,33 @@
         // Tente de vider la file d'attente (envoi au serveur)
         async function processSyncQueue() {
             if (syncQueue.length === 0 || !navigator.onLine) return;
-            
+
             let queueChanged = false;
-            // On fait une copie pour itérer, au cas où des éléments seraient ajoutés en cours de route
-            const currentQueue = [...syncQueue]; 
+            const currentQueue = [...syncQueue];
 
             for (let i = 0; i < currentQueue.length; i++) {
                 const item = currentQueue[i];
                 try {
                     const response = await fetch(API_APPS_SCRIPT, {
                         method: 'POST',
-                        // CRUCIAL: Utiliser text/plain pour éviter le preflight CORS
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify(item),
-                        redirect: 'follow' // CRUCIAL car Apps Script redirige après un POST
+                        redirect: 'follow'
                     });
-                    
+
                     const result = await response.json();
                     console.log("Réponse du serveur:", result);
+
                     if (result.success) {
-                        // Supprime de la queue originale si succès
+                        // Supprime de la queue
                         syncQueue = syncQueue.filter(qItem => qItem.tempId !== item.tempId);
                         queueChanged = true;
 
-                        // ⭐ NOUVEAU : Met à jour l'ID temporaire avec l'ID réel du serveur
+                        // ⭐ MET A JOUR L'ID TEMPORAIRE AVEC L'ID REEL
                         if (result.generatedId && result.tempId) {
                             appData.activites = appData.activites.map(act => {
                                 if (act.ID === result.tempId) {
-                                    act.ID = result.generatedId;
+                                    return { ...act, ID: result.generatedId };
                                 }
                                 return act;
                             });
@@ -344,15 +343,15 @@
                         }
                     }
                 } catch (e) {
-                    console.warn("Échec d'envoi d'un item de la file, on réessaiera plus tard.", e);
-                    break; // On s'arrête au premier échec réseau pour ne pas spammer
+                    console.warn("Échec d'envoi d'un item de la file:", e);
+                    break;
                 }
             }
 
             if (queueChanged) {
                 saveQueue();
-                // Si on a réussi à vider la queue, on rafraichit les données GET pour avoir les vrais ID
-                fetchAppData(false, true); 
+                // Rafraîchit les données pour avoir les vrais ID
+                await fetchAppData(false, true);
             }
         }
 
