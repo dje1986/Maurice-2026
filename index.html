@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Maurice 2026</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -188,11 +192,20 @@
                 </div>
             </div>
 
-            <div id="page-lieux" class="page hidden px-4 pt-8 pb-28 min-h-screen">
-                <h2 class="text-3xl font-bold font-heading mb-6">Carte & Lieux</h2>
-                <div class="bg-[var(--color-surface)] rounded-3xl p-8 shadow-sm text-center">
-                    <span class="text-4xl mb-4 block">🗺️</span><p class="font-bold opacity-80">En construction...</p>
+            <div id="page-lieux" class="page hidden pt-0 pb-0 h-[100dvh] relative">
+                <!-- En-tête flottant par dessus la carte -->
+                <div class="absolute top-6 left-4 right-4 z-[400] pointer-events-none flex justify-between items-start">
+                    <div class="bg-[var(--color-surface)]/90 backdrop-blur-md px-5 py-3 rounded-2xl shadow-lg pointer-events-auto border border-gray-200 dark:border-gray-800">
+                        <h2 class="text-2xl font-bold font-heading text-[var(--color-text)]">Carte & Lieux</h2>
+                    </div>
+                    <!-- Bouton pour recentrer sur l'île Maurice -->
+                    <button onclick="recenterMap()" class="bg-[var(--color-surface)]/90 backdrop-blur-md p-3 rounded-full shadow-lg pointer-events-auto active:scale-90 transition-transform text-[var(--color-accent)] border border-gray-200 dark:border-gray-800">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </button>
                 </div>
+                
+                <!-- Conteneur Leaflet -->
+                <div id="map-container" class="w-full h-full z-0 bg-gray-100 dark:bg-gray-800"></div>
             </div>
 
             <div id="page-transports" class="page hidden px-4 pt-8 pb-28 min-h-screen">
@@ -290,6 +303,10 @@
         const DEFAULT_DATA = { activites: [], anecdotes: [], lieux: [], checklist: [] };
         let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || DEFAULT_DATA;
         
+        // --- VARIABLES CARTE (NOUVEAU) ---
+        let mapInstance = null;
+        let markersGroup = null;
+
         // --- GESTION OFFLINE (NOUVEAU) ---
         // Cette queue contient toutes les requêtes POST qui n'ont pas pu aboutir
         let syncQueue = JSON.parse(localStorage.getItem('maurice2026_syncQueue')) || [];
@@ -422,6 +439,7 @@
                     localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                     renderAnecdote(); 
                     renderActivities();
+                    if (mapInstance) renderMapMarkers();
                     
                     if (isManual) showToast("Base de données synchronisée");
                 }
@@ -461,10 +479,26 @@
             btn.classList.remove('opacity-40');
 
             const h = document.getElementById('home-header');
+            const mainContent = document.getElementById('main-content');
+            
             if (pageId === 'page-home') {
                 h.style.height = '16rem'; h.style.opacity = '1'; h.style.pointerEvents = 'auto';
+                mainContent.classList.remove('overflow-hidden');
             } else {
                 h.style.height = '0'; h.style.opacity = '0'; h.style.pointerEvents = 'none';
+                
+                if (pageId === 'page-lieux') {
+                    mainContent.classList.add('overflow-hidden'); // Bloque le scroll global
+                    // Initialise la carte si c'est la première fois
+                    if (!mapInstance) {
+                        initMap();
+                    } else {
+                        // Leaflet a besoin d'être redimensionné s'il était caché
+                        setTimeout(() => mapInstance.invalidateSize(), 100);
+                    }
+                } else {
+                    mainContent.classList.remove('overflow-hidden');
+                }
             }
         }
 
@@ -570,6 +604,89 @@
                 });
             }
             container.innerHTML = html;
+        }
+
+        function initMap() {
+            // Centre par défaut sur l'île Maurice
+            mapInstance = L.map('map-container', {
+                zoomControl: false // On retire les boutons +/- par défaut pour le mobile
+            }).setView([-20.2783, 57.5739], 10); 
+
+            // Ajout du fond de carte OpenStreetMap
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap',
+                maxZoom: 18
+            }).addTo(mapInstance);
+
+            // Création d'un groupe pour nos marqueurs
+            markersGroup = L.layerGroup().addTo(mapInstance);
+
+            renderMapMarkers();
+        }
+
+        function recenterMap() {
+            if (mapInstance) {
+                mapInstance.setView([-20.2783, 57.5739], 10, { animate: true });
+            }
+        }
+
+        function renderMapMarkers() {
+            if (!mapInstance || !markersGroup) return;
+            
+            // Nettoie les anciens marqueurs
+            markersGroup.clearLayers();
+
+            // Création d'une icône personnalisée (optionnelle, utilise Leaflet par défaut sinon)
+            const defaultIcon = L.icon({
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            const activityIcon = L.icon({ ...defaultIcon.options, className: 'hue-rotate-[150deg] filter' }); // Petite astuce CSS pour teinter le marqueur
+
+            // 1. Marqueurs des Lieux (Onglet Lieux)
+            if (appData.lieux) {
+                appData.lieux.forEach(lieu => {
+                    if (lieu.Latitude && lieu.Longitude) {
+                        const lat = parseFloat(lieu.Latitude.replace(',', '.'));
+                        const lng = parseFloat(lieu.Longitude.replace(',', '.'));
+                        
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const marker = L.marker([lat, lng], { icon: defaultIcon }).addTo(markersGroup);
+                            marker.bindPopup(`
+                                <div class="font-bold text-[var(--color-accent)] font-heading text-lg">${lieu.Titre || lieu.Nom || 'Lieu'}</div>
+                                ${lieu.Descriptif || lieu.Description ? `<div class="text-xs mt-1 opacity-80">${lieu.Descriptif || lieu.Description}</div>` : ''}
+                            `);
+                        }
+                    }
+                });
+            }
+
+            // 2. Marqueurs des Activités (Onglet Activités)
+            if (appData.activites) {
+                appData.activites.forEach(act => {
+                    if (act.Latitude && act.Longitude) {
+                        const lat = parseFloat(act.Latitude.replace(',', '.'));
+                        const lng = parseFloat(act.Longitude.replace(',', '.'));
+                        
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const marker = L.marker([lat, lng], { icon: activityIcon }).addTo(markersGroup);
+                            marker.bindPopup(`
+                                <div class="font-bold text-[var(--color-accent-light)] font-heading text-lg">${act.Titre}</div>
+                                <div class="text-xs font-bold mt-1 opacity-70">📅 ${act.Jour || ''} à ${act.Heure || ''}</div>
+                                <div class="mt-2 flex justify-center">
+                                    <button onclick="openActivityDetails('${act.ID}')" class="bg-[var(--color-bg)] px-3 py-1.5 rounded-lg text-xs font-bold border w-full">Voir les détails</button>
+                                </div>
+                            `);
+                        }
+                    }
+                });
+            }
         }
 
         // --- GESTION DES MODALES ---
