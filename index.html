@@ -136,7 +136,7 @@
                     <div onclick="toggleCurrency()" class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition-transform select-none">
                         <div class="flex items-start justify-between mb-2">
                             <span class="text-xs font-bold opacity-70" id="currency-title">Taux EUR/MUR</span>
-                            <span class="text-xl">💱</span>
+                            <span class="text-xl">💰</span>
                         </div>
                         <div>
                             <div class="flex items-end gap-1">
@@ -755,8 +755,15 @@
                 return;
             }
             
-            // Initialisation centrée sur l'Île Maurice
-            map = L.map('map').setView([-20.3, 57.5], 10);
+            // Initialisation centrée sur l'Île Maurice (sans les contrôles de zoom par défaut en haut à gauche)
+            map = L.map('map', {
+                zoomControl: false
+            }).setView([-20.3, 57.5], 10);
+
+            // Ajout du contrôle de zoom en haut à droite pour ne pas cacher le titre
+            L.control.zoom({
+                position: 'topright'
+            }).addTo(map);
 
             // Ajout du fond de carte (CartoDB Voyager - très esthétique et clair)
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -766,6 +773,35 @@
 
             markersGroup = L.layerGroup().addTo(map);
             updateMapMarkers();
+
+            // Demander la position de l'utilisateur sans centrer la carte
+            map.locate({setView: false, enableHighAccuracy: true});
+
+            // Quand la position est trouvée
+            map.on('locationfound', function(e) {
+                // Création d'une icône bleue avec effet de pulsation pour la position de l'utilisateur
+                const userIcon = L.divIcon({
+                    html: `
+                        <div class="relative flex h-5 w-5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-5 w-5 bg-blue-500 border-2 border-white shadow-sm"></span>
+                        </div>
+                    `,
+                    className: '',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10],
+                    popupAnchor: [0, -10]
+                });
+                
+                L.marker(e.latlng, { icon: userIcon, zIndexOffset: 1000 })
+                    .bindPopup('<div class="text-center font-bold font-heading text-[var(--color-text)]">Votre position</div>')
+                    .addTo(map);
+            });
+
+            // En cas de refus ou d'erreur de géolocalisation
+            map.on('locationerror', function(e) {
+                console.log("Géolocalisation impossible ou refusée : " + e.message);
+            });
         }
 
         function updateMapMarkers() {
