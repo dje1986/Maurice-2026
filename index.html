@@ -1232,6 +1232,7 @@
             const statusDiv = document.getElementById(`flight-status-${journey}`);
             statusDiv.classList.remove('hidden');
             
+            // Animation de chargement pour imiter la recherche réseau
             statusDiv.innerHTML = `
                 <div class="flex items-center text-[var(--color-text)]">
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-[var(--color-accent)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -1240,21 +1241,33 @@
             `;
 
             setTimeout(() => {
-                const isAller = journey === 'aller';
+                // Récupération dynamique des vols basés sur la DB (appData.vols)
+                const vols = appData.vols || [];
+                const catVols = vols.filter(v => String(v.Categorie || '').toLowerCase() === journey.toLowerCase())
+                                    .sort((a,b) => parseInt(a.Etape || 1) - parseInt(b.Etape || 1));
+
+                let messageDyn = "Aucun vol trouvé pour ce trajet dans la base de données.";
+                
+                if (catVols.length > 0) {
+                    // Extraction des numéros de vol (Code) et de la date du premier vol de l'étape
+                    const flightCodes = catVols.map(v => v.Code).filter(c => c).join(' et ');
+                    const departureDate = catVols[0].DateDepart || 'prochainement';
+                    
+                    messageDyn = `Les vols ${flightCodes} s'activeront sur le radar OpenSky le ${departureDate}.`;
+                }
+
                 statusDiv.innerHTML = `
                     <div class="flex items-start gap-3">
                         <div class="text-xl mt-0.5">🗓️</div>
                         <div>
                             <div class="font-bold text-[var(--color-text)] mb-0.5">Vols Programmés</div>
                             <div class="opacity-80 leading-snug">
-                                ${isAller 
-                                    ? "Les vols TK 1804 et TK 160 s'activeront sur le radar OpenSky le 19 Octobre 2026."
-                                    : "Les vols TK 161 et TK 1803 s'activeront sur le radar le 27 Octobre 2026."}
+                                ${messageDyn}
                             </div>
                         </div>
                     </div>
                 `;
-            }, 1000);
+            }, 1000); // Faux délai d'attente d'une seconde
         }
     </script>
 </body>
