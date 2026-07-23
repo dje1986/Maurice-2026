@@ -2,7 +2,7 @@
 // Gère le mode hors ligne : coquille applicative (HTML/CSS/JS/polices/icônes)
 // + dernières données connues de l'API Google Apps Script.
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `maurice2026-static-${CACHE_VERSION}`;
 const DATA_CACHE = `maurice2026-data-${CACHE_VERSION}`;
 
