@@ -1276,18 +1276,29 @@
             }
         }
 
-        function toggleChecklistItem(id) {
+        async function toggleChecklistItem(id) {
             const item = appData.checklist.find(i => String(i.ID || i.id) === String(id));
             if (item) {
                 const currentlyChecked = isItemChecked(item);
-                item.Fait = currentlyChecked ? 'Non' : 'Oui';
+                const newStatus = currentlyChecked ? 'Non' : 'Oui';
+                item.Fait = newStatus;
                 item.checked = !currentlyChecked;
                 localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                 renderChecklist();
+
+                try {
+                    await fetch(API_APPS_SCRIPT, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'toggleChecklistItem', id: id, fait: newStatus }),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    });
+                } catch (error) {
+                    console.warn('Sync hors-ligne pour le changement d\'état checklist');
+                }
             }
         }
 
-        function addChecklistItem(e) {
+        async function addChecklistItem(e) {
             e.preventDefault();
             const input = document.getElementById('new-item-input');
             const select = document.getElementById('new-item-category-select');
@@ -1304,29 +1315,35 @@
 
             if (!appData.checklist) appData.checklist = [];
 
+            const newItemsToSync = [];
+
             if (targetCategory === 'ALL') {
                 // Ajouter à TOUTES les catégories existantes
                 const categories = Array.from(new Set(appData.checklist.map(i => i.Categorie || 'Général'))).filter(Boolean);
                 if (categories.length === 0) categories.push('Général');
 
                 categories.forEach(cat => {
-                    appData.checklist.push({
+                    const newItem = {
                         ID: 'CHK-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
                         Categorie: cat,
                         Item: val,
                         Fait: 'Non',
                         checked: false
-                    });
+                    };
+                    appData.checklist.push(newItem);
+                    newItemsToSync.push(newItem);
                 });
                 showToast(`Objet ajouté à toutes les ${categories.length} sections !`);
             } else {
-                appData.checklist.push({
+                const newItem = {
                     ID: 'CHK-' + Date.now(),
                     Categorie: targetCategory,
                     Item: val,
                     Fait: 'Non',
                     checked: false
-                });
+                };
+                appData.checklist.push(newItem);
+                newItemsToSync.push(newItem);
                 showToast('Objet ajouté !');
             }
 
@@ -1335,6 +1352,27 @@
             customInput.value = '';
             document.getElementById('custom-category-container').classList.add('hidden');
             renderChecklist();
+
+            // Synchronisation Google Sheet
+            for (const itemSync of newItemsToSync) {
+                try {
+                    await fetch(API_APPS_SCRIPT, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'addChecklistItem',
+                            payload: {
+                                ID: itemSync.ID,
+                                Categorie: itemSync.Categorie,
+                                Item: itemSync.Item,
+                                Fait: itemSync.Fait
+                            }
+                        }),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    });
+                } catch (error) {
+                    console.warn('Erreur de synchronisation checklist avec Google Sheet', error);
+                }
+            }
         }
 
         function promptDeleteChecklistItem(id) {
@@ -1342,15 +1380,28 @@
             openModal('modal-delete-confirm');
         }
 
-        function confirmDeleteChecklistItem() {
+        async function confirmDeleteChecklistItem() {
             if (itemIdToDelete !== null) {
-                appData.checklist = appData.checklist.filter(i => String(i.ID || i.id) !== String(itemIdToDelete));
+                const idSync = itemIdToDelete;
+                appData.checklist = appData.checklist.filter(i => String(i.ID || i.id) !== String(idSync));
                 localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                 renderChecklist();
                 showToast('Objet supprimé');
                 itemIdToDelete = null;
+                closeModal('modal-delete-confirm');
+
+                try {
+                    await fetch(API_APPS_SCRIPT, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'deleteChecklistItem', id: idSync }),
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    });
+                } catch (error) {
+                    console.warn('Erreur suppression backend checklist', error);
+                }
+            } else {
+                closeModal('modal-delete-confirm');
             }
-            closeModal('modal-delete-confirm');
         }
 
         function openModal(modalId) {
