@@ -1171,8 +1171,10 @@
         let itemIdToDelete = null;
 
         function isItemChecked(item) {
+            // Le Sheet peut renvoyer "Oui"/"Non", des booléens JS, ou "VRAI"/"FAUX"
+            // (affichage FR d'une case à cocher Google Sheets) selon l'historique de la ligne.
             const f = String(item.Fait || '').toLowerCase().trim();
-            return f === 'true' || f === 'oui' || f === '1' || item.checked === true;
+            return f === 'true' || f === 'vrai' || f === 'oui' || f === '1' || item.checked === true;
         }
 
         function renderChecklist() {
@@ -1287,13 +1289,19 @@
                 renderChecklist();
 
                 try {
-                    await fetch(API_APPS_SCRIPT, {
+                    const resp = await fetch(API_APPS_SCRIPT, {
                         method: 'POST',
                         body: JSON.stringify({ action: 'toggleChecklistItem', id: id, fait: newStatus }),
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                     });
+                    const result = await resp.json();
+                    if (!result.success) {
+                        console.error('Erreur backend toggleChecklistItem:', result.error);
+                        showToast('⚠️ Non sauvegardé dans le Sheet : ' + (result.error || 'erreur inconnue'));
+                    }
                 } catch (error) {
-                    console.warn('Sync hors-ligne pour le changement d\'état checklist');
+                    console.warn('Sync hors-ligne pour le changement d\'état checklist', error);
+                    showToast('⚠️ Hors-ligne : changement non synchronisé');
                 }
             }
         }
@@ -1356,7 +1364,7 @@
             // Synchronisation Google Sheet
             for (const itemSync of newItemsToSync) {
                 try {
-                    await fetch(API_APPS_SCRIPT, {
+                    const resp = await fetch(API_APPS_SCRIPT, {
                         method: 'POST',
                         body: JSON.stringify({
                             action: 'addChecklistItem',
@@ -1369,8 +1377,14 @@
                         }),
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                     });
+                    const result = await resp.json();
+                    if (!result.success) {
+                        console.error('Erreur backend addChecklistItem:', result.error);
+                        showToast('⚠️ Non sauvegardé dans le Sheet : ' + (result.error || 'erreur inconnue'));
+                    }
                 } catch (error) {
                     console.warn('Erreur de synchronisation checklist avec Google Sheet', error);
+                    showToast('⚠️ Hors-ligne : objet non synchronisé');
                 }
             }
         }
@@ -1391,13 +1405,19 @@
                 closeModal('modal-delete-confirm');
 
                 try {
-                    await fetch(API_APPS_SCRIPT, {
+                    const resp = await fetch(API_APPS_SCRIPT, {
                         method: 'POST',
                         body: JSON.stringify({ action: 'deleteChecklistItem', id: idSync }),
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                     });
+                    const result = await resp.json();
+                    if (!result.success) {
+                        console.error('Erreur backend deleteChecklistItem:', result.error);
+                        showToast('⚠️ Non supprimé du Sheet : ' + (result.error || 'erreur inconnue'));
+                    }
                 } catch (error) {
                     console.warn('Erreur suppression backend checklist', error);
+                    showToast('⚠️ Hors-ligne : suppression non synchronisée');
                 }
             } else {
                 closeModal('modal-delete-confirm');
