@@ -125,17 +125,19 @@
                 <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm mb-6 flex items-center justify-between border border-gray-100 dark:border-gray-800">
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)] mb-1">Départ dans</h3>
-                        <div class="flex gap-3 text-center">
+                        <div class="flex gap-2 text-center">
                             <div><span id="cd-days" class="block text-2xl font-heading font-bold">--</span><span class="text-[10px] opacity-70">Jours</span></div>
                             <div class="text-2xl font-bold opacity-30">:</div>
                             <div><span id="cd-hours" class="block text-2xl font-heading font-bold">--</span><span class="text-[10px] opacity-70">Heures</span></div>
                             <div class="text-2xl font-bold opacity-30">:</div>
                             <div><span id="cd-mins" class="block text-2xl font-heading font-bold">--</span><span class="text-[10px] opacity-70">Min</span></div>
+                            <div class="text-2xl font-bold opacity-30">:</div>
+                            <div><span id="cd-secs" class="block text-2xl font-heading font-bold">--</span><span class="text-[10px] opacity-70">Sec</span></div>
                         </div>
                     </div>
-                    <div class="h-12 w-12 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
+                    <button type="button" onclick="goToTransports()" aria-label="Voir les transports et vols" class="h-12 w-12 shrink-0 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[#004E7C] flex items-center justify-center text-white shadow-md active:scale-95 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                    </div>
+                    </button>
                 </div>
 
                 <!-- Widgets Météo & Devise -->
@@ -188,7 +190,7 @@
                 </div>
 
                 <!-- Urgences Dynamiques -->
-                <h3 class="text-lg font-bold font-heading mb-3 pl-2 opacity-90">Contacts</h3>
+                <h3 class="text-lg font-bold font-heading mb-3 pl-2 opacity-90">Contacts d'Urgence</h3>
                 <div id="urgences-container" class="bg-[var(--color-surface)] rounded-3xl p-4 shadow-sm space-y-3 mb-6 border border-gray-100 dark:border-gray-800">
                     <!-- Injecté dynamiquement par JS -->
                 </div>
@@ -222,7 +224,7 @@
 
             <!-- PAGE TRANSPORTS & VOLS -->
             <div id="page-transports" class="page hidden px-4 pt-8 h-full">
-                <h2 class="text-3xl font-bold font-heading mb-2">Transports & Vols</h2>
+                <h2 class="text-3xl font-bold font-heading mb-2">Transports</h2>
                 <p class="opacity-70 text-sm mb-6">Trajectoires et détails des vols programmés</p>
 
                 <!-- Carte des trajectoires de vol -->
@@ -242,28 +244,8 @@
 
                 <!-- Transports Locaux -->
                 <h3 class="text-lg font-bold font-heading mb-3 pl-1 opacity-90">Transports Locaux</h3>
-                <div class="space-y-4 pb-24">
-                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center border border-gray-100 dark:border-gray-800">
-                        <img src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=300&auto=format&fit=crop" alt="Navette" class="w-20 h-20 rounded-2xl object-cover shadow-sm">
-                        <div class="flex-1 py-1">
-                            <h4 class="font-bold font-heading text-base leading-tight mb-1">Navette de l'Hôtel</h4>
-                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Transferts aéroport aller-retour et excursions réservées.</p>
-                            <a href="tel:+23055551234" class="inline-flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform">
-                                📞 +230 5555 1234
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center border border-gray-100 dark:border-gray-800">
-                        <img src="https://images.unsplash.com/photo-1549315357-1df75a30e137?q=80&w=300&auto=format&fit=crop" alt="Taxi" class="w-20 h-20 rounded-2xl object-cover shadow-sm">
-                        <div class="flex-1 py-1">
-                            <h4 class="font-bold font-heading text-base leading-tight mb-1">Taxis (Ajay)</h4>
-                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Chauffeur privé de confiance pour déplacements locaux.</p>
-                            <a href="tel:+23058889999" class="inline-flex items-center gap-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform">
-                                📞 +230 5888 9999
-                            </a>
-                        </div>
-                    </div>
+                <div id="transports-locaux-container" class="space-y-4 pb-24">
+                    <!-- Injecté dynamiquement par JS -->
                 </div>
             </div>
 
@@ -353,8 +335,6 @@
                                 <option value="point de vue">📸 Point de vue</option>
                                 <option value="balade en ville">🚶 Balade en ville</option>
                                 <option value="hotel">🏠 Hotel</option>
-                                <option value="aeroport">✈️ Aéroport</option>
-                                <option value="plongee">🐠 Plongée</option>
                                 <option value="autre">📍 Autre</option>
                             </select>
                         </div>
@@ -428,9 +408,9 @@
                     </button>
                 </li>
                 <li class="flex-1 flex justify-center">
-                    <button onclick="switchTab('page-transports', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                    <button id="nav-btn-transports" onclick="switchTab('page-transports', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                        <span class="text-[10px] font-bold">Vols</span>
+                        <span class="text-[10px] font-bold">Transports</span>
                     </button>
                 </li>
                 <li class="flex-1 flex justify-center">
@@ -491,6 +471,11 @@
             { ID: "EMG-004", Nom: "Pompier / Incendie", Numero: "115", Icone: "🚒", Couleur: "amber" }
         ];
 
+        const DEFAULT_TRANSPORTS_LOCAUX = [
+            { ID: "TRA-001", Nom: "Navette de l'Hôtel", Description: "Transferts aéroport aller-retour et excursions réservées.", PhotoURL: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=300&auto=format&fit=crop", Numero: "+230 5555 1234" },
+            { ID: "TRA-002", Nom: "Taxis (Ajay)", Description: "Chauffeur privé de confiance pour déplacements locaux.", PhotoURL: "https://images.unsplash.com/photo-1549315357-1df75a30e137?q=80&w=300&auto=format&fit=crop", Numero: "+230 5888 9999" }
+        ];
+
         const DEFAULT_CHECKLIST = [
             { ID: "CHK-001", Categorie: "Valise Papa", Item: "Passeport valide", Fait: "Oui" },
             { ID: "CHK-002", Categorie: "Valise Papa", Item: "Permis de conduire", Fait: "Non" },
@@ -505,13 +490,15 @@
             lieux: [],
             checklist: DEFAULT_CHECKLIST,
             vols: DEFAULT_VOLS,
-            urgences: DEFAULT_URGENCES
+            urgences: DEFAULT_URGENCES,
+            transportsLocaux: DEFAULT_TRANSPORTS_LOCAUX
         };
 
         if (!appData.vols || appData.vols.length === 0) appData.vols = DEFAULT_VOLS;
         if (!appData.checklist || appData.checklist.length === 0) appData.checklist = DEFAULT_CHECKLIST;
         if (!appData.anecdotes || appData.anecdotes.length === 0) appData.anecdotes = DEFAULT_ANECDOTES;
         if (!appData.urgences || appData.urgences.length === 0) appData.urgences = DEFAULT_URGENCES;
+        if (!appData.transportsLocaux || appData.transportsLocaux.length === 0) appData.transportsLocaux = DEFAULT_TRANSPORTS_LOCAUX;
 
         let rawCurrencyRate = 50.5;
         let isMurToEur = false;
@@ -545,7 +532,7 @@
             updateMetaThemeColor(isDarkStored);
 
             updateCountdown();
-            setInterval(updateCountdown, 60000);
+            setInterval(updateCountdown, 1000);
             fetchWeather();
             fetchCurrency();
             renderAnecdote();
@@ -775,16 +762,24 @@
                 document.getElementById('cd-days').innerText = "0";
                 document.getElementById('cd-hours').innerText = "0";
                 document.getElementById('cd-mins').innerText = "0";
+                document.getElementById('cd-secs').innerText = "0";
                 return;
             }
 
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
             document.getElementById('cd-days').innerText = days;
             document.getElementById('cd-hours').innerText = hours;
             document.getElementById('cd-mins').innerText = minutes;
+            document.getElementById('cd-secs').innerText = seconds;
+        }
+
+        function goToTransports() {
+            const btn = document.getElementById('nav-btn-transports');
+            switchTab('page-transports', btn);
         }
 
         async function fetchWeather() {
@@ -1159,9 +1154,6 @@
             "restaurant": "🍽️",
             "point de vue": "📸",
             "balade en ville": "🚶",
-            "plongee": "🐠",
-            "aeroport": "✈️",
-            "autre": "📍",
             "hotel": "🏠"
         };
 
@@ -1592,7 +1584,7 @@
                 statusDiv.innerHTML = `
                     <div class="flex items-start gap-3">
                         <div class="text-xl mt-0.5">🗓️</div>
-                        <div> 
+                        <div>
                             <div class="font-bold text-[var(--color-text)] mb-0.5">Vols Programmés</div>
                             <div class="opacity-80 leading-snug">
                                 ${messageDyn}
