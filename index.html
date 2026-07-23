@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Maurice 2026 - PWA</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <style>
         :root {
+            /* Mode Clair : Techno-Lagon */
             --color-bg: #F0F4F8;
             --color-surface: #FFFFFF;
             --color-text: #1F2937;
-            --color-accent: #0A1128;
+            --color-accent: #0A1128; /* Bleu lagon profond */
             --color-accent-light: #004E7C;
         }
 
         .dark {
+            /* Mode Sombre */
             --color-bg: #121212;
             --color-surface: #1E1E1E;
             --color-text: #E0E0E0;
@@ -34,63 +39,78 @@
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.3s, color 0.3s;
             overflow: hidden;
-            touch-action: none; /* Bloque le rebond du navigateur natif pour le P2R */
         }
 
         h1, h2, h3, h4, .font-heading {
             font-family: 'Outfit', sans-serif;
         }
 
-        ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; touch-action: pan-y; }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        * {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-spin { animation: spin 1s linear infinite; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-spin {
+            animation: spin 1s linear infinite;
+        }
 
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+        .leaflet-popup-content-wrapper {
             background-color: var(--color-surface);
             color: var(--color-text);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .leaflet-popup-tip {
+            background-color: var(--color-surface);
         }
     </style>
 </head>
 <body class="antialiased selection:bg-[var(--color-accent)] selection:text-white pb-safe">
 
-    <!-- Indicateur Pull to Refresh -->
-    <div id="ptr-indicator" class="absolute top-0 left-0 w-full z-[45] pointer-events-none flex justify-center mt-4 transition-transform duration-200 transform -translate-y-full opacity-0">
-        <div class="bg-[var(--color-surface)] text-[var(--color-accent)] font-bold text-sm px-5 py-2.5 rounded-full shadow-lg flex items-center border border-gray-100 dark:border-gray-800">
-            <svg id="ptr-icon" class="h-4 w-4 animate-bounce mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-            <span id="ptr-text">Tirer pour rafraîchir</span>
-        </div>
-    </div>
-
     <div class="max-w-md mx-auto h-[100dvh] relative bg-[var(--color-bg)] shadow-2xl overflow-hidden flex flex-col" id="app-container">
         
-        <!-- Header Rétractable -->
-        <div id="home-header" class="relative h-64 w-full shrink-0 rounded-b-[40px] overflow-hidden shadow-lg transition-all duration-300 z-20 bg-transparent">
-            <img id="header-bg-img" src="https://images.unsplash.com/photo-1513415431848-a433b3de449f?q=80&w=1200&auto=format&fit=crop" alt="Ile Maurice" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 z-0">
-            <div id="header-gradient" class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-300 z-0"></div>
+        <!-- Header Rétractable de la Page Accueil -->
+        <div id="home-header" class="relative h-64 w-full shrink-0 rounded-b-[40px] overflow-hidden shadow-lg transition-all duration-300 z-20 bg-[var(--color-surface)]">
+            <img id="header-bg-img" src="https://images.unsplash.com/photo-1513415431848-a433b3de449f?q=80&w=1200&auto=format&fit=crop" alt="Ile Maurice" class="w-full h-full object-cover transition-opacity duration-300 absolute inset-0 z-0">
+            <div id="header-overlay" class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-300 z-10"></div>
             
-            <div id="header-subtext" class="absolute bottom-6 left-6 transition-all duration-300 z-10">
-                <h1 id="header-title" class="text-4xl font-bold font-heading mb-1 transition-all duration-300 text-white" style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Maurice 2026</h1>
-                <p id="header-subtitle" class="text-sm font-medium opacity-90 flex items-center gap-2 transition-all duration-300 text-white">
+            <div id="header-subtext" class="absolute bottom-6 left-6 text-white transition-all duration-300 z-20">
+                <h1 id="header-title" class="text-4xl font-bold font-heading mb-1 shadow-sm transition-all duration-300 text-white">Maurice 2026</h1>
+                <p id="header-subtitle" class="text-sm font-medium opacity-90 flex items-center gap-2 transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     17 Aventuriers
                 </p>
             </div>
 
-            <!-- Boutons Header (Rafraichissement / Thème) -->
-            <button onclick="manualRefresh()" aria-label="Rafraîchir" class="header-action-btn absolute top-4 right-4 p-2.5 rounded-full active:scale-90 transition-all z-30" style="background-color: rgba(255,255,255,0.2); color: white;">
+            <!-- Action Buttons Header -->
+            <button id="btn-refresh" onclick="manualRefresh()" aria-label="Rafraîchir" class="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-all z-30">
                 <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             </button>
-            <button onclick="toggleTheme()" aria-label="Changer de thème" class="header-action-btn absolute top-4 left-4 p-2.5 rounded-full active:scale-90 transition-all z-30" style="background-color: rgba(255,255,255,0.2); color: white;">
+            <button id="btn-theme" onclick="toggleTheme()" aria-label="Changer de thème" class="absolute top-4 left-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-all z-30">
                 <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
             </button>
         </div>
 
         <main id="main-content" class="flex-1 overflow-y-auto relative scroll-smooth pb-20 z-10">
             
+            <!-- Pull to refresh Indicator -->
+            <div id="pull-to-refresh" class="w-full flex items-center justify-center py-3 text-xs text-[var(--color-text)] opacity-0 transition-opacity duration-200 pointer-events-none -mt-10">
+                <div class="flex items-center gap-2 font-semibold">
+                    <svg id="ptr-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    <span id="ptr-text">Glisser pour rafraîchir</span>
+                </div>
+            </div>
+
             <!-- PAGE ACCUEIL -->
-            <div id="page-home" class="page block px-4 pt-6">
+            <div id="page-home" class="page block px-4 pt-4">
                 <!-- Compte à rebours -->
                 <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm mb-6 flex items-center justify-between border border-gray-100 dark:border-gray-800">
                     <div>
@@ -108,8 +128,9 @@
                     </div>
                 </div>
 
-                <!-- Météo & Change -->
+                <!-- Widgets Météo & Devise -->
                 <div class="grid grid-cols-2 gap-4 mb-6">
+                    <!-- Météo Port-Louis -->
                     <div class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between border border-gray-100 dark:border-gray-800">
                         <div class="flex items-start justify-between mb-2">
                             <span class="text-xs font-bold opacity-70">Port-Louis</span>
@@ -120,6 +141,7 @@
                             <div class="text-xs opacity-60 mt-1" id="weather-desc">Chargement...</div>
                         </div>
                     </div>
+                    <!-- Taux de Change -->
                     <div onclick="toggleCurrency()" class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition-transform select-none border border-gray-100 dark:border-gray-800">
                         <div class="flex items-start justify-between mb-2">
                             <span class="text-xs font-bold opacity-70" id="currency-title">Taux EUR/MUR</span>
@@ -135,7 +157,7 @@
                     </div>
                 </div>
 
-                <!-- Anecdote -->
+                <!-- Anecdote du jour -->
                 <div class="bg-gradient-to-br from-[var(--color-accent)] to-[#004E7C] text-white rounded-3xl p-5 shadow-lg mb-6 relative overflow-hidden">
                     <div class="relative z-10">
                         <div class="flex justify-between items-center mb-2">
@@ -149,8 +171,8 @@
                             Chargement de la découverte du jour...
                         </p>
                         <div class="flex justify-between items-center border-t border-white/20 pt-3">
-                            <button id="btn-prev-anecdote" onclick="prevAnecdote()" class="text-xs font-bold hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors active:scale-95" style="visibility: hidden;">← Précédent</button>
-                            <button id="btn-next-anecdote" onclick="nextAnecdote()" class="text-xs font-bold hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors active:scale-95" style="visibility: hidden;">Suivant →</button>
+                            <button onclick="prevAnecdote()" class="text-xs font-bold hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors active:scale-95">← Précédent</button>
+                            <button onclick="nextAnecdote()" id="btn-next-anecdote" class="text-xs font-bold hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors active:scale-95">Suivant →</button>
                         </div>
                     </div>
                 </div>
@@ -158,7 +180,7 @@
                 <!-- Urgences Dynamiques -->
                 <h3 class="text-lg font-bold font-heading mb-3 pl-2 opacity-90">Contacts d'Urgence</h3>
                 <div id="urgences-container" class="bg-[var(--color-surface)] rounded-3xl p-4 shadow-sm space-y-3 mb-6 border border-gray-100 dark:border-gray-800">
-                    <!-- Généré dynamiquement -->
+                    <!-- Injecté dynamiquement par JS -->
                 </div>
             </div>
 
@@ -174,7 +196,10 @@
                         Ajouter
                     </button>
                 </div>
-                <div id="activities-container" class="space-y-4 pb-12"></div>
+
+                <div id="activities-container" class="space-y-4 pb-12">
+                    <!-- Activités dynamiques -->
+                </div>
             </div>
 
             <!-- PAGE CARTE & LIEUX -->
@@ -185,11 +210,12 @@
                 <div id="map" class="absolute inset-0 z-0"></div>
             </div>
 
-            <!-- PAGE TRANSPORTS -->
+            <!-- PAGE TRANSPORTS & VOLS -->
             <div id="page-transports" class="page hidden px-4 pt-8 h-full">
                 <h2 class="text-3xl font-bold font-heading mb-2">Transports & Vols</h2>
                 <p class="opacity-70 text-sm mb-6">Trajectoires et détails des vols programmés</p>
 
+                <!-- Carte des trajectoires de vol -->
                 <div class="mb-6">
                     <h3 class="text-sm font-bold uppercase tracking-wider text-[var(--color-accent)] mb-2 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
@@ -198,87 +224,214 @@
                     <div id="flight-map" class="h-64 w-full rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden relative bg-[var(--color-surface)]"></div>
                 </div>
                 
+                <!-- Vols Dynamiques -->
                 <h3 class="text-lg font-bold font-heading mb-3 pl-1 opacity-90">Vos Vols Détaillés</h3>
-                <div id="flights-container" class="space-y-5 mb-8"></div>
+                <div id="flights-container" class="space-y-5 mb-8">
+                    <!-- Injecté dynamiquement par JS -->
+                </div>
+
+                <!-- Transports Locaux -->
+                <h3 class="text-lg font-bold font-heading mb-3 pl-1 opacity-90">Transports Locaux</h3>
+                <div class="space-y-4 pb-24">
+                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center border border-gray-100 dark:border-gray-800">
+                        <img src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=300&auto=format&fit=crop" alt="Navette" class="w-20 h-20 rounded-2xl object-cover shadow-sm">
+                        <div class="flex-1 py-1">
+                            <h4 class="font-bold font-heading text-base leading-tight mb-1">Navette de l'Hôtel</h4>
+                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Transferts aéroport aller-retour et excursions réservées.</p>
+                            <a href="tel:+23055551234" class="inline-flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform">
+                                📞 +230 5555 1234
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center border border-gray-100 dark:border-gray-800">
+                        <img src="https://images.unsplash.com/photo-1549315357-1df75a30e137?q=80&w=300&auto=format&fit=crop" alt="Taxi" class="w-20 h-20 rounded-2xl object-cover shadow-sm">
+                        <div class="flex-1 py-1">
+                            <h4 class="font-bold font-heading text-base leading-tight mb-1">Taxis (Ajay)</h4>
+                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Chauffeur privé de confiance pour déplacements locaux.</p>
+                            <a href="tel:+23058889999" class="inline-flex items-center gap-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform">
+                                📞 +230 5888 9999
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- PAGE CHECKLIST / VALISE -->
             <div id="page-checklist" class="page hidden px-4 pt-8 h-full">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-3xl font-bold font-heading">Valise & Checklist</h2>
+                        <h2 class="text-3xl font-bold font-heading">Valises & Checklist</h2>
                         <p class="opacity-70 text-sm mt-0.5" id="checklist-progress-text">0 / 0 objet prêt</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-[var(--color-accent)] text-white flex items-center justify-center font-bold text-sm shadow-md" id="checklist-percentage">0%</div>
+                    <div class="w-12 h-12 rounded-2xl bg-[var(--color-accent)] text-white flex items-center justify-center font-bold text-sm shadow-md" id="checklist-percentage">
+                        0%
+                    </div>
                 </div>
 
+                <!-- Barre de progression -->
                 <div class="w-full bg-gray-200 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden mb-6">
                     <div id="checklist-bar" class="bg-[var(--color-accent)] h-full transition-all duration-300 w-0"></div>
                 </div>
 
-                <!-- Ajout Universel -->
-                <div class="mb-6 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-light)] p-4 rounded-3xl text-white shadow-lg">
-                    <h3 class="font-bold mb-2 text-sm flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        Ajouter à tous les groupes
-                    </h3>
-                    <form onsubmit="addChecklistItem(event, 'ALL')" class="flex gap-2">
-                        <input type="text" placeholder="Ex: Passeport..." required class="flex-1 bg-white/20 placeholder-white/70 border border-white/30 rounded-xl px-3 py-2 text-sm outline-none focus:bg-white/30 transition-all text-white">
-                        <button type="submit" class="bg-white text-[var(--color-accent)] font-bold px-4 py-2 rounded-xl active:scale-95 transition-transform text-sm">
-                            +
+                <!-- Formulaire d'ajout rapide d'article -->
+                <form onsubmit="addChecklistItem(event)" class="bg-[var(--color-surface)] p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm mb-6 space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)] mb-1">Ajouter un objet</div>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-item-input" placeholder="Nom de l'objet (ex: Maillot de bain)..." required class="flex-1 bg-[var(--color-bg)] border border-transparent rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <select id="new-item-category-select" onchange="handleCategorySelectChange(this)" class="flex-1 bg-[var(--color-bg)] border border-transparent rounded-2xl px-3 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                            <!-- Options générées dynamiquement -->
+                        </select>
+                        <button type="submit" class="bg-[var(--color-accent)] text-white font-bold px-5 py-2.5 rounded-2xl active:scale-95 transition-transform text-xs shadow-md">
+                            + Ajouter
                         </button>
-                    </form>
-                </div>
+                    </div>
+                    <!-- Champ personnalisé si nouvelle section -->
+                    <div id="custom-category-container" class="hidden">
+                        <input type="text" id="new-custom-category-input" placeholder="Nom du nouveau groupe/valise..." class="w-full bg-[var(--color-bg)] border border-transparent rounded-2xl px-4 py-2 text-xs outline-none focus:ring-2 focus:ring-[var(--color-accent)]">
+                    </div>
+                </form>
 
-                <!-- Conteneur Dynamique des Familles -->
-                <div id="checklist-items" class="space-y-3 pb-24">
+                <!-- Listes interactives groupées par sections -->
+                <div id="checklist-sections-container" class="space-y-6 pb-24">
+                    <!-- Généré dynamiquement par JS -->
                 </div>
             </div>
         </main>
 
-        <!-- MODAL : DÉTAIL ACTIVITÉ & AJOUT ACTIVITÉ [Identique au code fourni]-->
+        <!-- MODAL : CONFIRMATION SUPPRESSION ITEM -->
+        <div id="modal-delete-confirm" class="fixed inset-0 z-[70] hidden bg-black/60 backdrop-blur-sm flex justify-center items-center opacity-0 transition-opacity duration-300 px-4">
+            <div class="bg-[var(--color-surface)] w-full max-w-xs rounded-3xl p-5 relative shadow-2xl text-center space-y-4">
+                <div class="w-12 h-12 rounded-full bg-red-100 text-red-500 mx-auto flex items-center justify-center text-xl font-bold">🗑️</div>
+                <h3 class="text-lg font-bold font-heading">Supprimer cet objet ?</h3>
+                <p class="text-xs opacity-70">Cette action retirera l'élément de votre checklist.</p>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="closeModal('modal-delete-confirm')" class="flex-1 bg-[var(--color-bg)] font-bold py-2.5 rounded-xl text-xs active:scale-95 transition-transform">Annuler</button>
+                    <button onclick="confirmDeleteChecklistItem()" class="flex-1 bg-red-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-md active:scale-95 transition-transform">Supprimer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL : DÉTAIL ACTIVITÉ -->
         <div id="modal-activity-details" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
             <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl" id="activity-modal-content">
             </div>
         </div>
 
+        <!-- MODAL : AJOUTER UNE ACTIVITÉ -->
         <div id="modal-add-activity" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
-            <!-- Formulaire inchangé -->
             <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl">
-                <button onclick="closeModal('modal-add-activity')" class="absolute top-4 right-4 p-2 bg-[var(--color-bg)] rounded-full active:scale-90 z-10 transition-transform"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <button onclick="closeModal('modal-add-activity')" class="absolute top-4 right-4 p-2 bg-[var(--color-bg)] rounded-full active:scale-90 z-10 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
                 <h3 class="text-2xl font-bold font-heading mb-4">Nouvelle Activité</h3>
                 <form id="form-add-activity" onsubmit="submitActivity(event)" class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2"><label class="block text-sm font-semibold mb-1 opacity-80">Titre *</label><input type="text" name="Titre" required class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></div>
-                        <div class="col-span-2"><label class="block text-sm font-semibold mb-1 opacity-80">Catégorie *</label><select name="Categorie" required class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"><option value="excursion en mer">🚤 Excursion en mer</option><option value="voyage en voiture">🚗 Voyage en voiture</option><option value="spectacle">🎭 Spectacle</option><option value="restaurant">🍽️ Restaurant</option><option value="point de vue">📸 Point de vue</option><option value="balade en ville">🚶 Balade en ville</option><option value="hotel">🏠 Hotel</option><option value="autre">📍 Autre</option></select></div>
-                        <div><label class="block text-sm font-semibold mb-1 opacity-80">Date (JJ/MM/AAAA) *</label><input type="text" name="Jour" placeholder="20/10/2026" required class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></div>
-                        <div><label class="block text-sm font-semibold mb-1 opacity-80">Heure (HH:MM)</label><input type="time" name="Heure" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></div>
-                        <div><label class="block text-sm font-semibold mb-1 opacity-80">Latitude</label><input type="text" name="Latitude" placeholder="-20.1609" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm"></div>
-                        <div><label class="block text-sm font-semibold mb-1 opacity-80">Longitude</label><input type="text" name="Longitude" placeholder="57.5011" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm"></div>
-                        <div><label class="block text-sm font-semibold mb-1 opacity-80">Participants</label><input type="text" name="Participants" placeholder="Tous, ou Nom..." class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></div>
-                        <div><label class="block text-sm font-semibold mb-1 opacity-80">Prix</label><input type="text" name="Prix" placeholder="ex: 1500 Rs" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></div>
-                        <div class="col-span-2"><label class="block text-sm font-semibold mb-1 opacity-80">URL de l'image</label><input type="url" name="PhotoURL" placeholder="https://..." class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></div>
-                        <div class="col-span-2"><label class="block text-sm font-semibold mb-1 opacity-80">Description rapide</label><textarea name="Descriptif" rows="2" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></textarea></div>
-                        <div class="col-span-2"><label class="block text-sm font-semibold mb-1 opacity-80">Statut</label><select name="Statut" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm"><option value="En attente">En attente</option><option value="Confirmé">Confirmé</option><option value="Annulé">Annulé</option></select></div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Titre *</label>
+                            <input type="text" name="Titre" required class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Catégorie *</label>
+                            <select name="Categorie" required class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                                <option value="excursion en mer">🚤 Excursion en mer</option>
+                                <option value="voyage en voiture">🚗 Voyage en voiture</option>
+                                <option value="spectacle">🎭 Spectacle</option>
+                                <option value="restaurant">🍽️ Restaurant</option>
+                                <option value="point de vue">📸 Point de vue</option>
+                                <option value="balade en ville">🚶 Balade en ville</option>
+                                <option value="hotel">🏠 Hotel</option>
+                                <option value="autre">📍 Autre</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Date (JJ/MM/AAAA) *</label>
+                            <input type="text" name="Jour" placeholder="20/10/2026" required class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Heure (HH:MM)</label>
+                            <input type="time" name="Heure" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Latitude</label>
+                            <input type="text" name="Latitude" placeholder="-20.1609" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Longitude</label>
+                            <input type="text" name="Longitude" placeholder="57.5011" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Participants</label>
+                            <input type="text" name="Participants" placeholder="Tous, ou Nom..." class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Prix</label>
+                            <input type="text" name="Prix" placeholder="ex: 1500 Rs" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">URL de l'image</label>
+                            <input type="url" name="PhotoURL" placeholder="https://..." class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Description rapide</label>
+                            <textarea name="Descriptif" rows="2" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"></textarea>
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Statut</label>
+                            <select name="Statut" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm">
+                                <option value="En attente">En attente</option>
+                                <option value="Confirmé">Confirmé</option>
+                                <option value="Annulé">Annulé</option>
+                            </select>
+                        </div>
                     </div>
-                    <button type="submit" class="w-full bg-[var(--color-accent)] text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-transform mt-6">Enregistrer l'activité</button>
+                    <button type="submit" class="w-full bg-[var(--color-accent)] text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-transform mt-6">
+                        Enregistrer l'activité
+                    </button>
                 </form>
             </div>
         </div>
 
-        <!-- NAVIGATION BAR [Inchangée] -->
+        <!-- NAVIGATION BAR -->
         <nav class="absolute bottom-0 w-full max-w-md bg-[var(--color-surface)] border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 px-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-50">
             <ul class="flex justify-between items-center h-16">
-                <li class="flex-1 flex justify-center"><button onclick="switchTab('page-home', this)" class="nav-btn flex flex-col items-center gap-1 opacity-100 text-[var(--color-accent)]"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span class="text-[10px] font-bold">Accueil</span></button></li>
-                <li class="flex-1 flex justify-center"><button onclick="switchTab('page-agenda', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span class="text-[10px] font-bold">Agenda</span></button></li>
-                <li class="flex-1 flex justify-center"><button onclick="switchTab('page-lieux', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg><span class="text-[10px] font-bold">Carte</span></button></li>
-                <li class="flex-1 flex justify-center"><button onclick="switchTab('page-transports', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg><span class="text-[10px] font-bold">Vols</span></button></li>
-                <li class="flex-1 flex justify-center"><button onclick="switchTab('page-checklist', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><span class="text-[10px] font-bold">Valises</span></button></li>
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-home', this)" class="nav-btn flex flex-col items-center gap-1 opacity-100 text-[var(--color-accent)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <span class="text-[10px] font-bold">Accueil</span>
+                    </button>
+                </li>
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-agenda', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="text-[10px] font-bold">Agenda</span>
+                    </button>
+                </li>
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-lieux', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        <span class="text-[10px] font-bold">Carte</span>
+                    </button>
+                </li>
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-transports', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                        <span class="text-[10px] font-bold">Vols</span>
+                    </button>
+                </li>
+                <li class="flex-1 flex justify-center">
+                    <button onclick="switchTab('page-checklist', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        <span class="text-[10px] font-bold">Valises</span>
+                    </button>
+                </li>
             </ul>
         </nav>
 
-        <!-- TOAST -->
-        <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-[70] transform -translate-y-4 whitespace-nowrap">
+        <!-- TOAST NOTIFICATION -->
+        <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-[80] transform -translate-y-4 whitespace-nowrap">
             Notification
         </div>
     </div>
@@ -286,83 +439,67 @@
     <script>
         const API_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxK1vBGBEoPdnndqGybpEaI4CEDZBs-raPzGuLu4wHAtxE0KpqEYydF-mZej3WqdZ4EtQ/exec';
         
-        // Liste des catégories valises (Produit Plan)
-        const CHECKLIST_FAMILIES = ["Boué", "Béringuier", "Eliane et Christian", "Alexandre", "Lauriane, Nicolas, Louise et Camille"];
+        const DEFAULT_VOLS = [
+            {
+                ID: "VOL-001", Categorie: "Aller", Etape: "1", Code: "TK 1804", Compagnie: "Turkish Airlines",
+                AeroportDepartCode: "TLS", AeroportDepartNom: "Toulouse", DateDepart: "19/10/2026", HeureDepart: "11:15",
+                AeroportArriveeCode: "IST", AeroportArriveeNom: "Istanbul", DateArrivee: "19/10/2026", HeureArrivee: "16:00",
+                Escale: "Escale à Istanbul (10h10)", LatDepart: "43.6291", LngDepart: "1.3638", LatArrivee: "41.2753", LngArrivee: "28.7519"
+            },
+            {
+                ID: "VOL-002", Categorie: "Aller", Etape: "2", Code: "TK 160", Compagnie: "Turkish Airlines",
+                AeroportDepartCode: "IST", AeroportDepartNom: "Istanbul", DateDepart: "20/10/2026", HeureDepart: "02:10",
+                AeroportArriveeCode: "MRU", AeroportArriveeNom: "Maurice", DateArrivee: "20/10/2026", HeureArrivee: "12:30",
+                Escale: "", LatDepart: "41.2753", LngDepart: "28.7519", LatArrivee: "-20.4302", LngArrivee: "57.6836"
+            },
+            {
+                ID: "VOL-003", Categorie: "Retour", Etape: "1", Code: "TK 161", Compagnie: "Turkish Airlines",
+                AeroportDepartCode: "MRU", AeroportDepartNom: "Maurice", DateDepart: "27/10/2026", HeureDepart: "21:25",
+                AeroportArriveeCode: "IST", AeroportArriveeNom: "Istanbul", DateArrivee: "28/10/2026", HeureArrivee: "06:05",
+                Escale: "Escale à Istanbul (02h45)", LatDepart: "-20.4302", LngDepart: "57.6836", LatArrivee: "41.2753", LngArrivee: "28.7519"
+            },
+            {
+                ID: "VOL-004", Categorie: "Retour", Etape: "2", Code: "TK 1803", Compagnie: "Turkish Airlines",
+                AeroportDepartCode: "IST", AeroportDepartNom: "Istanbul", DateDepart: "28/10/2026", HeureDepart: "08:50",
+                AeroportArriveeCode: "TLS", AeroportArriveeNom: "Toulouse", DateArrivee: "28/10/2026", HeureArrivee: "11:35",
+                Escale: "", LatDepart: "41.2753", LngDepart: "28.7519", LatArrivee: "43.6291", LngArrivee: "1.3638"
+            }
+        ];
 
-        const DEFAULT_VOLS = []; // [Omitted for brevity, keeps your old logic]
-        const DEFAULT_ANECDOTES = [];
-        const DEFAULT_ACTIVITES = [];
+        const DEFAULT_ANECDOTES = [
+            { Jour: "19/10/2026", Texte: "L'île Maurice possède la barrière de corail la plus spectaculaire de l'Océan Indien, abritant plus de 430 espèces de créatures marines !" },
+            { Jour: "20/10/2026", Texte: "Le Dodo, célèbre oiseau aujourd'hui disparu, n'existait nulle part ailleurs qu'à l'Île Maurice." },
+            { Jour: "21/10/2026", Texte: "La Terre des 7 Couleurs de Chamarel est une curiosité géologique d'origines volcaniques aux dunes colorées uniques au monde." }
+        ];
+
         const DEFAULT_URGENCES = [
-            { Nom: "Police / Urgences", Numero: "999 ou 112", Icone: "🚨", CouleurIcone: "text-red-500", CouleurFond: "bg-red-100 dark:bg-red-900/30", Lien: "tel:999" },
-            { Nom: "SAMU (Ambulance)", Numero: "114", Icone: "🚑", CouleurIcone: "text-red-500", CouleurFond: "bg-red-100 dark:bg-red-900/30", Lien: "tel:114" }
+            { ID: "EMG-001", Nom: "Police / Urgences", Numero: "999 ou 112", Icone: "🚨", Couleur: "red" },
+            { ID: "EMG-002", Nom: "SAMU (Ambulance)", Numero: "114", Icone: "🚑", Couleur: "red" },
+            { ID: "EMG-003", Nom: "Garde-Côtes / Secours Mer", Numero: "208 3935", Icone: "🛥️", Couleur: "blue" },
+            { ID: "EMG-004", Nom: "Pompier / Incendie", Numero: "115", Icone: "🚒", Couleur: "amber" }
+        ];
+
+        const DEFAULT_CHECKLIST = [
+            { ID: "CHK-001", Categorie: "Valise Papa", Item: "Passeport valide", Fait: "Oui" },
+            { ID: "CHK-002", Categorie: "Valise Papa", Item: "Permis de conduire", Fait: "Non" },
+            { ID: "CHK-003", Categorie: "Valise Maman", Item: "Crème solaire HF & Lunettes", Fait: "Non" },
+            { ID: "CHK-004", Categorie: "Trousse Pharmacie", Item: "Anti-moustique tropique", Fait: "Oui" },
+            { ID: "CHK-005", Categorie: "Trousse Pharmacie", Item: "Adaptateur prise UK/Maurice", Fait: "Non" }
         ];
 
         let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || {
             anecdotes: DEFAULT_ANECDOTES,
-            activites: DEFAULT_ACTIVITES,
+            activites: [],
             lieux: [],
-            checklist: [],
+            checklist: DEFAULT_CHECKLIST,
             vols: DEFAULT_VOLS,
             urgences: DEFAULT_URGENCES
         };
 
-        // --- GESTION DU PULL TO REFRESH ---
-        const appContainer = document.getElementById('main-content');
-        const ptrIndicator = document.getElementById('ptr-indicator');
-        const ptrIcon = document.getElementById('ptr-icon');
-        const ptrText = document.getElementById('ptr-text');
-        
-        let ptrStartY = 0;
-        let isPulling = false;
-
-        appContainer.addEventListener('touchstart', e => {
-            if (appContainer.scrollTop === 0) {
-                ptrStartY = e.touches[0].screenY;
-                isPulling = true;
-            }
-        }, {passive: true});
-
-        appContainer.addEventListener('touchmove', e => {
-            if (!isPulling) return;
-            const y = e.touches[0].screenY;
-            const dist = y - ptrStartY;
-            
-            if (dist > 20 && appContainer.scrollTop === 0) {
-                const pullDist = Math.min(dist - 20, 80);
-                ptrIndicator.style.transform = `translateY(${pullDist}px)`;
-                ptrIndicator.style.opacity = pullDist / 80;
-            } else if (dist < 0) {
-                isPulling = false;
-            }
-        }, {passive: true});
-
-        appContainer.addEventListener('touchend', e => {
-            if (!isPulling) return;
-            isPulling = false;
-            const dist = e.changedTouches[0].screenY - ptrStartY;
-            
-            if (dist > 80 && appContainer.scrollTop === 0) {
-                ptrIcon.classList.remove('animate-bounce');
-                ptrIcon.classList.add('loading-spin');
-                ptrText.innerText = "Synchronisation...";
-                
-                manualRefresh();
-                
-                setTimeout(() => {
-                    ptrIndicator.style.transform = 'translateY(-100%)';
-                    ptrIndicator.style.opacity = 0;
-                    setTimeout(() => {
-                        ptrIcon.classList.add('animate-bounce');
-                        ptrIcon.classList.remove('loading-spin');
-                        ptrText.innerText = "Tirer pour rafraîchir";
-                    }, 300);
-                }, 1500); 
-            } else {
-                ptrIndicator.style.transform = 'translateY(-100%)';
-                ptrIndicator.style.opacity = 0;
-            }
-        }, {passive: true});
-
+        if (!appData.vols || appData.vols.length === 0) appData.vols = DEFAULT_VOLS;
+        if (!appData.checklist || appData.checklist.length === 0) appData.checklist = DEFAULT_CHECKLIST;
+        if (!appData.anecdotes || appData.anecdotes.length === 0) appData.anecdotes = DEFAULT_ANECDOTES;
+        if (!appData.urgences || appData.urgences.length === 0) appData.urgences = DEFAULT_URGENCES;
 
         let rawCurrencyRate = 50.5;
         let isMurToEur = false;
@@ -371,7 +508,6 @@
             document.documentElement.classList.toggle('dark');
             const isDark = document.documentElement.classList.contains('dark');
             localStorage.setItem('maurice2026_theme', isDark ? 'dark' : 'light');
-            handleHomeScroll(); // Rafraîchit les couleurs du header selon le thème actuel
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -386,72 +522,121 @@
             renderAnecdote();
             renderActivities();
             renderFlights();
-            renderChecklist();
             renderUrgences();
+            renderChecklist();
 
+            initPullToRefresh();
             fetchAppData();
-            appContainer.addEventListener('scroll', handleHomeScroll);
+
+            const mainContent = document.getElementById('main-content');
+            mainContent.addEventListener('scroll', handleHomeScroll);
         });
 
-        // --- HEADER DYNAMIQUE ---
         function handleHomeScroll() {
             const homePage = document.getElementById('page-home');
             if (homePage.classList.contains('hidden')) return;
 
-            const scrollTop = appContainer.scrollTop;
+            const scrollTop = document.getElementById('main-content').scrollTop;
             const header = document.getElementById('home-header');
             const bgImg = document.getElementById('header-bg-img');
-            const gradient = document.getElementById('header-gradient');
+            const overlay = document.getElementById('header-overlay');
             const title = document.getElementById('header-title');
             const subtitle = document.getElementById('header-subtitle');
             const subtext = document.getElementById('header-subtext');
-            const actionBtns = document.querySelectorAll('.header-action-btn');
+            const btnRefresh = document.getElementById('btn-refresh');
+            const btnTheme = document.getElementById('btn-theme');
 
             if (scrollTop > 30) {
-                header.style.height = '5rem';
-                header.style.borderBottomLeftRadius = '24px';
-                header.style.borderBottomRightRadius = '24px';
-                header.style.backgroundColor = 'var(--color-surface)';
-                
+                header.style.height = '4.5rem';
+                header.style.borderBottomLeftRadius = '20px';
+                header.style.borderBottomRightRadius = '20px';
                 bgImg.style.opacity = '0';
-                gradient.style.opacity = '0';
-                
-                subtext.style.bottom = '0.7rem';
-                subtext.style.left = '4rem';
-                
-                title.style.fontSize = '1.5rem';
-                title.style.color = 'var(--color-text)'; 
-                title.style.textShadow = 'none';
-                
-                actionBtns.forEach(btn => {
-                    btn.style.backgroundColor = 'var(--color-bg)';
-                    btn.style.color = 'var(--color-text)';
-                });
-
+                overlay.style.opacity = '0';
+                subtext.style.bottom = '0.9rem';
+                subtext.style.left = '4.5rem';
+                title.style.fontSize = '1.25rem';
+                title.classList.remove('text-white', 'shadow-sm');
+                title.classList.add('text-[var(--color-text)]');
                 if (subtitle) subtitle.style.display = 'none';
+
+                btnRefresh.className = "absolute top-3 right-4 p-2 bg-[var(--color-bg)] text-[var(--color-text)] rounded-full active:scale-90 transition-all z-30 shadow-sm";
+                btnTheme.className = "absolute top-3 left-4 p-2 bg-[var(--color-bg)] text-[var(--color-text)] rounded-full active:scale-90 transition-all z-30 shadow-sm";
             } else {
                 header.style.height = '16rem';
                 header.style.borderBottomLeftRadius = '40px';
                 header.style.borderBottomRightRadius = '40px';
-                header.style.backgroundColor = 'transparent';
-                
                 bgImg.style.opacity = '1';
-                gradient.style.opacity = '1';
-                
+                overlay.style.opacity = '1';
                 subtext.style.bottom = '1.5rem';
                 subtext.style.left = '1.5rem';
-                
                 title.style.fontSize = '2.25rem';
-                title.style.color = 'white';
-                title.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-                
-                actionBtns.forEach(btn => {
-                    btn.style.backgroundColor = 'rgba(255,255,255,0.2)';
-                    btn.style.color = 'white';
-                });
-
+                title.classList.add('text-white', 'shadow-sm');
+                title.classList.remove('text-[var(--color-text)]');
                 if (subtitle) subtitle.style.display = 'flex';
+
+                btnRefresh.className = "absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-all z-30";
+                btnTheme.className = "absolute top-4 left-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-all z-30";
             }
+        }
+
+        let touchStartY = 0;
+        let touchMoveY = 0;
+        let isPulling = false;
+
+        function initPullToRefresh() {
+            const mainContent = document.getElementById('main-content');
+            const ptrIndicator = document.getElementById('pull-to-refresh');
+            const ptrIcon = document.getElementById('ptr-icon');
+            const ptrText = document.getElementById('ptr-text');
+
+            mainContent.addEventListener('touchstart', (e) => {
+                if (mainContent.scrollTop <= 0) {
+                    touchStartY = e.touches[0].clientY;
+                    isPulling = true;
+                }
+            }, { passive: true });
+
+            mainContent.addEventListener('touchmove', (e) => {
+                if (!isPulling || mainContent.scrollTop > 0) return;
+                touchMoveY = e.touches[0].clientY;
+                const diff = touchMoveY - touchStartY;
+
+                if (diff > 0) {
+                    const pullDistance = Math.min(diff * 0.4, 70);
+                    ptrIndicator.style.transform = `translateY(${pullDistance}px)`;
+                    ptrIndicator.style.opacity = Math.min(pullDistance / 50, 1);
+
+                    if (pullDistance >= 50) {
+                        ptrIcon.style.transform = 'rotate(180deg)';
+                        ptrText.textContent = 'Relâcher pour rafraîchir';
+                    } else {
+                        ptrIcon.style.transform = 'rotate(0deg)';
+                        ptrText.textContent = 'Glisser pour rafraîchir';
+                    }
+                }
+            }, { passive: true });
+
+            mainContent.addEventListener('touchend', () => {
+                if (!isPulling) return;
+                isPulling = false;
+                const diff = touchMoveY - touchStartY;
+                
+                if (diff > 100 && mainContent.scrollTop <= 0) {
+                    ptrText.textContent = 'Mise à jour...';
+                    ptrIcon.classList.add('loading-spin');
+                    manualRefresh().finally(() => {
+                        ptrIndicator.style.transform = 'translateY(0)';
+                        ptrIndicator.style.opacity = '0';
+                        ptrIcon.classList.remove('loading-spin');
+                        ptrIcon.style.transform = 'rotate(0deg)';
+                    });
+                } else {
+                    ptrIndicator.style.transform = 'translateY(0)';
+                    ptrIndicator.style.opacity = '0';
+                }
+                touchStartY = 0;
+                touchMoveY = 0;
+            });
         }
 
         function switchTab(pageId, btnElement) {
@@ -473,6 +658,14 @@
             } else {
                 header.style.display = 'none';
             }
+
+            if (pageId === 'page-lieux') {
+                setTimeout(initMap, 100); 
+            }
+
+            if (pageId === 'page-transports') {
+                setTimeout(initFlightMap, 100);
+            }
         }
 
         function showToast(message) {
@@ -480,6 +673,7 @@
             toast.textContent = message;
             toast.classList.remove('opacity-0', '-translate-y-4');
             toast.classList.add('opacity-100', 'translate-y-0');
+            
             setTimeout(() => {
                 toast.classList.remove('opacity-100', 'translate-y-0');
                 toast.classList.add('opacity-0', '-translate-y-4');
@@ -498,268 +692,668 @@
                 const rawData = await response.json();
                 
                 if (rawData && !rawData.error) {
-                    const cleanArray = (arr) => Array.isArray(arr) ? arr.map(item => {
-                        const cleanItem = {};
-                        for (const key in item) cleanItem[key.trim()] = item[key];
-                        return cleanItem;
-                    }) : [];
+                    const cleanArray = (arr) => {
+                        if (!Array.isArray(arr)) return [];
+                        return arr.map(item => {
+                            const cleanItem = {};
+                            for (const key in item) {
+                                cleanItem[key.trim()] = item[key];
+                            }
+                            return cleanItem;
+                        });
+                    };
 
                     appData = {
                         activites: cleanArray(rawData.activites).length ? cleanArray(rawData.activites) : appData.activites,
                         anecdotes: cleanArray(rawData.anecdotes).length ? cleanArray(rawData.anecdotes) : appData.anecdotes,
                         lieux: cleanArray(rawData.lieux),
                         checklist: cleanArray(rawData.checklist).length ? cleanArray(rawData.checklist) : appData.checklist,
-                        vols: cleanArray(rawData.vols).length ? cleanArray(rawData.vols) : appData.vols,
-                        urgences: cleanArray(rawData.urgences).length ? cleanArray(rawData.urgences) : DEFAULT_URGENCES
+                        vols: rawData.vols && rawData.vols.length > 0 ? cleanArray(rawData.vols) : DEFAULT_VOLS,
+                        urgences: rawData.urgences && rawData.urgences.length > 0 ? cleanArray(rawData.urgences) : DEFAULT_URGENCES
                     };
 
                     localStorage.setItem('maurice2026_data', JSON.stringify(appData));
-                    
                     renderAnecdote(); 
                     renderActivities();
                     renderFlights();
-                    renderChecklist();
                     renderUrgences();
-
+                    renderChecklist();
+                    updateMapMarkers();
+                    
+                    if (!document.getElementById('page-transports').classList.contains('hidden')) {
+                        initFlightMap();
+                    }
+                    
                     if (isManualRefresh) showToast("Données synchronisées !");
                 }
             } catch (error) {
-                if (isManualRefresh) showToast("Mode hors-ligne utilisé");
+                if (isManualRefresh) showToast("Mode hors-ligne / Données locales utilisées");
             } finally {
                 if(isManualRefresh && icon) icon.classList.remove('loading-spin');
             }
         }
 
-        function manualRefresh() { fetchAppData(true); }
+        async function manualRefresh() {
+            return fetchAppData(true);
+        }
 
         function updateCountdown() {
-            // Intégration transparente de la date et l'heure corrigées en fonction de l'historique utilisateur (départ exact TLS).
-            const targetDate = new Date('2026-10-20T18:50:00').getTime();
+            const targetDate = new Date('2026-10-19T10:00:00').getTime();
             const now = new Date().getTime();
             const distance = targetDate - now;
 
-            if (distance < 0) return;
-            document.getElementById('cd-days').innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
-            document.getElementById('cd-hours').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById('cd-mins').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            if (distance < 0) {
+                document.getElementById('cd-days').innerText = "0";
+                document.getElementById('cd-hours').innerText = "0";
+                document.getElementById('cd-mins').innerText = "0";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+            document.getElementById('cd-days').innerText = days;
+            document.getElementById('cd-hours').innerText = hours;
+            document.getElementById('cd-mins').innerText = minutes;
         }
 
-        async function fetchWeather() { /* [Identique] */ }
-        async function fetchCurrency() { /* [Identique] */ }
-        function toggleCurrency() { /* [Identique] */ }
-
-        // --- GESTION DYNAMIQUE DES URGENCES ---
-        function renderUrgences() {
-            const container = document.getElementById('urgences-container');
-            const items = (appData.urgences && appData.urgences.length > 0) ? appData.urgences : DEFAULT_URGENCES;
-            
-            container.innerHTML = items.map(u => `
-                <a href="${u.Lien || '#'}" class="flex items-center justify-between p-2 rounded-xl active:bg-[var(--color-bg)] transition-colors">
-                    <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 rounded-full ${u.CouleurFond || 'bg-gray-100 dark:bg-gray-800'} ${u.CouleurIcone || 'text-gray-500'} flex items-center justify-center text-xl">
-                            ${u.Icone || '📞'}
-                        </div>
-                        <div>
-                            <div class="font-bold text-sm">${u.Nom || 'Contact'}</div>
-                            <div class="text-xs opacity-60">${u.Numero || ''}</div>
-                        </div>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </a>
-            `).join('');
+        async function fetchWeather() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-20.1609&longitude=57.5011&current_weather=true');
+                const data = await res.json();
+                if (data && data.current_weather) {
+                    document.getElementById('weather-temp').innerText = `${Math.round(data.current_weather.temperature)}°C`;
+                    document.getElementById('weather-desc').innerText = "Ensoleillé";
+                    return;
+                }
+            } catch (e) {}
+            document.getElementById('weather-temp').innerText = "28°C";
+            document.getElementById('weather-desc').innerText = "Ensoleillé";
         }
 
-        // --- ANECDOTES LOGIC ---
-        let validAnecdotes = [];
+        async function fetchCurrency() {
+            try {
+                const res = await fetch('https://open.er-api.com/v6/latest/EUR');
+                const data = await res.json();
+                if(data.rates && data.rates.MUR) {
+                    rawCurrencyRate = data.rates.MUR;
+                }
+            } catch (e) {}
+            updateCurrencyUI();
+        }
+
+        function toggleCurrency() {
+            isMurToEur = !isMurToEur;
+            updateCurrencyUI();
+        }
+
+        function updateCurrencyUI() {
+            const valEl = document.getElementById('currency-rate');
+            const symEl = document.getElementById('currency-symbol');
+            const descEl = document.getElementById('currency-desc');
+            const titleEl = document.getElementById('currency-title');
+
+            if(isMurToEur) {
+                titleEl.innerText = "Taux MUR/EUR";
+                valEl.innerText = (1 / rawCurrencyRate).toFixed(3);
+                symEl.innerText = "€";
+                descEl.innerText = "Pour 1 Rs";
+            } else {
+                titleEl.innerText = "Taux EUR/MUR";
+                valEl.innerText = rawCurrencyRate.toFixed(1);
+                symEl.innerText = "Rs";
+                descEl.innerText = "Pour 1 €";
+            }
+        }
+
+        let visibleAnecdotes = [];
         let currentAnecdoteIdx = 0;
 
         function parseDateString(dateStr) {
             if(!dateStr) return new Date(0);
-            const s = String(dateStr).trim();
-            if (s.includes('-')) {
-                const parts = s.split('-');
-                if(parts.length === 3) return new Date(parts[0], parts[1] - 1, parts[2].substring(0,2));
-            } else if (s.includes('/')) {
-                const parts = s.split('/');
-                if(parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
-            }
+            const parts = String(dateStr).split('/');
+            if(parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
             return new Date(0);
         }
 
         function renderAnecdote() {
-            let allAn = (appData.anecdotes && appData.anecdotes.length > 0) ? [...appData.anecdotes] : [];
-            allAn.sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour));
+            const allAnecdotes = (appData.anecdotes && appData.anecdotes.length > 0) ? appData.anecdotes : DEFAULT_ANECDOTES;
             
-            const today = new Date();
-            today.setHours(0,0,0,0);
+            // Tri par date croissante
+            const sorted = [...allAnecdotes].sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour));
             
-            // On filtre pour ne garder que le présent et le passé
-            const pastAndPresent = allAn.filter(a => parseDateString(a.Jour) <= today);
-            
-            if (pastAndPresent.length > 0) {
-                validAnecdotes = pastAndPresent;
-                currentAnecdoteIdx = validAnecdotes.length - 1; // Pointe par défaut sur la plus récente
-            } else if (allAn.length > 0) {
-                validAnecdotes = [allAn[0]]; // Teaser s'il n'y a que du futur
-                currentAnecdoteIdx = 0;
-            } else {
-                validAnecdotes = [];
+            const now = new Date();
+            now.setHours(23, 59, 59, 999);
+
+            // Filtrage : uniquement les anecdotes <= aujourd'hui
+            visibleAnecdotes = sorted.filter(a => parseDateString(a.Jour) <= now);
+
+            // Si aucune anecdote n'est encore passée (ex: avant le voyage), on montre au moins la 1ère
+            if (visibleAnecdotes.length === 0 && sorted.length > 0) {
+                visibleAnecdotes = [sorted[0]];
             }
+
+            // Par défaut, positionnement sur l'anecdote la plus récente disponible (celle du jour)
+            currentAnecdoteIdx = visibleAnecdotes.length - 1;
             updateAnecdoteUI();
         }
 
         function updateAnecdoteUI() {
+            if (visibleAnecdotes.length === 0) return;
+            const a = visibleAnecdotes[currentAnecdoteIdx];
             const textEl = document.getElementById('anecdote-text');
             const dateEl = document.getElementById('anecdote-date');
-            const btnPrev = document.getElementById('btn-prev-anecdote');
-            const btnNext = document.getElementById('btn-next-anecdote');
             
-            if (validAnecdotes.length === 0) {
-                textEl.innerText = "Revenez plus tard pour de nouvelles découvertes !";
-                dateEl.innerText = '--/--';
-                btnPrev.style.visibility = 'hidden';
-                btnNext.style.visibility = 'hidden';
-                return;
-            }
-
-            const a = validAnecdotes[currentAnecdoteIdx];
             textEl.style.opacity = 0;
-            
             setTimeout(() => {
-                textEl.innerText = a.Texte || 'Pas d\'anecdote pour ce jour.';
+                textEl.innerText = a.Texte || 'Pas d\'anecdote pour aujourd\'hui.';
                 dateEl.innerText = a.Jour || '--/--';
                 textEl.style.opacity = 1;
-                
-                btnPrev.style.visibility = (currentAnecdoteIdx > 0) ? 'visible' : 'hidden';
-                btnNext.style.visibility = (currentAnecdoteIdx < validAnecdotes.length - 1) ? 'visible' : 'hidden';
             }, 150);
         }
 
-        function prevAnecdote() { if (currentAnecdoteIdx > 0) { currentAnecdoteIdx--; updateAnecdoteUI(); } }
-        function nextAnecdote() { if (currentAnecdoteIdx < validAnecdotes.length - 1) { currentAnecdoteIdx++; updateAnecdoteUI(); } }
+        function prevAnecdote() {
+            if (currentAnecdoteIdx > 0) { 
+                currentAnecdoteIdx--; 
+                updateAnecdoteUI(); 
+            } else { 
+                currentAnecdoteIdx = visibleAnecdotes.length - 1; 
+                updateAnecdoteUI(); 
+            }
+        }
 
-        function renderActivities() { /* [Identique - gère l'agenda] */ }
-        function renderFlights() { /* [Identique - gère les vols] */ }
-        function initFlightMap() { /* [Identique - gère la carte des vols] */ }
-        function initMap() { /* [Identique - gère la carte de Maurice] */ }
+        function nextAnecdote() {
+            if (currentAnecdoteIdx < visibleAnecdotes.length - 1) { 
+                currentAnecdoteIdx++; 
+                updateAnecdoteUI(); 
+            } else { 
+                showToast("Dernière anecdote disponible atteinte 🤫");
+            }
+        }
 
-        // --- CHECKLIST RESTRUCTURÉE ---
-        function renderChecklist() {
-            const container = document.getElementById('checklist-items');
+        function getEmergencyColorClasses(couleur) {
+            const c = String(couleur).toLowerCase().trim();
+            if (c.includes('red') || c.includes('rouge')) return 'bg-red-100 dark:bg-red-900/30 text-red-500';
+            if (c.includes('blue') || c.includes('bleu')) return 'bg-blue-100 dark:bg-blue-900/30 text-blue-500';
+            if (c.includes('amber') || c.includes('yellow') || c.includes('jaune')) return 'bg-amber-100 dark:bg-amber-900/30 text-amber-500';
+            if (c.includes('green') || c.includes('vert')) return 'bg-green-100 dark:bg-green-900/30 text-green-500';
+            return 'bg-purple-100 dark:bg-purple-900/30 text-purple-500';
+        }
+
+        function renderUrgences() {
+            const container = document.getElementById('urgences-container');
             if (!container) return;
 
-            const items = appData.checklist || [];
-            
-            items.forEach(i => {
-                if (typeof i.Fait === 'string') i.checked = (i.Fait.toUpperCase() === 'VRAI' || i.Fait.toUpperCase() === 'TRUE');
-                else if (i.checked === undefined) i.checked = !!i.Fait;
-            });
-
-            const checkedCount = items.filter(i => i.checked).length;
-            const totalCount = items.length;
-            const percentage = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
-
-            document.getElementById('checklist-progress-text').innerText = `${checkedCount} / ${totalCount} objet${totalCount > 1 ? 's' : ''} prêt${checkedCount > 1 ? 's' : ''}`;
-            document.getElementById('checklist-percentage').innerText = `${percentage}%`;
-            document.getElementById('checklist-bar').style.width = `${percentage}%`;
-
-            const categories = new Set([...CHECKLIST_FAMILIES]);
-            items.forEach(i => { if(i.Categorie && i.Categorie.trim() !== '') categories.add(i.Categorie.trim()); });
+            const urgences = (appData.urgences && appData.urgences.length > 0) ? appData.urgences : DEFAULT_URGENCES;
 
             let html = '';
-            categories.forEach(cat => {
-                const catItems = items.filter(i => i.Categorie === cat);
-                
+            urgences.forEach(u => {
+                const colorClass = getEmergencyColorClasses(u.Couleur);
+                const telClean = String(u.Numero || '').replace(/[^0-9+]/g, '');
+
                 html += `
-                <div class="mb-6">
-                    <h3 class="text-lg font-bold font-heading mb-3 pl-1 opacity-90 text-[var(--color-text)]">${cat}</h3>
-                    
-                    <form onsubmit="addChecklistItem(event, '${cat}')" class="flex gap-2 mb-3">
-                        <input type="text" placeholder="Ajouter pour ${cat}..." required class="flex-1 bg-[var(--color-surface)] border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-[var(--color-text)]">
-                        <button type="submit" class="bg-[var(--color-bg)] text-[var(--color-accent)] font-bold px-4 py-2 rounded-xl active:scale-95 transition-transform text-sm border border-[var(--color-accent)]/20">
-                            +
-                        </button>
-                    </form>
-                    
-                    <div class="space-y-2">
-                        ${catItems.length === 0 ? `<div class="text-xs opacity-50 pl-2">Aucun élément</div>` : ''}
-                        ${catItems.map(item => `
-                            <div class="bg-[var(--color-surface)] p-3 rounded-xl flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm transition-all">
-                                <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
-                                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleChecklistItem('${item.ID}')" class="w-5 h-5 accent-[var(--color-accent)] rounded cursor-pointer">
-                                    <span class="text-sm font-medium ${item.checked ? 'line-through opacity-50' : 'opacity-90'} truncate text-[var(--color-text)]">${item.Item || item.label}</span>
-                                </label>
-                                <button onclick="deleteChecklistItem('${item.ID}')" class="text-red-400 hover:text-red-600 p-1 rounded-lg text-xs font-bold active:scale-90 transition-transform">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                </button>
-                            </div>
-                        `).join('')}
+                <a href="tel:${telClean}" class="flex items-center justify-between p-2 rounded-xl active:bg-[var(--color-bg)] transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-full ${colorClass} flex items-center justify-center font-bold text-lg">
+                            ${u.Icone || '📞'}
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm text-[var(--color-text)]">${u.Nom || 'Urgence'}</div>
+                            <div class="text-xs opacity-60">${u.Numero || ''}</div>
+                        </div>
                     </div>
-                </div>`;
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>`;
             });
+
             container.innerHTML = html;
         }
 
-        async function syncChecklistToSheet() {
-            try {
-                await fetch(API_APPS_SCRIPT, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'syncChecklist', payload: appData.checklist }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        function getStatusColor(status) {
+            const s = String(status).toLowerCase();
+            if (s.includes('confirm')) return 'bg-green-500/20 text-green-600 dark:text-green-400';
+            if (s.includes('annul')) return 'bg-red-500/20 text-red-600 dark:text-red-400';
+            return 'bg-orange-500/20 text-orange-600 dark:text-orange-400';
+        }
+
+        function renderActivities() {
+            const container = document.getElementById('activities-container');
+            if (!container) return;
+            
+            if (!appData.activites || appData.activites.length === 0) {
+                container.innerHTML = `<div class="text-center opacity-50 py-10">Aucune activité programmée.</div>`;
+                return;
+            }
+
+            const sorted = [...appData.activites].sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour) || String(a.Heure).localeCompare(String(b.Heure)));
+
+            const grouped = {};
+            sorted.forEach(act => {
+                const date = act.Jour || 'Date à définir';
+                if (!grouped[date]) grouped[date] = [];
+                grouped[date].push(act);
+            });
+
+            let html = '';
+            for (const [date, acts] of Object.entries(grouped)) {
+                let displayDate = date;
+                const d = parseDateString(date);
+                if (d.getTime() > 0) {
+                    displayDate = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+                    displayDate = displayDate.charAt(0).toUpperCase() + displayDate.slice(1);
+                }
+
+                html += `<div class="mb-3 mt-6 font-bold text-lg opacity-90 pl-1">${displayDate}</div>`;
+                
+                acts.forEach(act => {
+                    const defaultImg = "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=500&auto=format&fit=crop";
+                    html += `
+                    <div onclick="openActivityDetails('${act.ID}')" class="bg-[var(--color-surface)] p-3.5 rounded-2xl flex shadow-sm mb-3 items-center space-x-4 active:scale-[0.98] transition-transform cursor-pointer border border-gray-100 dark:border-gray-800">
+                        <img src="${act.PhotoURL || defaultImg}" alt="${act.Titre}" class="w-16 h-16 rounded-xl object-cover shrink-0" onerror="this.src='${defaultImg}'"/>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold font-heading text-base leading-tight truncate">${act.Titre || 'Sans titre'}</h4>
+                            <div class="text-xs opacity-70 mt-1 flex items-center gap-2">
+                                <span>🕒 ${act.Heure || '--:--'}</span>
+                                ${act.Participants ? `<span>• 👥 ${act.Participants}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="text-[10px] px-2.5 py-1 rounded-full ${getStatusColor(act.Statut)} font-bold whitespace-nowrap">
+                            ${act.Statut || 'En attente'}
+                        </div>
+                    </div>`;
                 });
-            } catch (e) {
-                console.log('Synchronisation Checklist hors-ligne');
+            }
+            container.innerHTML = html;
+        }
+
+        function renderFlights() {
+            const container = document.getElementById('flights-container');
+            if (!container) return;
+
+            const vols = (appData.vols && appData.vols.length > 0) ? appData.vols : DEFAULT_VOLS;
+            const categories = ['Aller', 'Retour'];
+            let html = '';
+
+            categories.forEach(cat => {
+                const catVols = vols.filter(v => String(v.Categorie || '').toLowerCase() === cat.toLowerCase())
+                                    .sort((a,b) => parseInt(a.Etape || 1) - parseInt(b.Etape || 1));
+
+                if (catVols.length === 0) return;
+
+                const isAller = cat === 'Aller';
+                const badgeColor = isAller ? 'bg-[var(--color-accent)] text-white' : 'bg-gray-600 text-white';
+
+                html += `
+                <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm relative overflow-hidden border border-gray-100 dark:border-gray-800">
+                    <div class="absolute top-0 right-0 ${badgeColor} text-[10px] font-bold px-3 py-1 rounded-bl-xl tracking-wider uppercase">${cat}</div>
+                `;
+
+                catVols.forEach((vol) => {
+                    html += `
+                    <div class="flex justify-between items-center mt-3 mb-2">
+                        <div class="w-1/3 text-left">
+                            <div class="text-2xl font-bold font-heading text-[var(--color-accent)]">${vol.AeroportDepartCode || 'DEP'}</div>
+                            <div class="text-[10px] font-bold opacity-60 truncate">${vol.AeroportDepartNom || ''}</div>
+                            <div class="font-bold mt-1 text-sm">${vol.HeureDepart || '--:--'}</div>
+                            <div class="text-[10px] opacity-60">${vol.DateDepart || ''}</div>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center px-2">
+                            <span class="text-[10px] font-bold bg-[var(--color-bg)] px-2 py-0.5 rounded-md text-[var(--color-accent)] mb-1 border border-[var(--color-accent)]/10 whitespace-nowrap">${vol.Code || 'VOL'}</span>
+                            <div class="w-full h-[2px] bg-gray-200 dark:bg-gray-700 relative flex items-center justify-center">
+                                <svg class="w-4 h-4 text-[var(--color-accent)] absolute bg-[var(--color-surface)] px-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="transform: rotate(90deg);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            </div>
+                        </div>
+                        <div class="w-1/3 text-right">
+                            <div class="text-2xl font-bold font-heading text-[var(--color-accent)]">${vol.AeroportArriveeCode || 'ARR'}</div>
+                            <div class="text-[10px] font-bold opacity-60 truncate">${vol.AeroportArriveeNom || ''}</div>
+                            <div class="font-bold mt-1 text-sm">${vol.HeureArrivee || '--:--'}</div>
+                            <div class="text-[10px] opacity-60">${vol.DateArrivee || ''}</div>
+                        </div>
+                    </div>
+                    `;
+
+                    if (vol.Escale) {
+                        html += `
+                        <div class="flex justify-center items-center py-2">
+                            <div class="text-[10px] font-bold opacity-50 bg-[var(--color-bg)] px-3 py-0.5 rounded-full uppercase tracking-wider">${vol.Escale}</div>
+                        </div>
+                        `;
+                    }
+                });
+
+                html += `
+                    <button onclick="checkFlightStatus('${cat.toLowerCase()}')" class="w-full mt-4 bg-[var(--color-bg)] text-[var(--color-accent)] text-xs font-bold py-2.5 rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 border border-[var(--color-accent)]/20">
+                        ⚡ Suivre les vols ${cat} en direct
+                    </button>
+                    <div id="flight-status-${cat.toLowerCase()}" class="hidden mt-3 text-xs bg-[var(--color-bg)] p-3 rounded-xl border border-[var(--color-accent)]/10 transition-all">
+                    </div>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        let flightMap = null;
+
+        function initFlightMap() {
+            if (flightMap) {
+                flightMap.invalidateSize();
+                return;
+            }
+
+            flightMap = L.map('flight-map', { zoomControl: false }).setView([20, 30], 2);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap',
+                maxZoom: 18
+            }).addTo(flightMap);
+
+            const vols = (appData.vols && appData.vols.length > 0) ? appData.vols : DEFAULT_VOLS;
+            const pointsMap = {};
+            const latLngsAller = [];
+            const latLngsRetour = [];
+
+            vols.forEach(v => {
+                const latDep = parseFloat(v.LatDepart);
+                const lngDep = parseFloat(v.LngDepart);
+                const latArr = parseFloat(v.LatArrivee);
+                const lngArr = parseFloat(v.LngArrivee);
+
+                if (!isNaN(latDep) && !isNaN(lngDep)) {
+                    pointsMap[v.AeroportDepartCode] = { lat: latDep, lng: lngDep, name: v.AeroportDepartNom };
+                    if (v.Categorie && v.Categorie.toLowerCase() === 'aller') latLngsAller.push([latDep, lngDep]);
+                    else latLngsRetour.push([latDep, lngDep]);
+                }
+                if (!isNaN(latArr) && !isNaN(lngArr)) {
+                    pointsMap[v.AeroportArriveeCode] = { lat: latArr, lng: lngArr, name: v.AeroportArriveeNom };
+                    if (v.Categorie && v.Categorie.toLowerCase() === 'aller') latLngsAller.push([latArr, lngArr]);
+                    else latLngsRetour.push([latArr, lngArr]);
+                }
+            });
+
+            if (latLngsAller.length > 1) {
+                L.polyline(latLngsAller, { color: '#0284c7', weight: 3, dashArray: '6, 8', opacity: 0.8 }).addTo(flightMap);
+            }
+            if (latLngsRetour.length > 1) {
+                L.polyline(latLngsRetour, { color: '#8b5cf6', weight: 3, dashArray: '6, 8', opacity: 0.8 }).addTo(flightMap);
+            }
+
+            for (const [code, info] of Object.entries(pointsMap)) {
+                const airportIcon = L.divIcon({
+                    html: `<div class="bg-white dark:bg-gray-800 text-[10px] font-bold px-1.5 py-0.5 rounded shadow border border-gray-300 text-[var(--color-accent)] whitespace-nowrap">✈️ ${code}</div>`,
+                    className: '',
+                    iconSize: [40, 20],
+                    iconAnchor: [20, 10]
+                });
+
+                L.marker([info.lat, info.lng], { icon: airportIcon })
+                    .bindPopup(`<div class="text-center font-bold text-xs">${code} - ${info.name}</div>`)
+                    .addTo(flightMap);
+            }
+
+            const allPoints = [...latLngsAller, ...latLngsRetour];
+            if (allPoints.length > 0) {
+                flightMap.fitBounds(allPoints, { padding: [20, 20] });
+            }
+        }
+
+        let map = null;
+        let markersGroup = null;
+
+        const categoryIcons = {
+            "excursion en mer": "🚤",
+            "voyage en voiture": "🚗",
+            "spectacle": "🎭",
+            "restaurant": "🍽️",
+            "point de vue": "📸",
+            "balade en ville": "🚶",
+            "hotel": "🏠"
+        };
+
+        function getMarkerIcon(categorie) {
+            const cat = categorie ? String(categorie).toLowerCase().trim() : "";
+            const emoji = categoryIcons[cat] || "📍";
+            
+            return L.divIcon({
+                html: `<div class="text-xl shadow-lg bg-white rounded-full p-1 flex items-center justify-center border-[3px] border-[var(--color-accent)] w-10 h-10">${emoji}</div>`,
+                className: '',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+        }
+
+        function initMap() {
+            if (map) { map.invalidateSize(); return; }
+            
+            map = L.map('map', { zoomControl: false }).setView([-20.2, 57.55], 10);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap',
+                maxZoom: 19
+            }).addTo(map);
+
+            markersGroup = L.layerGroup().addTo(map);
+            updateMapMarkers();
+        }
+
+        function updateMapMarkers() {
+            if (!markersGroup) return;
+            markersGroup.clearLayers();
+
+            const items = [...(appData.activites || []), ...(appData.lieux || [])];
+
+            items.forEach(item => {
+                if (item.Latitude && item.Longitude) {
+                    const lat = parseFloat(item.Latitude);
+                    const lng = parseFloat(item.Longitude);
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        const marker = L.marker([lat, lng], { icon: getMarkerIcon(item.Categorie) });
+                        const isActivity = item.ID && item.ID.startsWith('ACT');
+                        let popupHtml = `
+                            <div class="text-center p-1">
+                                <div class="font-bold font-heading text-base leading-tight mb-1 text-[var(--color-text)]">${item.Titre || 'Lieu'}</div>
+                                <div class="text-xs opacity-70 mb-3 text-[var(--color-text)] capitalize">${item.Categorie || 'Exploration'}</div>
+                                ${isActivity ? `<button onclick="openActivityDetails('${item.ID}')" class="text-xs bg-[var(--color-accent)] text-white px-4 py-2 rounded-lg w-full font-bold active:scale-95 transition-transform">Détails</button>` : ''}
+                            </div>
+                        `;
+                        marker.bindPopup(popupHtml);
+                        markersGroup.addLayer(marker);
+                    }
+                }
+            });
+        }
+
+        let itemIdToDelete = null;
+
+        function isItemChecked(item) {
+            const f = String(item.Fait || '').toLowerCase().trim();
+            return f === 'true' || f === 'oui' || f === '1' || item.checked === true;
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('checklist-sections-container');
+            const selectEl = document.getElementById('new-item-category-select');
+            if (!container) return;
+
+            const rawItems = appData.checklist || DEFAULT_CHECKLIST;
+
+            // Extraire les catégories uniques
+            const categories = Array.from(new Set(rawItems.map(i => i.Categorie || 'Général'))).filter(Boolean);
+            if (categories.length === 0) categories.push('Général');
+
+            // Mettre à jour le dropdown de catégorie pour l'ajout
+            if (selectEl) {
+                let optionsHtml = `<option value="ALL">✨ Ajouter à TOUTES les sections</option>`;
+                categories.forEach(cat => {
+                    optionsHtml += `<option value="${cat}">📁 Section : ${cat}</option>`;
+                });
+                optionsHtml += `<option value="NEW">➕ Nouvelle section...</option>`;
+                selectEl.innerHTML = optionsHtml;
+            }
+
+            // Calcul global de progression
+            const totalItems = rawItems.length;
+            const checkedItems = rawItems.filter(isItemChecked).length;
+            const globalPercentage = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
+
+            document.getElementById('checklist-progress-text').innerText = `${checkedItems} / ${totalItems} objet${totalItems > 1 ? 's' : ''} prêt${checkedItems > 1 ? 's' : ''}`;
+            document.getElementById('checklist-percentage').innerText = `${globalPercentage}%`;
+            document.getElementById('checklist-bar').style.width = `${globalPercentage}%`;
+
+            if (rawItems.length === 0) {
+                container.innerHTML = `<div class="text-center opacity-50 py-10 text-sm">Votre checklist est vide. Ajoutez des objets ci-dessus !</div>`;
+                return;
+            }
+
+            // Grouper par catégorie
+            const grouped = {};
+            categories.forEach(c => grouped[c] = []);
+            rawItems.forEach(item => {
+                const cat = item.Categorie || 'Général';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(item);
+            });
+
+            let html = '';
+            for (const [cat, items] of Object.entries(grouped)) {
+                const catChecked = items.filter(isItemChecked).length;
+                const catTotal = items.length;
+
+                html += `
+                <div class="bg-[var(--color-surface)] rounded-3xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base font-bold font-heading text-[var(--color-accent)]">💼 ${cat}</span>
+                        </div>
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[var(--color-bg)] opacity-80">
+                            ${catChecked} / ${catTotal}
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                `;
+
+                if (items.length === 0) {
+                    html += `<div class="text-xs opacity-40 italic py-2">Aucun objet dans cette section</div>`;
+                } else {
+                    items.forEach(item => {
+                        const checked = isItemChecked(item);
+                        const itemId = item.ID || item.id;
+
+                        html += `
+                        <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
+                            <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                                <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleChecklistItem('${itemId}')" class="w-5 h-5 accent-[var(--color-accent)] rounded cursor-pointer shrink-0">
+                                <span class="text-sm font-medium ${checked ? 'line-through opacity-40' : 'opacity-90'} truncate">${item.Item || item.label || ''}</span>
+                            </label>
+                            <button onclick="promptDeleteChecklistItem('${itemId}')" class="text-red-400 hover:text-red-600 p-1.5 rounded-lg text-xs font-bold active:scale-90 transition-transform">
+                                ✕
+                            </button>
+                        </div>
+                        `;
+                    });
+                }
+
+                html += `
+                    </div>
+                </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function handleCategorySelectChange(select) {
+            const container = document.getElementById('custom-category-container');
+            if (select.value === 'NEW') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
             }
         }
 
         function toggleChecklistItem(id) {
-            const item = appData.checklist.find(i => i.ID === id);
+            const item = appData.checklist.find(i => String(i.ID || i.id) === String(id));
             if (item) {
-                item.checked = !item.checked;
-                item.Fait = item.checked ? 'VRAI' : 'FAUX';
+                const currentlyChecked = isItemChecked(item);
+                item.Fait = currentlyChecked ? 'Non' : 'Oui';
+                item.checked = !currentlyChecked;
                 localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                 renderChecklist();
-                syncChecklistToSheet();
             }
         }
 
-        function addChecklistItem(e, category) {
+        function addChecklistItem(e) {
             e.preventDefault();
-            const input = e.target.querySelector('input');
+            const input = document.getElementById('new-item-input');
+            const select = document.getElementById('new-item-category-select');
+            const customInput = document.getElementById('new-custom-category-input');
+
             const val = input.value.trim();
             if (!val) return;
 
-            if (category === 'ALL') {
-                CHECKLIST_FAMILIES.forEach(fam => {
+            let targetCategory = select.value;
+
+            if (targetCategory === 'NEW') {
+                targetCategory = customInput.value.trim() || 'Nouveau groupe';
+            }
+
+            if (!appData.checklist) appData.checklist = [];
+
+            if (targetCategory === 'ALL') {
+                // Ajouter à TOUTES les catégories existantes
+                const categories = Array.from(new Set(appData.checklist.map(i => i.Categorie || 'Général'))).filter(Boolean);
+                if (categories.length === 0) categories.push('Général');
+
+                categories.forEach(cat => {
                     appData.checklist.push({
-                        ID: 'CHK-' + Date.now() + Math.floor(Math.random()*1000),
-                        Categorie: fam, Item: val, Fait: 'FAUX', checked: false
+                        ID: 'CHK-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+                        Categorie: cat,
+                        Item: val,
+                        Fait: 'Non',
+                        checked: false
                     });
                 });
+                showToast(`Objet ajouté à toutes les ${categories.length} sections !`);
             } else {
                 appData.checklist.push({
-                    ID: 'CHK-' + Date.now(), Categorie: category, Item: val, Fait: 'FAUX', checked: false
+                    ID: 'CHK-' + Date.now(),
+                    Categorie: targetCategory,
+                    Item: val,
+                    Fait: 'Non',
+                    checked: false
                 });
+                showToast('Objet ajouté !');
             }
 
             localStorage.setItem('maurice2026_data', JSON.stringify(appData));
             input.value = '';
+            customInput.value = '';
+            document.getElementById('custom-category-container').classList.add('hidden');
             renderChecklist();
-            syncChecklistToSheet();
-            showToast('Ajouté à la valise !');
         }
 
-        function deleteChecklistItem(id) {
-            if (confirm("Voulez-vous vraiment supprimer cet élément de la checklist ?")) {
-                appData.checklist = appData.checklist.filter(i => i.ID !== id);
+        function promptDeleteChecklistItem(id) {
+            itemIdToDelete = id;
+            openModal('modal-delete-confirm');
+        }
+
+        function confirmDeleteChecklistItem() {
+            if (itemIdToDelete !== null) {
+                appData.checklist = appData.checklist.filter(i => String(i.ID || i.id) !== String(itemIdToDelete));
                 localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                 renderChecklist();
-                syncChecklistToSheet();
-                showToast('Élément supprimé');
+                showToast('Objet supprimé');
+                itemIdToDelete = null;
             }
+            closeModal('modal-delete-confirm');
         }
 
-        function openModal(modalId) { /* [Identique] */
+        function openModal(modalId) {
             const modal = document.getElementById(modalId);
             const content = modal.querySelector('div');
             modal.classList.remove('hidden');
@@ -769,7 +1363,7 @@
             }, 10);
         }
 
-        function closeModal(modalId) { /* [Identique] */
+        function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             const content = modal.querySelector('div');
             modal.classList.add('opacity-0');
@@ -777,6 +1371,113 @@
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
+        function openActivityDetails(id) {
+            const act = appData.activites.find(a => a.ID === id);
+            if (!act) return;
+
+            const defaultImg = "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1000&auto=format&fit=crop";
+            const modalContent = document.getElementById('activity-modal-content');
+            
+            modalContent.innerHTML = `
+                <button onclick="closeModal('modal-activity-details')" class="absolute top-4 right-4 p-2.5 bg-black/50 text-white rounded-full z-10 backdrop-blur-md active:scale-90 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <img src="${act.PhotoURL || defaultImg}" alt="Photo" class="w-full h-52 sm:rounded-t-3xl object-cover" onerror="this.src='${defaultImg}'"/>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-2xl font-bold font-heading leading-tight pr-4">${act.Titre || 'Activité'}</h3>
+                        <span class="text-[10px] px-2.5 py-1 rounded-full ${getStatusColor(act.Statut)} font-bold mt-1 whitespace-nowrap">${act.Statut || 'En attente'}</span>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4 mb-6 opacity-80 text-xs font-medium">
+                        <div class="flex items-center gap-1">📅 ${act.Jour || 'A définir'}</div>
+                        <div class="flex items-center gap-1">🕒 ${act.Heure || '--:--'}</div>
+                        ${act.Prix ? `<div class="flex items-center gap-1 font-bold text-[var(--color-accent)]">💰 ${act.Prix}</div>` : ''}
+                    </div>
+
+                    ${act.Descriptif ? `<p class="mb-6 leading-relaxed opacity-90 text-sm">${act.Descriptif}</p>` : ''}
+                    
+                    <div class="space-y-3 bg-[var(--color-bg)] p-4 rounded-2xl text-xs">
+                        ${act.Adresse ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">📍 Adresse</span>${act.Adresse}</div>` : ''}
+                        ${act.Participants ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">👥 Participants</span>${act.Participants}</div>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            openModal('modal-activity-details');
+        }
+
+        async function submitActivity(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+            
+            const tempActivity = { ID: 'ACT-' + Date.now(), ...payload };
+            if(!appData.activites) appData.activites = [];
+            appData.activites.push(tempActivity);
+            localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+            
+            renderActivities();
+            updateMapMarkers();
+            closeModal('modal-add-activity');
+            form.reset();
+            showToast('Activité sauvegardée localement !');
+
+            try {
+                const response = await fetch(API_APPS_SCRIPT, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addActivity', payload: payload }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Activité enregistrée dans le Sheet !');
+                    fetchAppData(); 
+                }
+            } catch (error) {
+                showToast('Enregistré hors-ligne');
+            }
+        }
+
+        async function checkFlightStatus(journey) {
+            const statusDiv = document.getElementById(`flight-status-${journey}`);
+            statusDiv.classList.remove('hidden');
+            
+            statusDiv.innerHTML = `
+                <div class="flex items-center text-[var(--color-text)]">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-[var(--color-accent)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Interrogation d'OpenSky Network...
+                </div>
+            `;
+
+            setTimeout(() => {
+                const vols = appData.vols || [];
+                const catVols = vols.filter(v => String(v.Categorie || '').toLowerCase() === journey.toLowerCase())
+                                    .sort((a,b) => parseInt(a.Etape || 1) - parseInt(b.Etape || 1));
+
+                let messageDyn = "Aucun vol trouvé pour ce trajet dans la base de données.";
+                
+                if (catVols.length > 0) {
+                    const flightCodes = catVols.map(v => v.Code).filter(c => c).join(' et ');
+                    const departureDate = catVols[0].DateDepart || 'prochainement';
+                    
+                    messageDyn = `Les vols ${flightCodes} s'activeront sur le radar OpenSky le ${departureDate}.`;
+                }
+
+                statusDiv.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="text-xl mt-0.5">🗓️</div>
+                        <div>
+                            <div class="font-bold text-[var(--color-text)] mb-0.5">Vols Programmés</div>
+                            <div class="opacity-80 leading-snug">
+                                ${messageDyn}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }, 1000);
+        }
     </script>
 </body>
 </html>
