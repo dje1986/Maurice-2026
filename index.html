@@ -1,10 +1,164 @@
+
+
+Claude a terminé la réponse.
+
+Maurice 2026 - BDD-5.xlsx
+XLSX
+
+index.html
+HTML
+
+const SPREADSHEET_ID = ''; // Laisser vide si le script est lié au Google Sheet, sinon insérer l'ID function doGet(e) { try { const ss = SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID) : SpreadsheetApp.getActiveSpreadsheet(); Logger.log("Spreadsheet: " + ss.getName() + "
+PASTED
+Nous allons reprendre le le développement d'une application PWA pour accompagner un voyage à l'ile Maurice commencée avec une autre IA.
+Je vais te fournir toutes les informations disponibles ci-dessous et ci-jointes et nous allons débuter l'application. 
+<HTML>     
+Je te joint le code actuel du fichier index.html.     
+<Base de données>    
+La base de données est un Google Sheet dont voici un export au format xlsx ci-joint.    
+<Apps Script>     
+L'URL de l'application web est la suivante : https://script.google.com/macros/s/AKfycbxK1vBGBEoPdnndqGybpEaI4CEDZBs-raPzGuLu4wHAtxE0KpqEYydF-mZej3WqdZ4EtQ/exec     
+Le code du Code.gs est collé.
+<Instructions> 
+L'application présente un bug, les modifications sur le page Valises (enlever un objet ou en ajouter un ou cocher une case) ne se répercutent pas sur la base de données. Que faire ?
+Peux tu me donner les codes corrigés ?
+Afficher plus
+
+Entreprit la refactorisation de la fonction isItemChecked
+
+Entreprit la refactorisation de la fonction isItemChecked
+Maintenant les fonctions de synchronisation, pour qu'elles vérifient réellement la réponse du serveur au lieu de l'ignorer silencieusement :
+
+Architected normalization function pour synchroniser données de formulaire
+
+Architected normalization function pour synchroniser données de formulaire
+Diagnostic
+En comparant ton index.html et ton Code.gs avec l'export du Sheet, j'ai trouvé un vrai bug et un problème d'usage classique à vérifier de ton côté :
+1. Bug confirmé — incohérence "Fait" (Oui/Non vs VRAI/FAUX)
+Dans ton export, la colonne Fait de l'onglet Checklist contient la valeur littérale "VRAI" (pas "Oui"). Or ton front-end (isItemChecked()) ne reconnaît que 'true', 'oui' ou '1' comme "coché" — il ignorait 'vrai'. Résultat : les lignes existantes s'affichent toujours décochées, et selon l'historique des cases, les écritures restaient incohérentes entre elles. J'ai corrigé les deux côtés (front + back) pour que Oui/Non/VRAI/FAUX/booléens soient tous traités de façon identique.
+2. Les erreurs du serveur étaient invisibles
+Tes 3 fonctions checklist (toggleChecklistItem, addChecklistItem, confirmDeleteChecklistItem) faisaient un fetch(...) sans jamais lire la réponse JSON — donc si Apps Script renvoyait une erreur (mauvais ID, onglet introuvable, action inconnue...), tu ne le voyais jamais, l'app affichait quand même "sauvegardé" en local. J'ai ajouté la lecture de result.success/result.error avec un toast d'alerte visible en cas d'échec réel.
+3. À vérifier absolument de ton côté (cause la plus fréquente)
+Si tu as modifié Code.gs après ton dernier déploiement, l'URL /exec continue de servir l'ancienne version tant que tu n'as pas republié :
+Apps Script → Déployer → Gérer les déploiements → icône crayon sur ton déploiement actif → Version : Nouvelle version → Déployer.
+Ensuite, ouvre Exécutions (menu de gauche) : tu y verras chaque appel doPost reçu et l'erreur exacte s'il y en a une — c'est le moyen le plus fiable de confirmer que les requêtes de la page Valises arrivent bien côté serveur.
+Fichiers corrigés
+Je t'ai remis les deux fichiers complets, prêts à remplacer les tiens :
+index.html : isItemChecked() corrigée + gestion d'erreur visible sur les 3 actions checklist.
+Code.gs : nouvelle fonction normalizeFait() (uniformise Oui/Non/VRAI/FAUX/booléen), logs plus détaillés, SpreadsheetApp.flush() ajouté après les écritures pour garantir la persistance immédiate.
+Remplace le contenu de ton Code.gs dans l'éditeur Apps Script, redéploie une nouvelle version, remplace ton index.html, et teste à nouveau la page Valises. Dis-moi ce que tu vois dans les Exécutions si le problème persiste.
+
+Index
+Code · HTML 
+
+Code
+GS 
+icon512.png
+Parfait cela fonctionne, passons à la suite. 
+Je veux créer le manifest.json et le sw.js qui conviennent pour gérer un mode hors ligne de l'application illustrer l'application avec l'image ci-jointe.
+
+Orchestrated theme initialization et préparé manifest.json avec service worker
+
+Orchestrated theme initialization et préparé manifest.json avec service worker
+Maintenant, on relie tout ça dans index.html : manifest, icônes, meta tags iOS/Android, et l'enregistrement du service worker.
+
+Orchestrated deployment requirements and offline functionality architecture
+
+Orchestrated deployment requirements and offline functionality architecture
+Voilà, tout est prêt : 9 fichiers à déposer dans le même dossier que ton index.html existant (remplace-le par la nouvelle version).
+Ce que j'ai ajouté
+manifest.json
+Nom "Maurice 2026", icône dodo, couleurs 
+#0A1128 (ton bleu lagon) en theme_color/background_color, mode standalone (plein écran, sans barre d'adresse).
+4 icônes générées à partir de ta photo : icon-192.png / icon-512.png (icônes classiques) + icon-maskable-192.png / icon-maskable-512.png (versions avec marge de sécurité pour ne pas être rognées dans les cercles/formes des launchers Android).
+apple-touch-icon.png et favicon-32.png pour iOS et l'onglet du navigateur.
+sw.js (service worker) — stratégie hors ligne :
+Les fichiers de l'app (HTML, CSS, polices, Leaflet, icônes) sont mis en cache à l'installation.
+Les données du voyage (appel GET à ton Apps Script) : réseau en priorité, mais la dernière réponse reçue est gardée en cache — donc si le téléphone perd le réseau à l'aéroport ou sur place, l'app affiche les dernières données synchronisées au lieu d'un écran blanc.
+Les écritures (coche/ajout/suppression checklist, ajout activité) passent toujours directement au réseau, jamais interceptées — cohérent avec les toasts d'erreur qu'on a ajoutés à l'étape précédente si la sync échoue hors-ligne.
+index.html : ajout du lien vers le manifest, des balises meta iOS/Android, et de l'enregistrement du service worker (+ la couleur de la barre de statut qui suit maintenant le thème clair/sombre).
+À faire de ton côté
+Dépose les 9 fichiers à la racine du même dossier que ton hébergement actuel (chemins relatifs ./).
+Le service worker exige HTTPS (ou localhost en test) — ça devrait déjà être le cas si tu accèdes à l'app via une URL classique.
+Teste : ouvre l'app, attends quelques secondes (le temps que le SW s'installe), puis active le mode avion et recharge la page pour vérifier que ça fonctionne hors ligne.
+Sur mobile, utilise "Ajouter à l'écran d'accueil" pour voir l'icône du dodo et le lancement en plein écran.
+
+Index
+Code · HTML 
+
+Manifest
+Code · JSON 
+
+Sw
+JS 
+
+Icon 192
+Image · PNG 
+
+Icon 512
+Image · PNG 
+
+Icon maskable 192
+Image · PNG 
+
+Icon maskable 512
+Image · PNG 
+
+Apple touch icon
+Image · PNG 
+
+Favicon 32
+Image · PNG 
+Petite modifications supplémentaires :
+Ajoute un fond ou décale les informations lors du pull to refresh pour éviter que le texte qui s'affiche (exemple "Mise à jour...") soit par dessus d'autres textes
+Assure toi que l'on puisse définir la couleur de fond des icônes de la partie "Contacts d'Urgence" de la page Accueil via le code hexadécimal de couleur dans la colonne "CouleurFond" de la google sheet
+En mode sombre, ajuste les couleurs des tuiles textes et icônes pour rester sur des nuances de bleu (comme en mode clair) plutôt que le vert actuel
+
+Identifié les usages intentionnels de couleurs et planifié les ajustements thématiques
+
+Identifié les usages intentionnels de couleurs et planifié les ajustements thématiques
+Maintenant, le correctif du pull-to-refresh (ajout d'un fond opaque + passage au-dessus du contenu) :
+
+Ajouter un fond opaque et un z-index au pull-to-refresh pour qu'il ne se mélange plus avec le texte du contenu en dessous
+
+Ajouter un fond opaque et un z-index au pull-to-refresh pour qu'il ne se mélange plus avec le texte du contenu en dessous
+Ensuite, le support de CouleurFond / CouleurIcone (hex) pour les icônes des contacts d'urgence, avec repli sur l'ancien système de couleurs nommées si absent :
+
+2 fichiers modifiés, a exécuté une commande, lu un fichier
+
+2 fichiers modifiés, a exécuté une commande, lu un fichier
+Les trois corrections sont faites dans le fichier :
+1. Pull-to-refresh : le bandeau a maintenant son propre fond (flou + couleur de fond de l'app) et passe au-dessus du contenu (z-index), au lieu d'être en dessous et de se mélanger visuellement avec le texte du "Compte à rebours" pendant qu'on tire vers le bas.
+2. Contacts d'urgence — couleurs hex : la pastille d'icône lit maintenant directement CouleurFond (fond) et CouleurIcone (couleur de l'icône/texte) depuis ta Google Sheet si elles contiennent un code hexadécimal valide (
+#FFFFFF, #000, etc.). Si ces colonnes sont vides ou invalides, ça retombe automatiquement sur l'ancien système de couleurs nommées (Couleur: red/blue/amber/green), donc rien ne casse pour les lignes qui n'auraient pas encore ces colonnes remplies.
+3. Mode sombre : les teintes vert/sarcelle (
+#26A69A / 
+#004D40) sont remplacées par des bleus (
+#38BDF8 / 
+#0369A1), dans la continuité du bleu lagon du mode clair. Toutes les tuiles/icônes qui utilisent la couleur d'accent (--color-accent) en héritent automatiquement.
+Note : j'ai laissé le vert du bouton d'appel d'urgence rapide et les couleurs de statut (confirmé/annulé en vert/rouge) inchangés, car ce sont des couleurs sémantiques (succès/erreur), pas la couleur de marque de l'app.
+Aucun changement côté Code.gs n'était nécessaire : la lecture des colonnes du Sheet est déjà générique, donc CouleurFond/CouleurIcone remontent automatiquement.
+
+Index
+Code · HTML 
+
+Souhaitez-vous être averti lorsque Claude répond ?
+
+
+
+
+
+
+Claude est une IA et peut faire des erreurs. Veuillez vérifier les réponses.
+
+Index · HTML
 <!DOCTYPE html>
 <html lang="fr" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Maurice 2026 - PWA</title>
-
+ 
     <!-- PWA : manifest, icônes, thème -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#0A1128" id="meta-theme-color">
@@ -14,7 +168,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Maurice">
-
+ 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,7 +176,7 @@
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
+ 
     <style>
         :root {
             /* Mode Clair : Techno-Lagon */
@@ -32,16 +186,16 @@
             --color-accent: #0A1128; /* Bleu lagon profond */
             --color-accent-light: #004E7C;
         }
-
+ 
         .dark {
-            /* Mode Sombre */
+            /* Mode Sombre : mêmes nuances de bleu lagon qu'en mode clair, éclaircies pour le contraste */
             --color-bg: #121212;
             --color-surface: #1E1E1E;
             --color-text: #E0E0E0;
-            --color-accent: #26A69A;
-            --color-accent-light: #004D40;
+            --color-accent: #38BDF8;
+            --color-accent-light: #0369A1;
         }
-
+ 
         body {
             font-family: 'Urbanist', sans-serif;
             background-color: var(--color-bg);
@@ -50,11 +204,11 @@
             transition: background-color 0.3s, color 0.3s;
             overflow: hidden;
         }
-
+ 
         h1, h2, h3, h4, .font-heading {
             font-family: 'Outfit', sans-serif;
         }
-
+ 
         ::-webkit-scrollbar {
             display: none;
         }
@@ -62,14 +216,14 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-
+ 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         .loading-spin {
             animation: spin 1s linear infinite;
         }
-
+ 
         .leaflet-popup-content-wrapper {
             background-color: var(--color-surface);
             color: var(--color-text);
@@ -82,7 +236,7 @@
     </style>
 </head>
 <body class="antialiased selection:bg-[var(--color-accent)] selection:text-white pb-safe">
-
+ 
     <div class="max-w-md mx-auto h-[100dvh] relative bg-[var(--color-bg)] shadow-2xl overflow-hidden flex flex-col" id="app-container">
         
         <!-- Header Rétractable de la Page Accueil -->
@@ -97,7 +251,7 @@
                     17 Aventuriers
                 </p>
             </div>
-
+ 
             <!-- Action Buttons Header -->
             <button id="btn-refresh" onclick="manualRefresh()" aria-label="Rafraîchir" class="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-all z-30">
                 <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -106,11 +260,11 @@
                 <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
             </button>
         </div>
-
+ 
         <main id="main-content" class="flex-1 overflow-y-auto relative scroll-smooth pb-20 z-10">
             
             <!-- Pull to refresh Indicator -->
-            <div id="pull-to-refresh" class="w-full flex items-center justify-center py-3 text-xs text-[var(--color-text)] opacity-0 transition-opacity duration-200 pointer-events-none -mt-10">
+            <div id="pull-to-refresh" class="w-full flex items-center justify-center py-3 text-xs text-[var(--color-text)] opacity-0 transition-opacity duration-200 pointer-events-none -mt-10 relative z-30 bg-[var(--color-bg)]/95 backdrop-blur-md rounded-b-3xl shadow-sm">
                 <div class="flex items-center gap-2 font-semibold">
                     <svg id="ptr-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -118,7 +272,7 @@
                     <span id="ptr-text">Glisser pour rafraîchir</span>
                 </div>
             </div>
-
+ 
             <!-- PAGE ACCUEIL -->
             <div id="page-home" class="page block px-4 pt-4">
                 <!-- Compte à rebours -->
@@ -137,7 +291,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     </div>
                 </div>
-
+ 
                 <!-- Widgets Météo & Devise -->
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <!-- Météo Port-Louis -->
@@ -166,7 +320,7 @@
                         </div>
                     </div>
                 </div>
-
+ 
                 <!-- Anecdote du jour -->
                 <div class="bg-gradient-to-br from-[var(--color-accent)] to-[#004E7C] text-white rounded-3xl p-5 shadow-lg mb-6 relative overflow-hidden">
                     <div class="relative z-10">
@@ -186,14 +340,14 @@
                         </div>
                     </div>
                 </div>
-
+ 
                 <!-- Urgences Dynamiques -->
                 <h3 class="text-lg font-bold font-heading mb-3 pl-2 opacity-90">Contacts d'Urgence</h3>
                 <div id="urgences-container" class="bg-[var(--color-surface)] rounded-3xl p-4 shadow-sm space-y-3 mb-6 border border-gray-100 dark:border-gray-800">
                     <!-- Injecté dynamiquement par JS -->
                 </div>
             </div>
-
+ 
             <!-- PAGE AGENDA -->
             <div id="page-agenda" class="page hidden px-4 pt-8 h-full">
                 <div class="flex justify-between items-end mb-6">
@@ -206,12 +360,12 @@
                         Ajouter
                     </button>
                 </div>
-
+ 
                 <div id="activities-container" class="space-y-4 pb-12">
                     <!-- Activités dynamiques -->
                 </div>
             </div>
-
+ 
             <!-- PAGE CARTE & LIEUX -->
             <div id="page-lieux" class="page hidden absolute inset-0 flex flex-col z-0">
                 <div class="px-4 pt-8 pb-4 bg-gradient-to-b from-[var(--color-bg)] to-transparent z-10 pointer-events-none">
@@ -219,12 +373,12 @@
                 </div>
                 <div id="map" class="absolute inset-0 z-0"></div>
             </div>
-
+ 
             <!-- PAGE TRANSPORTS & VOLS -->
             <div id="page-transports" class="page hidden px-4 pt-8 h-full">
                 <h2 class="text-3xl font-bold font-heading mb-2">Transports & Vols</h2>
                 <p class="opacity-70 text-sm mb-6">Trajectoires et détails des vols programmés</p>
-
+ 
                 <!-- Carte des trajectoires de vol -->
                 <div class="mb-6">
                     <h3 class="text-sm font-bold uppercase tracking-wider text-[var(--color-accent)] mb-2 flex items-center gap-2">
@@ -239,7 +393,7 @@
                 <div id="flights-container" class="space-y-5 mb-8">
                     <!-- Injecté dynamiquement par JS -->
                 </div>
-
+ 
                 <!-- Transports Locaux -->
                 <h3 class="text-lg font-bold font-heading mb-3 pl-1 opacity-90">Transports Locaux</h3>
                 <div class="space-y-4 pb-24">
@@ -253,7 +407,7 @@
                             </a>
                         </div>
                     </div>
-
+ 
                     <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center border border-gray-100 dark:border-gray-800">
                         <img src="https://images.unsplash.com/photo-1549315357-1df75a30e137?q=80&w=300&auto=format&fit=crop" alt="Taxi" class="w-20 h-20 rounded-2xl object-cover shadow-sm">
                         <div class="flex-1 py-1">
@@ -266,7 +420,7 @@
                     </div>
                 </div>
             </div>
-
+ 
             <!-- PAGE CHECKLIST / VALISE -->
             <div id="page-checklist" class="page hidden px-4 pt-8 h-full">
                 <div class="flex justify-between items-center mb-6">
@@ -278,12 +432,12 @@
                         0%
                     </div>
                 </div>
-
+ 
                 <!-- Barre de progression -->
                 <div class="w-full bg-gray-200 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden mb-6">
                     <div id="checklist-bar" class="bg-[var(--color-accent)] h-full transition-all duration-300 w-0"></div>
                 </div>
-
+ 
                 <!-- Formulaire d'ajout rapide d'article -->
                 <form onsubmit="addChecklistItem(event)" class="bg-[var(--color-surface)] p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm mb-6 space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)] mb-1">Ajouter un objet</div>
@@ -303,14 +457,14 @@
                         <input type="text" id="new-custom-category-input" placeholder="Nom du nouveau groupe/valise..." class="w-full bg-[var(--color-bg)] border border-transparent rounded-2xl px-4 py-2 text-xs outline-none focus:ring-2 focus:ring-[var(--color-accent)]">
                     </div>
                 </form>
-
+ 
                 <!-- Listes interactives groupées par sections -->
                 <div id="checklist-sections-container" class="space-y-6 pb-24">
                     <!-- Généré dynamiquement par JS -->
                 </div>
             </div>
         </main>
-
+ 
         <!-- MODAL : CONFIRMATION SUPPRESSION ITEM -->
         <div id="modal-delete-confirm" class="fixed inset-0 z-[70] hidden bg-black/60 backdrop-blur-sm flex justify-center items-center opacity-0 transition-opacity duration-300 px-4">
             <div class="bg-[var(--color-surface)] w-full max-w-xs rounded-3xl p-5 relative shadow-2xl text-center space-y-4">
@@ -323,13 +477,13 @@
                 </div>
             </div>
         </div>
-
+ 
         <!-- MODAL : DÉTAIL ACTIVITÉ -->
         <div id="modal-activity-details" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
             <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl" id="activity-modal-content">
             </div>
         </div>
-
+ 
         <!-- MODAL : AJOUTER UNE ACTIVITÉ -->
         <div id="modal-add-activity" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
             <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl">
@@ -403,7 +557,7 @@
                 </form>
             </div>
         </div>
-
+ 
         <!-- NAVIGATION BAR -->
         <nav class="absolute bottom-0 w-full max-w-md bg-[var(--color-surface)] border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 px-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-50">
             <ul class="flex justify-between items-center h-16">
@@ -439,13 +593,13 @@
                 </li>
             </ul>
         </nav>
-
+ 
         <!-- TOAST NOTIFICATION -->
         <div id="toast" class="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-[80] transform -translate-y-4 whitespace-nowrap">
             Notification
         </div>
     </div>
-
+ 
     <script>
         const API_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxK1vBGBEoPdnndqGybpEaI4CEDZBs-raPzGuLu4wHAtxE0KpqEYydF-mZej3WqdZ4EtQ/exec';
         
@@ -475,20 +629,20 @@
                 Escale: "", LatDepart: "41.2753", LngDepart: "28.7519", LatArrivee: "43.6291", LngArrivee: "1.3638"
             }
         ];
-
+ 
         const DEFAULT_ANECDOTES = [
             { Jour: "19/10/2026", Texte: "L'île Maurice possède la barrière de corail la plus spectaculaire de l'Océan Indien, abritant plus de 430 espèces de créatures marines !" },
             { Jour: "20/10/2026", Texte: "Le Dodo, célèbre oiseau aujourd'hui disparu, n'existait nulle part ailleurs qu'à l'Île Maurice." },
             { Jour: "21/10/2026", Texte: "La Terre des 7 Couleurs de Chamarel est une curiosité géologique d'origines volcaniques aux dunes colorées uniques au monde." }
         ];
-
+ 
         const DEFAULT_URGENCES = [
             { ID: "EMG-001", Nom: "Police / Urgences", Numero: "999 ou 112", Icone: "🚨", Couleur: "red" },
             { ID: "EMG-002", Nom: "SAMU (Ambulance)", Numero: "114", Icone: "🚑", Couleur: "red" },
             { ID: "EMG-003", Nom: "Garde-Côtes / Secours Mer", Numero: "208 3935", Icone: "🛥️", Couleur: "blue" },
             { ID: "EMG-004", Nom: "Pompier / Incendie", Numero: "115", Icone: "🚒", Couleur: "amber" }
         ];
-
+ 
         const DEFAULT_CHECKLIST = [
             { ID: "CHK-001", Categorie: "Valise Papa", Item: "Passeport valide", Fait: "Oui" },
             { ID: "CHK-002", Categorie: "Valise Papa", Item: "Permis de conduire", Fait: "Non" },
@@ -496,7 +650,7 @@
             { ID: "CHK-004", Categorie: "Trousse Pharmacie", Item: "Anti-moustique tropique", Fait: "Oui" },
             { ID: "CHK-005", Categorie: "Trousse Pharmacie", Item: "Adaptateur prise UK/Maurice", Fait: "Non" }
         ];
-
+ 
         let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || {
             anecdotes: DEFAULT_ANECDOTES,
             activites: [],
@@ -505,27 +659,27 @@
             vols: DEFAULT_VOLS,
             urgences: DEFAULT_URGENCES
         };
-
+ 
         if (!appData.vols || appData.vols.length === 0) appData.vols = DEFAULT_VOLS;
         if (!appData.checklist || appData.checklist.length === 0) appData.checklist = DEFAULT_CHECKLIST;
         if (!appData.anecdotes || appData.anecdotes.length === 0) appData.anecdotes = DEFAULT_ANECDOTES;
         if (!appData.urgences || appData.urgences.length === 0) appData.urgences = DEFAULT_URGENCES;
-
+ 
         let rawCurrencyRate = 50.5;
         let isMurToEur = false;
-
+ 
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
             const isDark = document.documentElement.classList.contains('dark');
             localStorage.setItem('maurice2026_theme', isDark ? 'dark' : 'light');
             updateMetaThemeColor(isDark);
         }
-
+ 
         function updateMetaThemeColor(isDark) {
             const meta = document.getElementById('meta-theme-color');
             if (meta) meta.setAttribute('content', isDark ? '#004D40' : '#0A1128');
         }
-
+ 
         // Enregistrement du Service Worker pour le mode hors ligne
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -534,14 +688,14 @@
                     .catch(err => console.warn('[PWA] Échec enregistrement Service Worker :', err));
             });
         }
-
+ 
         document.addEventListener('DOMContentLoaded', () => {
             const isDarkStored = localStorage.getItem('maurice2026_theme') === 'dark';
             if (isDarkStored) {
                 document.documentElement.classList.add('dark');
             }
             updateMetaThemeColor(isDarkStored);
-
+ 
             updateCountdown();
             setInterval(updateCountdown, 60000);
             fetchWeather();
@@ -551,18 +705,18 @@
             renderFlights();
             renderUrgences();
             renderChecklist();
-
+ 
             initPullToRefresh();
             fetchAppData();
-
+ 
             const mainContent = document.getElementById('main-content');
             mainContent.addEventListener('scroll', handleHomeScroll);
         });
-
+ 
         function handleHomeScroll() {
             const homePage = document.getElementById('page-home');
             if (homePage.classList.contains('hidden')) return;
-
+ 
             const scrollTop = document.getElementById('main-content').scrollTop;
             const header = document.getElementById('home-header');
             const bgImg = document.getElementById('header-bg-img');
@@ -572,7 +726,7 @@
             const subtext = document.getElementById('header-subtext');
             const btnRefresh = document.getElementById('btn-refresh');
             const btnTheme = document.getElementById('btn-theme');
-
+ 
             if (scrollTop > 30) {
                 header.style.height = '4.5rem';
                 header.style.borderBottomLeftRadius = '20px';
@@ -585,7 +739,7 @@
                 title.classList.remove('text-white', 'shadow-sm');
                 title.classList.add('text-[var(--color-text)]');
                 if (subtitle) subtitle.style.display = 'none';
-
+ 
                 btnRefresh.className = "absolute top-3 right-4 p-2 bg-[var(--color-bg)] text-[var(--color-text)] rounded-full active:scale-90 transition-all z-30 shadow-sm";
                 btnTheme.className = "absolute top-3 left-4 p-2 bg-[var(--color-bg)] text-[var(--color-text)] rounded-full active:scale-90 transition-all z-30 shadow-sm";
             } else {
@@ -600,39 +754,39 @@
                 title.classList.add('text-white', 'shadow-sm');
                 title.classList.remove('text-[var(--color-text)]');
                 if (subtitle) subtitle.style.display = 'flex';
-
+ 
                 btnRefresh.className = "absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-all z-30";
                 btnTheme.className = "absolute top-4 left-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-all z-30";
             }
         }
-
+ 
         let touchStartY = 0;
         let touchMoveY = 0;
         let isPulling = false;
-
+ 
         function initPullToRefresh() {
             const mainContent = document.getElementById('main-content');
             const ptrIndicator = document.getElementById('pull-to-refresh');
             const ptrIcon = document.getElementById('ptr-icon');
             const ptrText = document.getElementById('ptr-text');
-
+ 
             mainContent.addEventListener('touchstart', (e) => {
                 if (mainContent.scrollTop <= 0) {
                     touchStartY = e.touches[0].clientY;
                     isPulling = true;
                 }
             }, { passive: true });
-
+ 
             mainContent.addEventListener('touchmove', (e) => {
                 if (!isPulling || mainContent.scrollTop > 0) return;
                 touchMoveY = e.touches[0].clientY;
                 const diff = touchMoveY - touchStartY;
-
+ 
                 if (diff > 0) {
                     const pullDistance = Math.min(diff * 0.4, 70);
                     ptrIndicator.style.transform = `translateY(${pullDistance}px)`;
                     ptrIndicator.style.opacity = Math.min(pullDistance / 50, 1);
-
+ 
                     if (pullDistance >= 50) {
                         ptrIcon.style.transform = 'rotate(180deg)';
                         ptrText.textContent = 'Relâcher pour rafraîchir';
@@ -642,7 +796,7 @@
                     }
                 }
             }, { passive: true });
-
+ 
             mainContent.addEventListener('touchend', () => {
                 if (!isPulling) return;
                 isPulling = false;
@@ -665,11 +819,11 @@
                 touchMoveY = 0;
             });
         }
-
+ 
         function switchTab(pageId, btnElement) {
             document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
             document.getElementById(pageId).classList.remove('hidden');
-
+ 
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-[var(--color-accent)]', 'opacity-100');
                 btn.classList.add('opacity-40');
@@ -677,7 +831,7 @@
             
             btnElement.classList.add('text-[var(--color-accent)]', 'opacity-100');
             btnElement.classList.remove('opacity-40');
-
+ 
             const header = document.getElementById('home-header');
             if (pageId === 'page-home') {
                 header.style.display = 'block';
@@ -685,16 +839,16 @@
             } else {
                 header.style.display = 'none';
             }
-
+ 
             if (pageId === 'page-lieux') {
                 setTimeout(initMap, 100); 
             }
-
+ 
             if (pageId === 'page-transports') {
                 setTimeout(initFlightMap, 100);
             }
         }
-
+ 
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -706,11 +860,11 @@
                 toast.classList.add('opacity-0', '-translate-y-4');
             }, 3000);
         }
-
+ 
         async function fetchAppData(isManualRefresh = false) {
             const icon = document.getElementById('refresh-icon');
             if(isManualRefresh && icon) icon.classList.add('loading-spin');
-
+ 
             try {
                 const url = `${API_APPS_SCRIPT}?action=getAllData&t=${Date.now()}`;
                 const response = await fetch(url);
@@ -729,7 +883,7 @@
                             return cleanItem;
                         });
                     };
-
+ 
                     appData = {
                         activites: cleanArray(rawData.activites).length ? cleanArray(rawData.activites) : appData.activites,
                         anecdotes: cleanArray(rawData.anecdotes).length ? cleanArray(rawData.anecdotes) : appData.anecdotes,
@@ -738,7 +892,7 @@
                         vols: rawData.vols && rawData.vols.length > 0 ? cleanArray(rawData.vols) : DEFAULT_VOLS,
                         urgences: rawData.urgences && rawData.urgences.length > 0 ? cleanArray(rawData.urgences) : DEFAULT_URGENCES
                     };
-
+ 
                     localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                     renderAnecdote(); 
                     renderActivities();
@@ -759,32 +913,32 @@
                 if(isManualRefresh && icon) icon.classList.remove('loading-spin');
             }
         }
-
+ 
         async function manualRefresh() {
             return fetchAppData(true);
         }
-
+ 
         function updateCountdown() {
             const targetDate = new Date('2026-10-19T10:00:00').getTime();
             const now = new Date().getTime();
             const distance = targetDate - now;
-
+ 
             if (distance < 0) {
                 document.getElementById('cd-days').innerText = "0";
                 document.getElementById('cd-hours').innerText = "0";
                 document.getElementById('cd-mins').innerText = "0";
                 return;
             }
-
+ 
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-
+ 
             document.getElementById('cd-days').innerText = days;
             document.getElementById('cd-hours').innerText = hours;
             document.getElementById('cd-mins').innerText = minutes;
         }
-
+ 
         async function fetchWeather() {
             try {
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-20.1609&longitude=57.5011&current_weather=true');
@@ -798,7 +952,7 @@
             document.getElementById('weather-temp').innerText = "28°C";
             document.getElementById('weather-desc').innerText = "Ensoleillé";
         }
-
+ 
         async function fetchCurrency() {
             try {
                 const res = await fetch('https://open.er-api.com/v6/latest/EUR');
@@ -809,18 +963,18 @@
             } catch (e) {}
             updateCurrencyUI();
         }
-
+ 
         function toggleCurrency() {
             isMurToEur = !isMurToEur;
             updateCurrencyUI();
         }
-
+ 
         function updateCurrencyUI() {
             const valEl = document.getElementById('currency-rate');
             const symEl = document.getElementById('currency-symbol');
             const descEl = document.getElementById('currency-desc');
             const titleEl = document.getElementById('currency-title');
-
+ 
             if(isMurToEur) {
                 titleEl.innerText = "Taux MUR/EUR";
                 valEl.innerText = (1 / rawCurrencyRate).toFixed(3);
@@ -833,17 +987,17 @@
                 descEl.innerText = "Pour 1 €";
             }
         }
-
+ 
         let visibleAnecdotes = [];
         let currentAnecdoteIdx = 0;
-
+ 
         function parseDateString(dateStr) {
             if(!dateStr) return new Date(0);
             const parts = String(dateStr).split('/');
             if(parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
             return new Date(0);
         }
-
+ 
         function renderAnecdote() {
             const allAnecdotes = (appData.anecdotes && appData.anecdotes.length > 0) ? appData.anecdotes : DEFAULT_ANECDOTES;
             
@@ -852,20 +1006,20 @@
             
             const now = new Date();
             now.setHours(23, 59, 59, 999);
-
+ 
             // Filtrage : uniquement les anecdotes <= aujourd'hui
             visibleAnecdotes = sorted.filter(a => parseDateString(a.Jour) <= now);
-
+ 
             // Si aucune anecdote n'est encore passée (ex: avant le voyage), on montre au moins la 1ère
             if (visibleAnecdotes.length === 0 && sorted.length > 0) {
                 visibleAnecdotes = [sorted[0]];
             }
-
+ 
             // Par défaut, positionnement sur l'anecdote la plus récente disponible (celle du jour)
             currentAnecdoteIdx = visibleAnecdotes.length - 1;
             updateAnecdoteUI();
         }
-
+ 
         function updateAnecdoteUI() {
             if (visibleAnecdotes.length === 0) return;
             const a = visibleAnecdotes[currentAnecdoteIdx];
@@ -879,7 +1033,7 @@
                 textEl.style.opacity = 1;
             }, 150);
         }
-
+ 
         function prevAnecdote() {
             if (currentAnecdoteIdx > 0) { 
                 currentAnecdoteIdx--; 
@@ -889,7 +1043,7 @@
                 updateAnecdoteUI(); 
             }
         }
-
+ 
         function nextAnecdote() {
             if (currentAnecdoteIdx < visibleAnecdotes.length - 1) { 
                 currentAnecdoteIdx++; 
@@ -898,7 +1052,7 @@
                 showToast("Dernière anecdote disponible atteinte 🤫");
             }
         }
-
+ 
         function getEmergencyColorClasses(couleur) {
             const c = String(couleur).toLowerCase().trim();
             if (c.includes('red') || c.includes('rouge')) return 'bg-red-100 dark:bg-red-900/30 text-red-500';
@@ -907,22 +1061,43 @@
             if (c.includes('green') || c.includes('vert')) return 'bg-green-100 dark:bg-green-900/30 text-green-500';
             return 'bg-purple-100 dark:bg-purple-900/30 text-purple-500';
         }
-
+ 
+        function isValidHexColor(hex) {
+            return typeof hex === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(hex.trim());
+        }
+ 
+        // Détermine le style de la pastille d'icône : priorité aux couleurs hexadécimales
+        // (colonnes "CouleurFond" / "CouleurIcone" du Sheet), sinon repli sur les
+        // couleurs nommées (colonne "Couleur") pour rester compatible avec l'existant.
+        function getEmergencyIconStyle(u) {
+            const bgHex = isValidHexColor(u.CouleurFond) ? u.CouleurFond.trim() : null;
+            const iconHex = isValidHexColor(u.CouleurIcone) ? u.CouleurIcone.trim() : null;
+ 
+            if (!bgHex && !iconHex) {
+                return { classes: getEmergencyColorClasses(u.Couleur), style: '' };
+            }
+ 
+            const styleParts = [];
+            if (bgHex) styleParts.push(`background-color:${bgHex}`);
+            if (iconHex) styleParts.push(`color:${iconHex}`);
+            return { classes: '', style: styleParts.join(';') };
+        }
+ 
         function renderUrgences() {
             const container = document.getElementById('urgences-container');
             if (!container) return;
-
+ 
             const urgences = (appData.urgences && appData.urgences.length > 0) ? appData.urgences : DEFAULT_URGENCES;
-
+ 
             let html = '';
             urgences.forEach(u => {
-                const colorClass = getEmergencyColorClasses(u.Couleur);
+                const { classes: colorClass, style: colorStyle } = getEmergencyIconStyle(u);
                 const telClean = String(u.Numero || '').replace(/[^0-9+]/g, '');
-
+ 
                 html += `
                 <a href="tel:${telClean}" class="flex items-center justify-between p-2 rounded-xl active:bg-[var(--color-bg)] transition-colors">
                     <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 rounded-full ${colorClass} flex items-center justify-center font-bold text-lg">
+                        <div class="h-10 w-10 rounded-full ${colorClass} flex items-center justify-center font-bold text-lg" style="${colorStyle}">
                             ${u.Icone || '📞'}
                         </div>
                         <div>
@@ -933,17 +1108,17 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>`;
             });
-
+ 
             container.innerHTML = html;
         }
-
+ 
         function getStatusColor(status) {
             const s = String(status).toLowerCase();
             if (s.includes('confirm')) return 'bg-green-500/20 text-green-600 dark:text-green-400';
             if (s.includes('annul')) return 'bg-red-500/20 text-red-600 dark:text-red-400';
             return 'bg-orange-500/20 text-orange-600 dark:text-orange-400';
         }
-
+ 
         function renderActivities() {
             const container = document.getElementById('activities-container');
             if (!container) return;
@@ -952,16 +1127,16 @@
                 container.innerHTML = `<div class="text-center opacity-50 py-10">Aucune activité programmée.</div>`;
                 return;
             }
-
+ 
             const sorted = [...appData.activites].sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour) || String(a.Heure).localeCompare(String(b.Heure)));
-
+ 
             const grouped = {};
             sorted.forEach(act => {
                 const date = act.Jour || 'Date à définir';
                 if (!grouped[date]) grouped[date] = [];
                 grouped[date].push(act);
             });
-
+ 
             let html = '';
             for (const [date, acts] of Object.entries(grouped)) {
                 let displayDate = date;
@@ -970,7 +1145,7 @@
                     displayDate = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
                     displayDate = displayDate.charAt(0).toUpperCase() + displayDate.slice(1);
                 }
-
+ 
                 html += `<div class="mb-3 mt-6 font-bold text-lg opacity-90 pl-1">${displayDate}</div>`;
                 
                 acts.forEach(act => {
@@ -993,29 +1168,29 @@
             }
             container.innerHTML = html;
         }
-
+ 
         function renderFlights() {
             const container = document.getElementById('flights-container');
             if (!container) return;
-
+ 
             const vols = (appData.vols && appData.vols.length > 0) ? appData.vols : DEFAULT_VOLS;
             const categories = ['Aller', 'Retour'];
             let html = '';
-
+ 
             categories.forEach(cat => {
                 const catVols = vols.filter(v => String(v.Categorie || '').toLowerCase() === cat.toLowerCase())
                                     .sort((a,b) => parseInt(a.Etape || 1) - parseInt(b.Etape || 1));
-
+ 
                 if (catVols.length === 0) return;
-
+ 
                 const isAller = cat === 'Aller';
                 const badgeColor = isAller ? 'bg-[var(--color-accent)] text-white' : 'bg-gray-600 text-white';
-
+ 
                 html += `
                 <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm relative overflow-hidden border border-gray-100 dark:border-gray-800">
                     <div class="absolute top-0 right-0 ${badgeColor} text-[10px] font-bold px-3 py-1 rounded-bl-xl tracking-wider uppercase">${cat}</div>
                 `;
-
+ 
                 catVols.forEach((vol) => {
                     html += `
                     <div class="flex justify-between items-center mt-3 mb-2">
@@ -1039,7 +1214,7 @@
                         </div>
                     </div>
                     `;
-
+ 
                     if (vol.Escale) {
                         html += `
                         <div class="flex justify-center items-center py-2">
@@ -1048,7 +1223,7 @@
                         `;
                     }
                 });
-
+ 
                 html += `
                     <button onclick="checkFlightStatus('${cat.toLowerCase()}')" class="w-full mt-4 bg-[var(--color-bg)] text-[var(--color-accent)] text-xs font-bold py-2.5 rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 border border-[var(--color-accent)]/20">
                         ⚡ Suivre les vols ${cat} en direct
@@ -1058,36 +1233,36 @@
                 </div>
                 `;
             });
-
+ 
             container.innerHTML = html;
         }
-
+ 
         let flightMap = null;
-
+ 
         function initFlightMap() {
             if (flightMap) {
                 flightMap.invalidateSize();
                 return;
             }
-
+ 
             flightMap = L.map('flight-map', { zoomControl: false }).setView([20, 30], 2);
-
+ 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap',
                 maxZoom: 18
             }).addTo(flightMap);
-
+ 
             const vols = (appData.vols && appData.vols.length > 0) ? appData.vols : DEFAULT_VOLS;
             const pointsMap = {};
             const latLngsAller = [];
             const latLngsRetour = [];
-
+ 
             vols.forEach(v => {
                 const latDep = parseFloat(v.LatDepart);
                 const lngDep = parseFloat(v.LngDepart);
                 const latArr = parseFloat(v.LatArrivee);
                 const lngArr = parseFloat(v.LngArrivee);
-
+ 
                 if (!isNaN(latDep) && !isNaN(lngDep)) {
                     pointsMap[v.AeroportDepartCode] = { lat: latDep, lng: lngDep, name: v.AeroportDepartNom };
                     if (v.Categorie && v.Categorie.toLowerCase() === 'aller') latLngsAller.push([latDep, lngDep]);
@@ -1099,14 +1274,14 @@
                     else latLngsRetour.push([latArr, lngArr]);
                 }
             });
-
+ 
             if (latLngsAller.length > 1) {
                 L.polyline(latLngsAller, { color: '#0284c7', weight: 3, dashArray: '6, 8', opacity: 0.8 }).addTo(flightMap);
             }
             if (latLngsRetour.length > 1) {
                 L.polyline(latLngsRetour, { color: '#8b5cf6', weight: 3, dashArray: '6, 8', opacity: 0.8 }).addTo(flightMap);
             }
-
+ 
             for (const [code, info] of Object.entries(pointsMap)) {
                 const airportIcon = L.divIcon({
                     html: `<div class="bg-white dark:bg-gray-800 text-[10px] font-bold px-1.5 py-0.5 rounded shadow border border-gray-300 text-[var(--color-accent)] whitespace-nowrap">✈️ ${code}</div>`,
@@ -1114,21 +1289,21 @@
                     iconSize: [40, 20],
                     iconAnchor: [20, 10]
                 });
-
+ 
                 L.marker([info.lat, info.lng], { icon: airportIcon })
                     .bindPopup(`<div class="text-center font-bold text-xs">${code} - ${info.name}</div>`)
                     .addTo(flightMap);
             }
-
+ 
             const allPoints = [...latLngsAller, ...latLngsRetour];
             if (allPoints.length > 0) {
                 flightMap.fitBounds(allPoints, { padding: [20, 20] });
             }
         }
-
+ 
         let map = null;
         let markersGroup = null;
-
+ 
         const categoryIcons = {
             "excursion en mer": "🚤",
             "voyage en voiture": "🚗",
@@ -1138,7 +1313,7 @@
             "balade en ville": "🚶",
             "hotel": "🏠"
         };
-
+ 
         function getMarkerIcon(categorie) {
             const cat = categorie ? String(categorie).toLowerCase().trim() : "";
             const emoji = categoryIcons[cat] || "📍";
@@ -1151,28 +1326,28 @@
                 popupAnchor: [0, -40]
             });
         }
-
+ 
         function initMap() {
             if (map) { map.invalidateSize(); return; }
             
             map = L.map('map', { zoomControl: false }).setView([-20.2, 57.55], 10);
             L.control.zoom({ position: 'topright' }).addTo(map);
-
+ 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap',
                 maxZoom: 19
             }).addTo(map);
-
+ 
             markersGroup = L.layerGroup().addTo(map);
             updateMapMarkers();
         }
-
+ 
         function updateMapMarkers() {
             if (!markersGroup) return;
             markersGroup.clearLayers();
-
+ 
             const items = [...(appData.activites || []), ...(appData.lieux || [])];
-
+ 
             items.forEach(item => {
                 if (item.Latitude && item.Longitude) {
                     const lat = parseFloat(item.Latitude);
@@ -1194,27 +1369,27 @@
                 }
             });
         }
-
+ 
         let itemIdToDelete = null;
-
+ 
         function isItemChecked(item) {
             // Le Sheet peut renvoyer "Oui"/"Non", des booléens JS, ou "VRAI"/"FAUX"
             // (affichage FR d'une case à cocher Google Sheets) selon l'historique de la ligne.
             const f = String(item.Fait || '').toLowerCase().trim();
             return f === 'true' || f === 'vrai' || f === 'oui' || f === '1' || item.checked === true;
         }
-
+ 
         function renderChecklist() {
             const container = document.getElementById('checklist-sections-container');
             const selectEl = document.getElementById('new-item-category-select');
             if (!container) return;
-
+ 
             const rawItems = appData.checklist || DEFAULT_CHECKLIST;
-
+ 
             // Extraire les catégories uniques
             const categories = Array.from(new Set(rawItems.map(i => i.Categorie || 'Général'))).filter(Boolean);
             if (categories.length === 0) categories.push('Général');
-
+ 
             // Mettre à jour le dropdown de catégorie pour l'ajout
             if (selectEl) {
                 let optionsHtml = `<option value="ALL">✨ Ajouter à TOUTES les sections</option>`;
@@ -1224,21 +1399,21 @@
                 optionsHtml += `<option value="NEW">➕ Nouvelle section...</option>`;
                 selectEl.innerHTML = optionsHtml;
             }
-
+ 
             // Calcul global de progression
             const totalItems = rawItems.length;
             const checkedItems = rawItems.filter(isItemChecked).length;
             const globalPercentage = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
-
+ 
             document.getElementById('checklist-progress-text').innerText = `${checkedItems} / ${totalItems} objet${totalItems > 1 ? 's' : ''} prêt${checkedItems > 1 ? 's' : ''}`;
             document.getElementById('checklist-percentage').innerText = `${globalPercentage}%`;
             document.getElementById('checklist-bar').style.width = `${globalPercentage}%`;
-
+ 
             if (rawItems.length === 0) {
                 container.innerHTML = `<div class="text-center opacity-50 py-10 text-sm">Votre checklist est vide. Ajoutez des objets ci-dessus !</div>`;
                 return;
             }
-
+ 
             // Grouper par catégorie
             const grouped = {};
             categories.forEach(c => grouped[c] = []);
@@ -1247,12 +1422,12 @@
                 if (!grouped[cat]) grouped[cat] = [];
                 grouped[cat].push(item);
             });
-
+ 
             let html = '';
             for (const [cat, items] of Object.entries(grouped)) {
                 const catChecked = items.filter(isItemChecked).length;
                 const catTotal = items.length;
-
+ 
                 html += `
                 <div class="bg-[var(--color-surface)] rounded-3xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
@@ -1265,14 +1440,14 @@
                     </div>
                     <div class="space-y-2">
                 `;
-
+ 
                 if (items.length === 0) {
                     html += `<div class="text-xs opacity-40 italic py-2">Aucun objet dans cette section</div>`;
                 } else {
                     items.forEach(item => {
                         const checked = isItemChecked(item);
                         const itemId = item.ID || item.id;
-
+ 
                         html += `
                         <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
                             <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
@@ -1286,16 +1461,16 @@
                         `;
                     });
                 }
-
+ 
                 html += `
                     </div>
                 </div>
                 `;
             }
-
+ 
             container.innerHTML = html;
         }
-
+ 
         function handleCategorySelectChange(select) {
             const container = document.getElementById('custom-category-container');
             if (select.value === 'NEW') {
@@ -1304,7 +1479,7 @@
                 container.classList.add('hidden');
             }
         }
-
+ 
         async function toggleChecklistItem(id) {
             const item = appData.checklist.find(i => String(i.ID || i.id) === String(id));
             if (item) {
@@ -1314,7 +1489,7 @@
                 item.checked = !currentlyChecked;
                 localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                 renderChecklist();
-
+ 
                 try {
                     const resp = await fetch(API_APPS_SCRIPT, {
                         method: 'POST',
@@ -1332,31 +1507,31 @@
                 }
             }
         }
-
+ 
         async function addChecklistItem(e) {
             e.preventDefault();
             const input = document.getElementById('new-item-input');
             const select = document.getElementById('new-item-category-select');
             const customInput = document.getElementById('new-custom-category-input');
-
+ 
             const val = input.value.trim();
             if (!val) return;
-
+ 
             let targetCategory = select.value;
-
+ 
             if (targetCategory === 'NEW') {
                 targetCategory = customInput.value.trim() || 'Nouveau groupe';
             }
-
+ 
             if (!appData.checklist) appData.checklist = [];
-
+ 
             const newItemsToSync = [];
-
+ 
             if (targetCategory === 'ALL') {
                 // Ajouter à TOUTES les catégories existantes
                 const categories = Array.from(new Set(appData.checklist.map(i => i.Categorie || 'Général'))).filter(Boolean);
                 if (categories.length === 0) categories.push('Général');
-
+ 
                 categories.forEach(cat => {
                     const newItem = {
                         ID: 'CHK-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
@@ -1381,13 +1556,13 @@
                 newItemsToSync.push(newItem);
                 showToast('Objet ajouté !');
             }
-
+ 
             localStorage.setItem('maurice2026_data', JSON.stringify(appData));
             input.value = '';
             customInput.value = '';
             document.getElementById('custom-category-container').classList.add('hidden');
             renderChecklist();
-
+ 
             // Synchronisation Google Sheet
             for (const itemSync of newItemsToSync) {
                 try {
@@ -1415,12 +1590,12 @@
                 }
             }
         }
-
+ 
         function promptDeleteChecklistItem(id) {
             itemIdToDelete = id;
             openModal('modal-delete-confirm');
         }
-
+ 
         async function confirmDeleteChecklistItem() {
             if (itemIdToDelete !== null) {
                 const idSync = itemIdToDelete;
@@ -1430,7 +1605,7 @@
                 showToast('Objet supprimé');
                 itemIdToDelete = null;
                 closeModal('modal-delete-confirm');
-
+ 
                 try {
                     const resp = await fetch(API_APPS_SCRIPT, {
                         method: 'POST',
@@ -1450,7 +1625,7 @@
                 closeModal('modal-delete-confirm');
             }
         }
-
+ 
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             const content = modal.querySelector('div');
@@ -1460,7 +1635,7 @@
                 if (content) content.classList.remove('translate-y-full');
             }, 10);
         }
-
+ 
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             const content = modal.querySelector('div');
@@ -1468,11 +1643,11 @@
             if (content) content.classList.add('translate-y-full');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
-
+ 
         function openActivityDetails(id) {
             const act = appData.activites.find(a => a.ID === id);
             if (!act) return;
-
+ 
             const defaultImg = "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1000&auto=format&fit=crop";
             const modalContent = document.getElementById('activity-modal-content');
             
@@ -1492,7 +1667,7 @@
                         <div class="flex items-center gap-1">🕒 ${act.Heure || '--:--'}</div>
                         ${act.Prix ? `<div class="flex items-center gap-1 font-bold text-[var(--color-accent)]">💰 ${act.Prix}</div>` : ''}
                     </div>
-
+ 
                     ${act.Descriptif ? `<p class="mb-6 leading-relaxed opacity-90 text-sm">${act.Descriptif}</p>` : ''}
                     
                     <div class="space-y-3 bg-[var(--color-bg)] p-4 rounded-2xl text-xs">
@@ -1504,7 +1679,7 @@
             
             openModal('modal-activity-details');
         }
-
+ 
         async function submitActivity(e) {
             e.preventDefault();
             const form = e.target;
@@ -1521,7 +1696,7 @@
             closeModal('modal-add-activity');
             form.reset();
             showToast('Activité sauvegardée localement !');
-
+ 
             try {
                 const response = await fetch(API_APPS_SCRIPT, {
                     method: 'POST',
@@ -1537,7 +1712,7 @@
                 showToast('Enregistré hors-ligne');
             }
         }
-
+ 
         async function checkFlightStatus(journey) {
             const statusDiv = document.getElementById(`flight-status-${journey}`);
             statusDiv.classList.remove('hidden');
@@ -1548,12 +1723,12 @@
                     Interrogation d'OpenSky Network...
                 </div>
             `;
-
+ 
             setTimeout(() => {
                 const vols = appData.vols || [];
                 const catVols = vols.filter(v => String(v.Categorie || '').toLowerCase() === journey.toLowerCase())
                                     .sort((a,b) => parseInt(a.Etape || 1) - parseInt(b.Etape || 1));
-
+ 
                 let messageDyn = "Aucun vol trouvé pour ce trajet dans la base de données.";
                 
                 if (catVols.length > 0) {
@@ -1562,7 +1737,7 @@
                     
                     messageDyn = `Les vols ${flightCodes} s'activeront sur le radar OpenSky le ${departureDate}.`;
                 }
-
+ 
                 statusDiv.innerHTML = `
                     <div class="flex items-start gap-3">
                         <div class="text-xl mt-0.5">🗓️</div>
