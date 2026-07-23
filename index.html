@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Maurice 2026</title>
+    <title>Maurice 2026 - PWA</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
     
@@ -13,7 +15,7 @@
 
     <style>
         :root {
-            /* Mode Clair : "Techno-Lagon" */
+            /* Mode Clair : Techno-Lagon */
             --color-bg: #F0F4F8;
             --color-surface: #FFFFFF;
             --color-text: #1F2937;
@@ -36,14 +38,13 @@
             color: var(--color-text);
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.3s, color 0.3s;
-            overflow: hidden; /* Empêche le scroll du body complet */
+            overflow: hidden;
         }
 
         h1, h2, h3, h4, .font-heading {
             font-family: 'Outfit', sans-serif;
         }
 
-        /* Masquer la scrollbar tout en gardant le scroll possible */
         ::-webkit-scrollbar {
             display: none;
         }
@@ -52,7 +53,6 @@
             scrollbar-width: none;
         }
 
-        /* Animation Pull-to-refresh visuelle */
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -60,7 +60,6 @@
             animation: spin 1s linear infinite;
         }
 
-        /* Personnalisation Popup Leaflet */
         .leaflet-popup-content-wrapper {
             background-color: var(--color-surface);
             color: var(--color-text);
@@ -74,36 +73,36 @@
 </head>
 <body class="antialiased selection:bg-[var(--color-accent)] selection:text-white pb-safe">
 
-    <!-- UTILISATION DE h-[100dvh] POUR ETRE EXACTEMENT DE LA TAILLE DE L'ECRAN MOBILE -->
     <div class="max-w-md mx-auto h-[100dvh] relative bg-[var(--color-bg)] shadow-2xl overflow-hidden flex flex-col" id="app-container">
         
-        <!-- Header Image (pour la page Home) -->
-        <div id="home-header" class="relative h-64 w-full shrink-0 rounded-b-[40px] overflow-hidden shadow-lg transition-all duration-300">
-            <img src="https://images.unsplash.com/photo-1513415431848-a433b3de449f?q=80&w=4142&auto=format&fit=crop" alt="Ile Maurice" class="w-full h-full object-cover">
+        <!-- Header Rétractable de la Page Accueil -->
+        <div id="home-header" class="relative h-64 w-full shrink-0 rounded-b-[40px] overflow-hidden shadow-lg transition-all duration-300 z-20">
+            <img id="header-bg-img" src="https://images.unsplash.com/photo-1513415431848-a433b3de449f?q=80&w=1200&auto=format&fit=crop" alt="Ile Maurice" class="w-full h-full object-cover transition-opacity duration-300">
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-            <div class="absolute bottom-6 left-6 text-white">
-                <h1 class="text-4xl font-bold font-heading mb-1 shadow-sm">Maurice 2026</h1>
-                <p class="text-sm font-medium opacity-90 flex items-center gap-2">
+            
+            <div id="header-subtext" class="absolute bottom-6 left-6 text-white transition-all duration-300">
+                <h1 id="header-title" class="text-4xl font-bold font-heading mb-1 shadow-sm transition-all duration-300">Maurice 2026</h1>
+                <p id="header-subtitle" class="text-sm font-medium opacity-90 flex items-center gap-2 transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     17 Aventuriers
                 </p>
             </div>
-            <!-- Bouton Rafraichir Manuel -->
-            <button onclick="manualRefresh()" class="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-transform z-10">
+
+            <!-- Action Buttons Header -->
+            <button onclick="manualRefresh()" aria-label="Rafraîchir" class="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-transform z-30">
                 <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             </button>
-            <!-- Bouton Thème -->
-            <button onclick="toggleTheme()" class="absolute top-4 left-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-transform z-10">
+            <button onclick="toggleTheme()" aria-label="Changer de thème" class="absolute top-4 left-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white active:scale-90 transition-transform z-30">
                 <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
             </button>
         </div>
 
-        <!-- Zone de Contenu Principal (Scrollable) -->
-        <main id="main-content" class="flex-1 overflow-y-auto relative scroll-smooth pb-20"> <!-- pb-20 pour ne pas cacher de contenu sous la nav -->
+        <main id="main-content" class="flex-1 overflow-y-auto relative scroll-smooth pb-20 z-10">
             
+            <!-- PAGE ACCUEIL -->
             <div id="page-home" class="page block px-4 pt-6">
                 <!-- Compte à rebours -->
-                <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm mb-6 flex items-center justify-between">
+                <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm mb-6 flex items-center justify-between border border-gray-100 dark:border-gray-800">
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)] mb-1">Départ dans</h3>
                         <div class="flex gap-3 text-center">
@@ -114,7 +113,7 @@
                             <div><span id="cd-mins" class="block text-2xl font-heading font-bold">--</span><span class="text-[10px] opacity-70">Min</span></div>
                         </div>
                     </div>
-                    <div class="h-12 w-12 rounded-full bg-[var(--color-accent-light)] flex items-center justify-center text-[var(--color-accent)]">
+                    <div class="h-12 w-12 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     </div>
                 </div>
@@ -122,7 +121,7 @@
                 <!-- Widgets Météo & Devise -->
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <!-- Météo Port-Louis -->
-                    <div class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between">
+                    <div class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between border border-gray-100 dark:border-gray-800">
                         <div class="flex items-start justify-between mb-2">
                             <span class="text-xs font-bold opacity-70">Port-Louis</span>
                             <span id="weather-icon" class="text-xl">☀️</span>
@@ -132,8 +131,8 @@
                             <div class="text-xs opacity-60 mt-1" id="weather-desc">Chargement...</div>
                         </div>
                     </div>
-                    <!-- Taux de Change (Cliquable) -->
-                    <div onclick="toggleCurrency()" class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition-transform select-none">
+                    <!-- Taux de Change -->
+                    <div onclick="toggleCurrency()" class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition-transform select-none border border-gray-100 dark:border-gray-800">
                         <div class="flex items-start justify-between mb-2">
                             <span class="text-xs font-bold opacity-70" id="currency-title">Taux EUR/MUR</span>
                             <span class="text-xl">💰</span>
@@ -156,9 +155,9 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 Le Saviez-Vous ?
                             </h3>
-                            <span class="text-xs font-semibold bg-white/20 px-2 py-1 rounded-lg" id="anecdote-date">--/--</span>
+                            <span class="text-xs font-semibold bg-white/20 px-2.5 py-1 rounded-lg" id="anecdote-date">--/--</span>
                         </div>
-                        <p class="text-lg font-heading font-medium leading-tight mt-3 mb-4" id="anecdote-text">
+                        <p class="text-base font-heading font-medium leading-snug mt-3 mb-4 min-h-[3rem] transition-opacity duration-200" id="anecdote-text">
                             Chargement de la découverte du jour...
                         </p>
                         <div class="flex justify-between items-center border-t border-white/20 pt-3">
@@ -168,12 +167,12 @@
                     </div>
                 </div>
 
-                <!-- Section Urgences -->
+                <!-- Urgences -->
                 <h3 class="text-lg font-bold font-heading mb-3 pl-2 opacity-90">Contacts d'Urgence</h3>
-                <div class="bg-[var(--color-surface)] rounded-3xl p-4 shadow-sm space-y-3 mb-4">
+                <div class="bg-[var(--color-surface)] rounded-3xl p-4 shadow-sm space-y-3 mb-6 border border-gray-100 dark:border-gray-800">
                     <a href="tel:999" class="flex items-center justify-between p-2 rounded-xl active:bg-[var(--color-bg)] transition-colors">
                         <div class="flex items-center gap-3">
-                            <div class="h-10 w-10 rounded-full bg-red-100 text-red-500 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div>
+                            <div class="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div>
                             <div>
                                 <div class="font-bold text-sm">Police / Urgences</div>
                                 <div class="text-xs opacity-60">999 ou 112</div>
@@ -183,7 +182,7 @@
                     </a>
                     <a href="tel:114" class="flex items-center justify-between p-2 rounded-xl active:bg-[var(--color-bg)] transition-colors">
                         <div class="flex items-center gap-3">
-                            <div class="h-10 w-10 rounded-full bg-red-100 text-red-500 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div>
+                            <div class="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div>
                             <div>
                                 <div class="font-bold text-sm">SAMU (Ambulance)</div>
                                 <div class="text-xs opacity-60">114</div>
@@ -207,201 +206,94 @@
                     </button>
                 </div>
 
-                <div id="activities-container" class="space-y-6 pb-6">
-                    <!-- Les activités seront injectées ici par JS -->
+                <div id="activities-container" class="space-y-4 pb-12">
+                    <!-- Activités dynamiques -->
                 </div>
             </div>
 
-            <!-- PAGE LIEUX (CARTE) -->
-            <!-- En mode Absolute pour prendre 100% de la zone dispo sans scroller sous le header -->
+            <!-- PAGE CARTE & LIEUX -->
             <div id="page-lieux" class="page hidden absolute inset-0 flex flex-col z-0">
                 <div class="px-4 pt-8 pb-4 bg-gradient-to-b from-[var(--color-bg)] to-transparent z-10 pointer-events-none">
                     <h2 class="text-3xl font-bold font-heading pointer-events-auto">Carte & Lieux</h2>
                 </div>
-                <!-- Le conteneur map -->
                 <div id="map" class="absolute inset-0 z-0"></div>
             </div>
 
-            <!-- PAGE TRANSPORTS -->
+            <!-- PAGE TRANSPORTS & VOLS -->
             <div id="page-transports" class="page hidden px-4 pt-8 h-full">
-                <h2 class="text-3xl font-bold font-heading mb-6">Transports</h2>
+                <h2 class="text-3xl font-bold font-heading mb-2">Transports & Vols</h2>
+                <p class="opacity-70 text-sm mb-6">Trajectoires et détails des vols programmés</p>
+
+                <!-- Carte des trajectoires de vol -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-[var(--color-accent)] mb-2 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        Carte des Trajectoires
+                    </h3>
+                    <div id="flight-map" class="h-64 w-full rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden relative bg-[var(--color-surface)]"></div>
+                </div>
                 
-                <h3 class="text-lg font-bold font-heading mb-3 pl-2 opacity-90">Vos Vols</h3>
-                <div class="space-y-5 mb-8">
-                    <!-- VOL ALLER -->
-                    <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-[var(--color-accent)] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl tracking-wider">ALLER</div>
-                        
-                        <!-- Étape 1 -->
-                        <div class="flex justify-between items-center mt-2 mb-1">
-                            <div class="w-1/3 text-left">
-                                <div class="text-2xl font-bold font-heading text-[var(--color-accent)]">TLS</div>
-                                <div class="text-[10px] font-bold opacity-60">Toulouse</div>
-                                <div class="font-bold mt-1 text-base">11:15</div>
-                                <div class="text-[10px] opacity-60">19 Oct 2026</div>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center px-2">
-                                <span class="text-[10px] font-bold bg-[var(--color-bg)] px-2 py-1 rounded-md text-[var(--color-accent)] mb-2 border border-[var(--color-accent)]/10 whitespace-nowrap">TK 1804</span>
-                                <div class="w-full h-[2px] bg-gray-200 dark:bg-gray-700 relative flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-[var(--color-accent)] absolute bg-[var(--color-surface)] px-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="transform: rotate(90deg);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                </div>
-                            </div>
-                            <div class="w-1/3 text-right">
-                                <div class="text-2xl font-bold font-heading text-[var(--color-accent)]">IST</div>
-                                <div class="text-[10px] font-bold opacity-60">Istanbul</div>
-                                <div class="font-bold mt-1 text-base opacity-0">-</div>
-                                <div class="text-[10px] opacity-60">19 Oct 2026</div>
-                            </div>
-                        </div>
-
-                        <!-- Séparateur Escale -->
-                        <div class="flex justify-center items-center py-2">
-                            <div class="text-[10px] font-bold opacity-40 bg-[var(--color-bg)] px-3 py-0.5 rounded-full uppercase tracking-wider">Escale à Istanbul</div>
-                        </div>
-
-                        <!-- Étape 2 -->
-                        <div class="flex justify-between items-center mb-5">
-                            <div class="w-1/3 text-left">
-                                <div class="text-2xl font-bold font-heading text-[var(--color-accent)]">IST</div>
-                                <div class="text-[10px] font-bold opacity-60">Istanbul</div>
-                                <div class="font-bold mt-1 text-base">02:10</div>
-                                <div class="text-[10px] opacity-60">20 Oct 2026</div>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center px-2">
-                                <span class="text-[10px] font-bold bg-[var(--color-bg)] px-2 py-1 rounded-md text-[var(--color-accent)] mb-2 border border-[var(--color-accent)]/10 whitespace-nowrap">TK 160</span>
-                                <div class="w-full h-[2px] bg-gray-200 dark:bg-gray-700 relative flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-[var(--color-accent)] absolute bg-[var(--color-surface)] px-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="transform: rotate(90deg);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                </div>
-                            </div>
-                            <div class="w-1/3 text-right">
-                                <div class="text-2xl font-bold font-heading text-[var(--color-accent)]">MRU</div>
-                                <div class="text-[10px] font-bold opacity-60">Maurice</div>
-                                <div class="font-bold mt-1 text-base opacity-0">-</div>
-                                <div class="text-[10px] opacity-60">20 Oct 2026</div>
-                            </div>
-                        </div>
-
-                        <button onclick="checkFlightStatus('aller')" class="w-full bg-[var(--color-bg)] hover:bg-[var(--color-accent)]/5 text-[var(--color-accent)] text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 border border-[var(--color-accent)]/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
-                            Suivre les vols (OpenSky)
-                        </button>
-                        <div id="flight-status-aller" class="hidden mt-3 text-xs bg-[var(--color-bg)] p-3 rounded-xl border border-[var(--color-accent)]/10 transition-all">
-                            <!-- Statut injecté ici -->
-                        </div>
-                    </div>
-
-                    <!-- VOL RETOUR -->
-                    <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-gray-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl tracking-wider">RETOUR</div>
-                        
-                        <!-- Étape 1 -->
-                        <div class="flex justify-between items-center mt-2 mb-1">
-                            <div class="w-1/3 text-left">
-                                <div class="text-2xl font-bold font-heading text-[var(--color-text)]">MRU</div>
-                                <div class="text-[10px] font-bold opacity-60">Maurice</div>
-                                <div class="font-bold mt-1 text-base">21:25</div>
-                                <div class="text-[10px] opacity-60">27 Oct 2026</div>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center px-2">
-                                <span class="text-[10px] font-bold bg-[var(--color-bg)] px-2 py-1 rounded-md text-[var(--color-text)] mb-2 border border-gray-200 dark:border-gray-700 whitespace-nowrap">TK 161</span>
-                                <div class="w-full h-[2px] bg-gray-200 dark:bg-gray-700 relative flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-gray-400 absolute bg-[var(--color-surface)] px-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="transform: rotate(270deg);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                </div>
-                            </div>
-                            <div class="w-1/3 text-right">
-                                <div class="text-2xl font-bold font-heading text-[var(--color-text)]">IST</div>
-                                <div class="text-[10px] font-bold opacity-60">Istanbul</div>
-                                <div class="font-bold mt-1 text-base opacity-0">-</div>
-                                <div class="text-[10px] opacity-60">28 Oct 2026</div>
-                            </div>
-                        </div>
-
-                        <!-- Séparateur Escale -->
-                        <div class="flex justify-center items-center py-2">
-                            <div class="text-[10px] font-bold opacity-40 bg-[var(--color-bg)] px-3 py-0.5 rounded-full uppercase tracking-wider">Escale à Istanbul</div>
-                        </div>
-
-                        <!-- Étape 2 -->
-                        <div class="flex justify-between items-center mb-5">
-                            <div class="w-1/3 text-left">
-                                <div class="text-2xl font-bold font-heading text-[var(--color-text)]">IST</div>
-                                <div class="text-[10px] font-bold opacity-60">Istanbul</div>
-                                <div class="font-bold mt-1 text-base">08:50</div>
-                                <div class="text-[10px] opacity-60">28 Oct 2026</div>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center px-2">
-                                <span class="text-[10px] font-bold bg-[var(--color-bg)] px-2 py-1 rounded-md text-[var(--color-text)] mb-2 border border-gray-200 dark:border-gray-700 whitespace-nowrap">TK 1803</span>
-                                <div class="w-full h-[2px] bg-gray-200 dark:bg-gray-700 relative flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-gray-400 absolute bg-[var(--color-surface)] px-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="transform: rotate(270deg);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                </div>
-                            </div>
-                            <div class="w-1/3 text-right">
-                                <div class="text-2xl font-bold font-heading text-[var(--color-text)]">TLS</div>
-                                <div class="text-[10px] font-bold opacity-60">Toulouse</div>
-                                <div class="font-bold mt-1 text-base opacity-0">-</div>
-                                <div class="text-[10px] opacity-60">28 Oct 2026</div>
-                            </div>
-                        </div>
-
-                        <button onclick="checkFlightStatus('retour')" class="w-full bg-[var(--color-bg)] hover:bg-[var(--color-accent)]/5 text-[var(--color-text)] text-sm font-bold py-2.5 rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
-                            Suivre les vols (OpenSky)
-                        </button>
-                        <div id="flight-status-retour" class="hidden mt-3 text-xs bg-[var(--color-bg)] p-3 rounded-xl border border-gray-200 dark:border-gray-700 transition-all">
-                            <!-- Statut injecté ici -->
-                        </div>
-                    </div>
+                <!-- Vols Dynamiques -->
+                <h3 class="text-lg font-bold font-heading mb-3 pl-1 opacity-90">Vos Vols Détaillés</h3>
+                <div id="flights-container" class="space-y-5 mb-8">
+                    <!-- Injecté dynamiquement par JS -->
                 </div>
 
-                <h3 class="text-lg font-bold font-heading mb-3 pl-2 opacity-90">Transports Locaux</h3>
+                <!-- Transports Locaux -->
+                <h3 class="text-lg font-bold font-heading mb-3 pl-1 opacity-90">Transports Locaux</h3>
                 <div class="space-y-4 pb-24">
-                    <!-- Navette Hôtel -->
-                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center">
-                        <img src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=300&auto=format&fit=crop" alt="Navette" class="w-24 h-24 rounded-2xl object-cover shadow-sm">
+                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center border border-gray-100 dark:border-gray-800">
+                        <img src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=300&auto=format&fit=crop" alt="Navette" class="w-20 h-20 rounded-2xl object-cover shadow-sm">
                         <div class="flex-1 py-1">
-                            <h4 class="font-bold font-heading text-lg leading-tight mb-1">Navette de l'Hôtel</h4>
-                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Transferts aéroport aller-retour et excursions de groupe réservées.</p>
+                            <h4 class="font-bold font-heading text-base leading-tight mb-1">Navette de l'Hôtel</h4>
+                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Transferts aéroport aller-retour et excursions réservées.</p>
                             <a href="tel:+23055551234" class="inline-flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                                +230 5555 1234
+                                📞 +230 5555 1234
                             </a>
                         </div>
                     </div>
 
-                    <!-- Taxi Privé -->
-                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center">
-                        <img src="https://images.unsplash.com/photo-1549315357-1df75a30e137?q=80&w=300&auto=format&fit=crop" alt="Taxi" class="w-24 h-24 rounded-2xl object-cover shadow-sm">
+                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center border border-gray-100 dark:border-gray-800">
+                        <img src="https://images.unsplash.com/photo-1549315357-1df75a30e137?q=80&w=300&auto=format&fit=crop" alt="Taxi" class="w-20 h-20 rounded-2xl object-cover shadow-sm">
                         <div class="flex-1 py-1">
-                            <h4 class="font-bold font-heading text-lg leading-tight mb-1">Taxis (Ajay)</h4>
-                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Chauffeur de confiance pour les trajets rapides à la demande.</p>
+                            <h4 class="font-bold font-heading text-base leading-tight mb-1">Taxis (Ajay)</h4>
+                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Chauffeur privé de confiance pour déplacements locaux.</p>
                             <a href="tel:+23058889999" class="inline-flex items-center gap-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                                +230 5888 9999
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Bus Publics -->
-                    <div class="bg-[var(--color-surface)] rounded-3xl p-3 flex gap-4 shadow-sm items-center">
-                        <img src="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=300&auto=format&fit=crop" alt="Bus Mauricien" class="w-24 h-24 rounded-2xl object-cover shadow-sm">
-                        <div class="flex-1 py-1">
-                            <h4 class="font-bold font-heading text-lg leading-tight mb-1">Réseau de Bus</h4>
-                            <p class="text-[11px] opacity-70 mb-2 leading-tight">Immersion locale et économique. NTC (National Transport Corp).</p>
-                            <a href="tel:+2304262938" class="inline-flex items-center gap-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                                +230 426 2938
+                                📞 +230 5888 9999
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- PAGE CHECKLIST -->
+            <!-- PAGE CHECKLIST / VALISE -->
             <div id="page-checklist" class="page hidden px-4 pt-8 h-full">
-                <h2 class="text-3xl font-bold font-heading mb-6">Valises & Checklist</h2>
-                <div class="bg-[var(--color-surface)] rounded-3xl p-8 shadow-sm text-center">
-                    <span class="text-4xl mb-4 block">✅</span>
-                    <p class="font-bold opacity-80">En cours de construction...</p>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold font-heading">Valise & Checklist</h2>
+                        <p class="opacity-70 text-sm mt-0.5" id="checklist-progress-text">0 / 0 objet prêt</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-[var(--color-accent)] text-white flex items-center justify-center font-bold text-sm shadow-md" id="checklist-percentage">
+                        0%
+                    </div>
+                </div>
+
+                <!-- Barre de progression -->
+                <div class="w-full bg-gray-200 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden mb-6">
+                    <div id="checklist-bar" class="bg-[var(--color-accent)] h-full transition-all duration-300 w-0"></div>
+                </div>
+
+                <!-- Formulaire d'ajout rapide d'article -->
+                <form onsubmit="addChecklistItem(event)" class="flex gap-2 mb-6">
+                    <input type="text" id="new-item-input" placeholder="Ajouter un objet..." required class="flex-1 bg-[var(--color-surface)] border border-gray-200 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                    <button type="submit" class="bg-[var(--color-accent)] text-white font-bold px-5 py-3 rounded-2xl active:scale-95 transition-transform text-sm">
+                        +
+                    </button>
+                </form>
+
+                <!-- Liste interactive -->
+                <div id="checklist-items" class="space-y-3 pb-24">
+                    <!-- Généré dynamiquement en JS -->
                 </div>
             </div>
         </main>
@@ -409,7 +301,6 @@
         <!-- MODAL : DÉTAIL ACTIVITÉ -->
         <div id="modal-activity-details" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
             <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl" id="activity-modal-content">
-                <!-- Contenu injecté via JS -->
             </div>
         </div>
 
@@ -448,16 +339,16 @@
                             <input type="time" name="Heure" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold mb-1 opacity-80">Latitude (Optionnel)</label>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Latitude</label>
                             <input type="text" name="Latitude" placeholder="-20.1609" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold mb-1 opacity-80">Longitude (Optionnel)</label>
+                            <label class="block text-sm font-semibold mb-1 opacity-80">Longitude</label>
                             <input type="text" name="Longitude" placeholder="57.5011" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold mb-1 opacity-80">Participants</label>
-                            <input type="text" name="Participants" placeholder="Tous, ou Boué..." class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                            <input type="text" name="Participants" placeholder="Tous, ou Nom..." class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold mb-1 opacity-80">Prix</label>
@@ -487,38 +378,33 @@
             </div>
         </div>
 
-        <!-- NAVIGATION BAR (FIXE EN BAS DE L'ECRAN) -->
+        <!-- NAVIGATION BAR -->
         <nav class="absolute bottom-0 w-full max-w-md bg-[var(--color-surface)] border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 px-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-50">
             <ul class="flex justify-between items-center h-16">
-                <!-- Accueil -->
                 <li class="flex-1 flex justify-center">
-                    <button onclick="switchTab('page-home', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity text-[var(--color-accent)] active">
+                    <button onclick="switchTab('page-home', this)" class="nav-btn flex flex-col items-center gap-1 opacity-100 text-[var(--color-accent)]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         <span class="text-[10px] font-bold">Accueil</span>
                     </button>
                 </li>
-                <!-- Agenda -->
                 <li class="flex-1 flex justify-center">
                     <button onclick="switchTab('page-agenda', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         <span class="text-[10px] font-bold">Agenda</span>
                     </button>
                 </li>
-                <!-- Carte -->
                 <li class="flex-1 flex justify-center">
                     <button onclick="switchTab('page-lieux', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
                         <span class="text-[10px] font-bold">Carte</span>
                     </button>
                 </li>
-                <!-- Transports -->
                 <li class="flex-1 flex justify-center">
                     <button onclick="switchTab('page-transports', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                         <span class="text-[10px] font-bold">Vols</span>
                     </button>
                 </li>
-                <!-- Checklist -->
                 <li class="flex-1 flex justify-center">
                     <button onclick="switchTab('page-checklist', this)" class="nav-btn flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -535,24 +421,140 @@
     </div>
 
     <script>
-        // 1. CONFIGURATION API & VARIABLES GLOBALES
         const API_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbxK1vBGBEoPdnndqGybpEaI4CEDZBs-raPzGuLu4wHAtxE0KpqEYydF-mZej3WqdZ4EtQ/exec';
         
-        const DEFAULT_DATA = {
-            anecdotes: [],
-            activites: [],
+        const DEFAULT_VOLS = [
+            {
+                ID: "VOL-001",
+                Categorie: "Aller",
+                Etape: "1",
+                Code: "TK 1804",
+                Compagnie: "Turkish Airlines",
+                AeroportDepartCode: "TLS",
+                AeroportDepartNom: "Toulouse",
+                DateDepart: "19/10/2026",
+                HeureDepart: "11:15",
+                AeroportArriveeCode: "IST",
+                AeroportArriveeNom: "Istanbul",
+                DateArrivee: "19/10/2026",
+                HeureArrivee: "16:00",
+                Escale: "Escale à Istanbul (10h10)",
+                LatDepart: "43.6291", LngDepart: "1.3638",
+                LatArrivee: "41.2753", LngArrivee: "28.7519"
+            },
+            {
+                ID: "VOL-002",
+                Categorie: "Aller",
+                Etape: "2",
+                Code: "TK 160",
+                Compagnie: "Turkish Airlines",
+                AeroportDepartCode: "IST",
+                AeroportDepartNom: "Istanbul",
+                DateDepart: "20/10/2026",
+                HeureDepart: "02:10",
+                AeroportArriveeCode: "MRU",
+                AeroportArriveeNom: "Maurice",
+                DateArrivee: "20/10/2026",
+                HeureArrivee: "12:30",
+                Escale: "",
+                LatDepart: "41.2753", LngDepart: "28.7519",
+                LatArrivee: "-20.4302", LngArrivee: "57.6836"
+            },
+            {
+                ID: "VOL-003",
+                Categorie: "Retour",
+                Etape: "1",
+                Code: "TK 161",
+                Compagnie: "Turkish Airlines",
+                AeroportDepartCode: "MRU",
+                AeroportDepartNom: "Maurice",
+                DateDepart: "27/10/2026",
+                HeureDepart: "21:25",
+                AeroportArriveeCode: "IST",
+                AeroportArriveeNom: "Istanbul",
+                DateArrivee: "28/10/2026",
+                HeureArrivee: "06:05",
+                Escale: "Escale à Istanbul (02h45)",
+                LatDepart: "-20.4302", LngDepart: "57.6836",
+                LatArrivee: "41.2753", LngArrivee: "28.7519"
+            },
+            {
+                ID: "VOL-004",
+                Categorie: "Retour",
+                Etape: "2",
+                Code: "TK 1803",
+                Compagnie: "Turkish Airlines",
+                AeroportDepartCode: "IST",
+                AeroportDepartNom: "Istanbul",
+                DateDepart: "28/10/2026",
+                HeureDepart: "08:50",
+                AeroportArriveeCode: "TLS",
+                AeroportArriveeNom: "Toulouse",
+                DateArrivee: "28/10/2026",
+                HeureArrivee: "11:35",
+                Escale: "",
+                LatDepart: "41.2753", LngDepart: "28.7519",
+                LatArrivee: "43.6291", LngDepart: "1.3638"
+            }
+        ];
+
+        const DEFAULT_ANECDOTES = [
+            { Jour: "19/10/2026", Texte: "L'île Maurice possède la barrière de corail la plus spectaculaire de l'Océan Indien, abritant plus de 430 espèces de créatures marines !" },
+            { Jour: "20/10/2026", Texte: "Le Dodo, célèbre oiseau aujourd'hui disparu, n'existait nulle part ailleurs qu'à l'Île Maurice." },
+            { Jour: "21/10/2026", Texte: "La Terre des 7 Couleurs de Chamarel est une curiosité géologique d'origines volcaniques aux dunes colorées uniques au monde." }
+        ];
+
+        const DEFAULT_ACTIVITES = [
+            {
+                ID: "ACT-001",
+                Titre: "Arrivée & Installation",
+                Jour: "20/10/2026",
+                Heure: "14:00",
+                Categorie: "hotel",
+                Descriptif: "Prise en charge de la villa, cocktail de bienvenue et détente au bord du lagon.",
+                Statut: "Confirmé",
+                PhotoURL: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800&auto=format&fit=crop",
+                Latitude: "-20.1609",
+                Longitude: "57.5011"
+            },
+            {
+                ID: "ACT-002",
+                Titre: "Excursion Île aux Cerfs",
+                Jour: "22/10/2026",
+                Heure: "09:00",
+                Categorie: "excursion en mer",
+                Descriptif: "Journée catamaran avec barbecue créole sur l'île aux Cerfs et plongée masque-tuba.",
+                Statut: "Confirmé",
+                PhotoURL: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=800&auto=format&fit=crop",
+                Latitude: "-20.2700",
+                Longitude: "57.8000"
+            }
+        ];
+
+        const DEFAULT_CHECKLIST = [
+            { id: 1, label: "Passeport valide (6 mois)", checked: true },
+            { id: 2, label: "Permis de conduire", checked: false },
+            { id: 3, label: "Crème solaire HF & Lunettes", checked: false },
+            { id: 4, label: "Maillots de bain & Masque", checked: true },
+            { id: 5, label: "Adaptateur prise UK/Maurice", checked: false },
+            { id: 6, label: "Anti-moustique tropique", checked: false }
+        ];
+
+        let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || {
+            anecdotes: DEFAULT_ANECDOTES,
+            activites: DEFAULT_ACTIVITES,
             lieux: [],
-            checklist: [],
-            participants: []
+            checklist: DEFAULT_CHECKLIST,
+            vols: DEFAULT_VOLS
         };
 
-        let appData = JSON.parse(localStorage.getItem('maurice2026_data')) || DEFAULT_DATA;
+        if (!appData.vols || appData.vols.length === 0) appData.vols = DEFAULT_VOLS;
+        if (!appData.checklist || appData.checklist.length === 0) appData.checklist = DEFAULT_CHECKLIST;
+        if (!appData.anecdotes || appData.anecdotes.length === 0) appData.anecdotes = DEFAULT_ANECDOTES;
 
-        // Variables d'état
-        let rawCurrencyRate = 50.5; // valeur de secours
-        let isMurToEur = false; // Toggle devise
+        let rawCurrencyRate = 50.5;
+        let isMurToEur = false;
 
-        // 2. THEME & INITIALISATION
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
             const isDark = document.documentElement.classList.contains('dark');
@@ -570,11 +572,47 @@
             fetchCurrency();
             renderAnecdote();
             renderActivities();
+            renderFlights();
+            renderChecklist();
 
             fetchAppData();
+
+            const mainContent = document.getElementById('main-content');
+            mainContent.addEventListener('scroll', handleHomeScroll);
         });
 
-        // 3. NAVIGATION (TABS)
+        function handleHomeScroll() {
+            const homePage = document.getElementById('page-home');
+            if (homePage.classList.contains('hidden')) return;
+
+            const scrollTop = document.getElementById('main-content').scrollTop;
+            const header = document.getElementById('home-header');
+            const bgImg = document.getElementById('header-bg-img');
+            const title = document.getElementById('header-title');
+            const subtitle = document.getElementById('header-subtitle');
+            const subtext = document.getElementById('header-subtext');
+
+            if (scrollTop > 30) {
+                header.style.height = '4.5rem';
+                header.style.borderBottomLeftRadius = '20px';
+                header.style.borderBottomRightRadius = '20px';
+                bgImg.style.opacity = '0.2';
+                subtext.style.bottom = '0.8rem';
+                subtext.style.left = '4rem';
+                title.style.fontSize = '1.25rem';
+                if (subtitle) subtitle.style.display = 'none';
+            } else {
+                header.style.height = '16rem';
+                header.style.borderBottomLeftRadius = '40px';
+                header.style.borderBottomRightRadius = '40px';
+                bgImg.style.opacity = '1';
+                subtext.style.bottom = '1.5rem';
+                subtext.style.left = '1.5rem';
+                title.style.fontSize = '2.25rem';
+                if (subtitle) subtitle.style.display = 'flex';
+            }
+        }
+
         function switchTab(pageId, btnElement) {
             document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
             document.getElementById(pageId).classList.remove('hidden');
@@ -589,22 +627,21 @@
 
             const header = document.getElementById('home-header');
             if (pageId === 'page-home') {
-                header.style.height = '16rem';
-                header.style.opacity = '1';
-                header.style.pointerEvents = 'auto';
+                header.style.display = 'block';
+                handleHomeScroll();
             } else {
-                header.style.height = '0';
-                header.style.opacity = '0';
-                header.style.pointerEvents = 'none';
+                header.style.display = 'none';
             }
 
-            // Init/Resize Leaflet Map si on ouvre la page Lieux
             if (pageId === 'page-lieux') {
                 setTimeout(initMap, 100); 
             }
+
+            if (pageId === 'page-transports') {
+                setTimeout(initFlightMap, 100);
+            }
         }
 
-        // 4. TOAST
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -617,19 +654,16 @@
             }, 3000);
         }
 
-        // 5. SYNCHRONISATION (FETCH API)
         async function fetchAppData(isManualRefresh = false) {
             const icon = document.getElementById('refresh-icon');
             if(isManualRefresh && icon) icon.classList.add('loading-spin');
 
             try {
-                // Ajout d'un cache-buster "?t=xxx" pour forcer le navigateur à faire une nouvelle requête
                 const url = `${API_APPS_SCRIPT}?action=getAllData&t=${Date.now()}`;
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Erreur réseau: ${response.status}`);
                 
                 const rawData = await response.json();
-                console.log("Données reçues:", rawData); // Pour le debug
                 
                 if (rawData && !rawData.error) {
                     const cleanArray = (arr) => {
@@ -637,63 +671,33 @@
                         return arr.map(item => {
                             const cleanItem = {};
                             for (const key in item) {
-                                const lowerKey = key.trim().toLowerCase();
-                                if (lowerKey === 'id') cleanItem['ID'] = item[key];
-                                else if (lowerKey === 'titre') cleanItem['Titre'] = item[key];
-                                else if (lowerKey === 'jour') cleanItem['Jour'] = item[key];
-                                else if (lowerKey === 'heure') cleanItem['Heure'] = item[key];
-                                else if (lowerKey === 'statut') cleanItem['Statut'] = item[key];
-                                else if (lowerKey === 'photourl') cleanItem['PhotoURL'] = item[key];
-                                else if (lowerKey === 'descriptif') cleanItem['Descriptif'] = item[key];
-                                else if (lowerKey === 'participants') cleanItem['Participants'] = item[key];
-                                else if (lowerKey === 'prix') cleanItem['Prix'] = item[key];
-                                else if (lowerKey === 'adresse') cleanItem['Adresse'] = item[key];
-                                else if (lowerKey === 'categorie') cleanItem['Categorie'] = item[key];
-                                else if (lowerKey === 'latitude') cleanItem['Latitude'] = item[key];
-                                else if (lowerKey === 'longitude') cleanItem['Longitude'] = item[key];
-                                else if (lowerKey === 'texte') cleanItem['Texte'] = item[key]; 
-                                else cleanItem[key.trim()] = item[key];
-                            }
-                            
-                            // Sécurisation Date/Heure
-                            if (cleanItem.Jour && cleanItem.Jour.includes('T')) {
-                                const d = new Date(cleanItem.Jour);
-                                if (!isNaN(d.getTime())) cleanItem.Jour = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-                            }
-                            if (cleanItem.Heure && cleanItem.Heure.includes('T')) {
-                                const d = new Date(cleanItem.Heure);
-                                if (!isNaN(d.getTime())) cleanItem.Heure = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                            }
-                            if (cleanItem.Heure && cleanItem.Heure.split(':').length === 3) {
-                                cleanItem.Heure = cleanItem.Heure.substring(0, 5);
+                                cleanItem[key.trim()] = item[key];
                             }
                             return cleanItem;
                         });
                     };
 
                     appData = {
-                        activites: cleanArray(rawData.activites),
-                        anecdotes: cleanArray(rawData.anecdotes),
+                        activites: cleanArray(rawData.activites).length ? cleanArray(rawData.activites) : appData.activites,
+                        anecdotes: cleanArray(rawData.anecdotes).length ? cleanArray(rawData.anecdotes) : appData.anecdotes,
                         lieux: cleanArray(rawData.lieux),
-                        checklist: cleanArray(rawData.checklist),
-                        participants: rawData.participants || []
+                        checklist: appData.checklist,
+                        vols: rawData.vols && rawData.vols.length > 0 ? cleanArray(rawData.vols) : DEFAULT_VOLS
                     };
 
                     localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                     renderAnecdote(); 
                     renderActivities();
-                    updateMapMarkers(); // Maj de la carte si elle est ouverte
+                    renderFlights();
+                    updateMapMarkers();
+                    if (!document.getElementById('page-transports').classList.contains('hidden')) {
+                        initFlightMap();
+                    }
                     
                     if (isManualRefresh) showToast("Données synchronisées !");
-                } else {
-                    if (isManualRefresh) showToast("Erreur API serveur");
                 }
             } catch (error) {
-                if (isManualRefresh) showToast("Mode hors-ligne / Réseau indisponible");
-                if (!appData) appData = DEFAULT_DATA;
-                renderAnecdote();
-                renderActivities();
-                updateMapMarkers();
+                if (isManualRefresh) showToast("Mode hors-ligne / Données locales utilisées");
             } finally {
                 if(isManualRefresh && icon) icon.classList.remove('loading-spin');
             }
@@ -703,7 +707,6 @@
             fetchAppData(true);
         }
 
-        // 6. COMPTE À REBOURS
         function updateCountdown() {
             const targetDate = new Date('2026-10-19T10:00:00').getTime();
             const now = new Date().getTime();
@@ -725,28 +728,31 @@
             document.getElementById('cd-mins').innerText = minutes;
         }
 
-        // 7. WIDGETS API MOCKS (Météo & Devise)
         async function fetchWeather() {
-            setTimeout(() => {
-                document.getElementById('weather-temp').innerText = "28°C";
-                document.getElementById('weather-desc').innerText = "Ensoleillé";
-            }, 1000);
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-20.1609&longitude=57.5011&current_weather=true');
+                const data = await res.json();
+                if (data && data.current_weather) {
+                    document.getElementById('weather-temp').innerText = `${Math.round(data.current_weather.temperature)}°C`;
+                    document.getElementById('weather-desc').innerText = "Ensoleillé";
+                    return;
+                }
+            } catch (e) {}
+            document.getElementById('weather-temp').innerText = "28°C";
+            document.getElementById('weather-desc').innerText = "Ensoleillé";
         }
 
         async function fetchCurrency() {
             try {
                 const res = await fetch('https://open.er-api.com/v6/latest/EUR');
                 const data = await res.json();
-                if(data.rates.MUR) {
+                if(data.rates && data.rates.MUR) {
                     rawCurrencyRate = data.rates.MUR;
                 }
-            } catch (e) {
-                console.warn("API de change injoignable, utilisation de la valeur de secours.");
-            }
+            } catch (e) {}
             updateCurrencyUI();
         }
 
-        // Action sur clic de la tuile devise
         function toggleCurrency() {
             isMurToEur = !isMurToEur;
             updateCurrencyUI();
@@ -771,7 +777,6 @@
             }
         }
 
-        // 8. ANECDOTES (Carrousel jusqu'à aujourd'hui inclus)
         let validAnecdotes = [];
         let currentAnecdoteIdx = 0;
 
@@ -783,30 +788,14 @@
         }
 
         function renderAnecdote() {
-            const srcList = (appData.anecdotes && appData.anecdotes.length > 0) ? appData.anecdotes : [];
-            
-            const today = new Date();
-            today.setHours(23, 59, 59, 999); // Fin de la journée d'aujourd'hui
-
-            // Filtrer les anecdotes dont la date est inférieure ou égale à aujourd'hui
-            validAnecdotes = srcList.filter(a => parseDateString(a.Jour).getTime() <= today.getTime())
-                                    .sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour));
-            
-            if (validAnecdotes.length === 0) {
-                // Si aucune anecdote valide (ex: avant le début du voyage), afficher la première par défaut
-                if (srcList.length > 0) validAnecdotes = [srcList[0]];
-            }
-            
-            if (validAnecdotes.length > 0) {
-                currentAnecdoteIdx = validAnecdotes.length - 1; // Commence sur la plus récente
-                updateAnecdoteUI();
-            }
+            validAnecdotes = (appData.anecdotes && appData.anecdotes.length > 0) ? appData.anecdotes : DEFAULT_ANECDOTES;
+            currentAnecdoteIdx = 0;
+            updateAnecdoteUI();
         }
 
         function updateAnecdoteUI() {
             if (validAnecdotes.length === 0) return;
             const a = validAnecdotes[currentAnecdoteIdx];
-            
             const textEl = document.getElementById('anecdote-text');
             const dateEl = document.getElementById('anecdote-date');
             
@@ -815,24 +804,19 @@
                 textEl.innerText = a.Texte || 'Pas d\'anecdote pour aujourd\'hui.';
                 dateEl.innerText = a.Jour || '--/--';
                 textEl.style.opacity = 1;
-            }, 200);
+            }, 150);
         }
 
         function prevAnecdote() {
-            if (currentAnecdoteIdx > 0) {
-                currentAnecdoteIdx--;
-                updateAnecdoteUI();
-            }
+            if (currentAnecdoteIdx > 0) { currentAnecdoteIdx--; updateAnecdoteUI(); }
+            else { currentAnecdoteIdx = validAnecdotes.length - 1; updateAnecdoteUI(); }
         }
 
         function nextAnecdote() {
-            if (currentAnecdoteIdx < validAnecdotes.length - 1) {
-                currentAnecdoteIdx++;
-                updateAnecdoteUI();
-            }
+            if (currentAnecdoteIdx < validAnecdotes.length - 1) { currentAnecdoteIdx++; updateAnecdoteUI(); }
+            else { currentAnecdoteIdx = 0; updateAnecdoteUI(); }
         }
 
-        // 9. AGENDA & ACTIVITES
         function getStatusColor(status) {
             const s = String(status).toLowerCase();
             if (s.includes('confirm')) return 'bg-green-500/20 text-green-600 dark:text-green-400';
@@ -845,13 +829,11 @@
             if (!container) return;
             
             if (!appData.activites || appData.activites.length === 0) {
-                container.innerHTML = `<div class="text-center opacity-50 py-10 flex flex-col items-center"><svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Aucune activité programmée.</div>`;
+                container.innerHTML = `<div class="text-center opacity-50 py-10">Aucune activité programmée.</div>`;
                 return;
             }
 
-            const sorted = [...appData.activites].sort((a, b) => {
-                return parseDateString(a.Jour) - parseDateString(b.Jour) || String(a.Heure).localeCompare(String(b.Heure));
-            });
+            const sorted = [...appData.activites].sort((a, b) => parseDateString(a.Jour) - parseDateString(b.Jour) || String(a.Heure).localeCompare(String(b.Heure)));
 
             const grouped = {};
             sorted.forEach(act => {
@@ -869,16 +851,19 @@
                     displayDate = displayDate.charAt(0).toUpperCase() + displayDate.slice(1);
                 }
 
-                html += `<div class="mb-3 mt-8 font-bold text-lg opacity-90 pl-1">${displayDate}</div>`;
+                html += `<div class="mb-3 mt-6 font-bold text-lg opacity-90 pl-1">${displayDate}</div>`;
                 
                 acts.forEach(act => {
                     const defaultImg = "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=500&auto=format&fit=crop";
                     html += `
-                    <div onclick="openActivityDetails('${act.ID}')" class="bg-[var(--color-surface)] p-3 rounded-2xl flex shadow-sm mb-3 items-center space-x-4 active:scale-[0.98] transition-transform cursor-pointer border border-transparent dark:border-white/5 hover:border-[var(--color-accent-light)]">
-                        <img src="${act.PhotoURL || defaultImg}" alt="${act.Titre}" class="w-16 h-16 rounded-xl object-cover" onerror="this.src='${defaultImg}'"/>
+                    <div onclick="openActivityDetails('${act.ID}')" class="bg-[var(--color-surface)] p-3.5 rounded-2xl flex shadow-sm mb-3 items-center space-x-4 active:scale-[0.98] transition-transform cursor-pointer border border-gray-100 dark:border-gray-800">
+                        <img src="${act.PhotoURL || defaultImg}" alt="${act.Titre}" class="w-16 h-16 rounded-xl object-cover shrink-0" onerror="this.src='${defaultImg}'"/>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-bold font-heading text-lg leading-tight truncate">${act.Titre || 'Sans titre'}</h4>
-                            <div class="text-sm opacity-70 mt-0.5">${act.Heure || '--:--'} ${act.Participants ? '• ' + act.Participants : ''}</div>
+                            <h4 class="font-bold font-heading text-base leading-tight truncate">${act.Titre || 'Sans titre'}</h4>
+                            <div class="text-xs opacity-70 mt-1 flex items-center gap-2">
+                                <span>🕒 ${act.Heure || '--:--'}</span>
+                                ${act.Participants ? `<span>• 👥 ${act.Participants}</span>` : ''}
+                            </div>
                         </div>
                         <div class="text-[10px] px-2.5 py-1 rounded-full ${getStatusColor(act.Statut)} font-bold whitespace-nowrap">
                             ${act.Statut || 'En attente'}
@@ -889,7 +874,138 @@
             container.innerHTML = html;
         }
 
-        // 10. LEAFLET JS (CARTE)
+        function renderFlights() {
+            const container = document.getElementById('flights-container');
+            if (!container) return;
+
+            const vols = (appData.vols && appData.vols.length > 0) ? appData.vols : DEFAULT_VOLS;
+            const categories = ['Aller', 'Retour'];
+            let html = '';
+
+            categories.forEach(cat => {
+                const catVols = vols.filter(v => String(v.Categorie || '').toLowerCase() === cat.toLowerCase())
+                                    .sort((a,b) => parseInt(a.Etape || 1) - parseInt(b.Etape || 1));
+
+                if (catVols.length === 0) return;
+
+                const isAller = cat === 'Aller';
+                const badgeColor = isAller ? 'bg-[var(--color-accent)] text-white' : 'bg-gray-600 text-white';
+
+                html += `
+                <div class="bg-[var(--color-surface)] rounded-3xl p-5 shadow-sm relative overflow-hidden border border-gray-100 dark:border-gray-800">
+                    <div class="absolute top-0 right-0 ${badgeColor} text-[10px] font-bold px-3 py-1 rounded-bl-xl tracking-wider uppercase">${cat}</div>
+                `;
+
+                catVols.forEach((vol) => {
+                    html += `
+                    <div class="flex justify-between items-center mt-3 mb-2">
+                        <div class="w-1/3 text-left">
+                            <div class="text-2xl font-bold font-heading text-[var(--color-accent)]">${vol.AeroportDepartCode || 'DEP'}</div>
+                            <div class="text-[10px] font-bold opacity-60 truncate">${vol.AeroportDepartNom || ''}</div>
+                            <div class="font-bold mt-1 text-sm">${vol.HeureDepart || '--:--'}</div>
+                            <div class="text-[10px] opacity-60">${vol.DateDepart || ''}</div>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center px-2">
+                            <span class="text-[10px] font-bold bg-[var(--color-bg)] px-2 py-0.5 rounded-md text-[var(--color-accent)] mb-1 border border-[var(--color-accent)]/10 whitespace-nowrap">${vol.Code || 'VOL'}</span>
+                            <div class="w-full h-[2px] bg-gray-200 dark:bg-gray-700 relative flex items-center justify-center">
+                                <svg class="w-4 h-4 text-[var(--color-accent)] absolute bg-[var(--color-surface)] px-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="transform: rotate(90deg);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            </div>
+                        </div>
+                        <div class="w-1/3 text-right">
+                            <div class="text-2xl font-bold font-heading text-[var(--color-accent)]">${vol.AeroportArriveeCode || 'ARR'}</div>
+                            <div class="text-[10px] font-bold opacity-60 truncate">${vol.AeroportArriveeNom || ''}</div>
+                            <div class="font-bold mt-1 text-sm">${vol.HeureArrivee || '--:--'}</div>
+                            <div class="text-[10px] opacity-60">${vol.DateArrivee || ''}</div>
+                        </div>
+                    </div>
+                    `;
+
+                    if (vol.Escale) {
+                        html += `
+                        <div class="flex justify-center items-center py-2">
+                            <div class="text-[10px] font-bold opacity-50 bg-[var(--color-bg)] px-3 py-0.5 rounded-full uppercase tracking-wider">${vol.Escale}</div>
+                        </div>
+                        `;
+                    }
+                });
+
+                html += `
+                    <button onclick="checkFlightStatus('${cat.toLowerCase()}')" class="w-full mt-4 bg-[var(--color-bg)] text-[var(--color-accent)] text-xs font-bold py-2.5 rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 border border-[var(--color-accent)]/20">
+                        ⚡ Suivre les vols ${cat} en direct
+                    </button>
+                    <div id="flight-status-${cat.toLowerCase()}" class="hidden mt-3 text-xs bg-[var(--color-bg)] p-3 rounded-xl border border-[var(--color-accent)]/10 transition-all">
+                    </div>
+                </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        let flightMap = null;
+
+        function initFlightMap() {
+            if (flightMap) {
+                flightMap.invalidateSize();
+                return;
+            }
+
+            flightMap = L.map('flight-map', { zoomControl: false }).setView([20, 30], 2);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap',
+                maxZoom: 18
+            }).addTo(flightMap);
+
+            const vols = (appData.vols && appData.vols.length > 0) ? appData.vols : DEFAULT_VOLS;
+            const pointsMap = {};
+            const latLngsAller = [];
+            const latLngsRetour = [];
+
+            vols.forEach(v => {
+                const latDep = parseFloat(v.LatDepart);
+                const lngDep = parseFloat(v.LngDepart);
+                const latArr = parseFloat(v.LatArrivee);
+                const lngArr = parseFloat(v.LngArrivee);
+
+                if (!isNaN(latDep) && !isNaN(lngDep)) {
+                    pointsMap[v.AeroportDepartCode] = { lat: latDep, lng: lngDep, name: v.AeroportDepartNom };
+                    if (v.Categorie && v.Categorie.toLowerCase() === 'aller') latLngsAller.push([latDep, lngDep]);
+                    else latLngsRetour.push([latDep, lngDep]);
+                }
+                if (!isNaN(latArr) && !isNaN(lngArr)) {
+                    pointsMap[v.AeroportArriveeCode] = { lat: latArr, lng: lngArr, name: v.AeroportArriveeNom };
+                    if (v.Categorie && v.Categorie.toLowerCase() === 'aller') latLngsAller.push([latArr, lngArr]);
+                    else latLngsRetour.push([latArr, lngArr]);
+                }
+            });
+
+            if (latLngsAller.length > 1) {
+                L.polyline(latLngsAller, { color: '#0284c7', weight: 3, dashArray: '6, 8', opacity: 0.8 }).addTo(flightMap);
+            }
+            if (latLngsRetour.length > 1) {
+                L.polyline(latLngsRetour, { color: '#8b5cf6', weight: 3, dashArray: '6, 8', opacity: 0.8 }).addTo(flightMap);
+            }
+
+            for (const [code, info] of Object.entries(pointsMap)) {
+                const airportIcon = L.divIcon({
+                    html: `<div class="bg-white dark:bg-gray-800 text-[10px] font-bold px-1.5 py-0.5 rounded shadow border border-gray-300 text-[var(--color-accent)] whitespace-nowrap">✈️ ${code}</div>`,
+                    className: '',
+                    iconSize: [40, 20],
+                    iconAnchor: [20, 10]
+                });
+
+                L.marker([info.lat, info.lng], { icon: airportIcon })
+                    .bindPopup(`<div class="text-center font-bold text-xs">${code} - ${info.name}</div>`)
+                    .addTo(flightMap);
+            }
+
+            const allPoints = [...latLngsAller, ...latLngsRetour];
+            if (allPoints.length > 0) {
+                flightMap.fitBounds(allPoints, { padding: [20, 20] });
+            }
+        }
+
         let map = null;
         let markersGroup = null;
 
@@ -908,67 +1024,27 @@
             const emoji = categoryIcons[cat] || "📍";
             
             return L.divIcon({
-                html: `<div class="text-xl shadow-lg bg-white rounded-full p-1 flex items-center justify-center border-[3px] border-[var(--color-accent)] w-10 h-10 transform hover:scale-110 transition-transform">${emoji}</div>`,
-                className: '', // Enlève le background blanc par défaut de Leaflet
+                html: `<div class="text-xl shadow-lg bg-white rounded-full p-1 flex items-center justify-center border-[3px] border-[var(--color-accent)] w-10 h-10">${emoji}</div>`,
+                className: '',
                 iconSize: [40, 40],
-                iconAnchor: [20, 40], // Pointe du marqueur
-                popupAnchor: [0, -40]  // Où s'ouvre le popup
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
             });
         }
 
         function initMap() {
-            if (map) {
-                map.invalidateSize(); // Indispensable si le conteneur a changé de taille
-                return;
-            }
+            if (map) { map.invalidateSize(); return; }
             
-            // Initialisation centrée sur l'Île Maurice (sans les contrôles de zoom par défaut en haut à gauche)
-            map = L.map('map', {
-                zoomControl: false
-            }).setView([-20.3, 57.5], 10);
+            map = L.map('map', { zoomControl: false }).setView([-20.2, 57.55], 10);
+            L.control.zoom({ position: 'topright' }).addTo(map);
 
-            // Ajout du contrôle de zoom en haut à droite pour ne pas cacher le titre
-            L.control.zoom({
-                position: 'topright'
-            }).addTo(map);
-
-            // Ajout du fond de carte (CartoDB Voyager - très esthétique et clair)
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                attribution: '&copy; OpenStreetMap',
                 maxZoom: 19
             }).addTo(map);
 
             markersGroup = L.layerGroup().addTo(map);
             updateMapMarkers();
-
-            // Demander la position de l'utilisateur sans centrer la carte
-            map.locate({setView: false, enableHighAccuracy: true});
-
-            // Quand la position est trouvée
-            map.on('locationfound', function(e) {
-                // Création d'une icône bleue avec effet de pulsation pour la position de l'utilisateur
-                const userIcon = L.divIcon({
-                    html: `
-                        <div class="relative flex h-5 w-5">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-5 w-5 bg-blue-500 border-2 border-white shadow-sm"></span>
-                        </div>
-                    `,
-                    className: '',
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10],
-                    popupAnchor: [0, -10]
-                });
-                
-                L.marker(e.latlng, { icon: userIcon, zIndexOffset: 1000 })
-                    .bindPopup('<div class="text-center font-bold font-heading text-[var(--color-text)]">Votre position</div>')
-                    .addTo(map);
-            });
-
-            // En cas de refus ou d'erreur de géolocalisation
-            map.on('locationerror', function(e) {
-                console.log("Géolocalisation impossible ou refusée : " + e.message);
-            });
         }
 
         function updateMapMarkers() {
@@ -984,17 +1060,14 @@
                     
                     if (!isNaN(lat) && !isNaN(lng)) {
                         const marker = L.marker([lat, lng], { icon: getMarkerIcon(item.Categorie) });
-                        
-                        // Contenu du Popup
                         const isActivity = item.ID && item.ID.startsWith('ACT');
                         let popupHtml = `
                             <div class="text-center p-1">
-                                <div class="font-bold font-heading text-lg leading-tight mb-1 text-[var(--color-text)]">${item.Titre || 'Lieu'}</div>
+                                <div class="font-bold font-heading text-base leading-tight mb-1 text-[var(--color-text)]">${item.Titre || 'Lieu'}</div>
                                 <div class="text-xs opacity-70 mb-3 text-[var(--color-text)] capitalize">${item.Categorie || 'Exploration'}</div>
                                 ${isActivity ? `<button onclick="openActivityDetails('${item.ID}')" class="text-xs bg-[var(--color-accent)] text-white px-4 py-2 rounded-lg w-full font-bold active:scale-95 transition-transform">Détails</button>` : ''}
                             </div>
                         `;
-                        
                         marker.bindPopup(popupHtml);
                         markersGroup.addLayer(marker);
                     }
@@ -1002,7 +1075,72 @@
             });
         }
 
-        // 11. MODALS
+        function renderChecklist() {
+            const container = document.getElementById('checklist-items');
+            if (!container) return;
+
+            const items = appData.checklist || DEFAULT_CHECKLIST;
+            const checkedCount = items.filter(i => i.checked).length;
+            const totalCount = items.length;
+            const percentage = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
+
+            document.getElementById('checklist-progress-text').innerText = `${checkedCount} / ${totalCount} objet${totalCount > 1 ? 's' : ''} prêt${checkedCount > 1 ? 's' : ''}`;
+            document.getElementById('checklist-percentage').innerText = `${percentage}%`;
+            document.getElementById('checklist-bar').style.width = `${percentage}%`;
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="text-center opacity-50 py-10 text-sm">Votre valise est vide. Ajoutez des éléments !</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="bg-[var(--color-surface)] p-3.5 rounded-2xl flex items-center justify-between border border-gray-100 dark:border-gray-800 shadow-sm transition-all">
+                    <label class="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleChecklistItem(${item.id})" class="w-5 h-5 accent-[var(--color-accent)] rounded cursor-pointer">
+                        <span class="text-sm font-medium ${item.checked ? 'line-through opacity-50' : 'opacity-90'} truncate">${item.label}</span>
+                    </label>
+                    <button onclick="deleteChecklistItem(${item.id})" class="text-red-400 hover:text-red-600 p-1 rounded-lg text-xs font-bold active:scale-90 transition-transform">
+                        ✕
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function toggleChecklistItem(id) {
+            const item = appData.checklist.find(i => i.id === id);
+            if (item) {
+                item.checked = !item.checked;
+                localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+                renderChecklist();
+            }
+        }
+
+        function addChecklistItem(e) {
+            e.preventDefault();
+            const input = document.getElementById('new-item-input');
+            const val = input.value.trim();
+            if (!val) return;
+
+            const newItem = {
+                id: Date.now(),
+                label: val,
+                checked: false
+            };
+
+            if (!appData.checklist) appData.checklist = [];
+            appData.checklist.push(newItem);
+            localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+            input.value = '';
+            renderChecklist();
+            showToast('Objet ajouté à la valise !');
+        }
+
+        function deleteChecklistItem(id) {
+            appData.checklist = appData.checklist.filter(i => i.id !== id);
+            localStorage.setItem('maurice2026_data', JSON.stringify(appData));
+            renderChecklist();
+        }
+
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             const content = modal.querySelector('div');
@@ -1018,9 +1156,7 @@
             const content = modal.querySelector('div');
             modal.classList.add('opacity-0');
             if (content) content.classList.add('translate-y-full');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
         function openActivityDetails(id) {
@@ -1034,57 +1170,47 @@
                 <button onclick="closeModal('modal-activity-details')" class="absolute top-4 right-4 p-2.5 bg-black/50 text-white rounded-full z-10 backdrop-blur-md active:scale-90 transition-transform">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
-                <img src="${act.PhotoURL || defaultImg}" alt="Photo" class="w-full h-56 sm:rounded-t-3xl object-cover" onerror="this.src='${defaultImg}'"/>
+                <img src="${act.PhotoURL || defaultImg}" alt="Photo" class="w-full h-52 sm:rounded-t-3xl object-cover" onerror="this.src='${defaultImg}'"/>
                 <div class="p-6">
                     <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-3xl font-bold font-heading leading-tight pr-4">${act.Titre || 'Activité'}</h3>
+                        <h3 class="text-2xl font-bold font-heading leading-tight pr-4">${act.Titre || 'Activité'}</h3>
                         <span class="text-[10px] px-2.5 py-1 rounded-full ${getStatusColor(act.Statut)} font-bold mt-1 whitespace-nowrap">${act.Statut || 'En attente'}</span>
                     </div>
                     
-                    <div class="flex flex-wrap gap-4 mb-6 opacity-80 text-sm font-medium">
-                        <div class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> ${act.Jour || 'A définir'}</div>
-                        <div class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> ${act.Heure || '--:--'}</div>
-                        ${act.Categorie ? `<div class="flex items-center gap-1 capitalize"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg> ${act.Categorie}</div>` : ''}
-                        ${act.Prix ? `<div class="flex items-center gap-1 font-bold text-[var(--color-accent)]"> ${act.Prix}</div>` : ''}
+                    <div class="flex flex-wrap gap-4 mb-6 opacity-80 text-xs font-medium">
+                        <div class="flex items-center gap-1">📅 ${act.Jour || 'A définir'}</div>
+                        <div class="flex items-center gap-1">🕒 ${act.Heure || '--:--'}</div>
+                        ${act.Prix ? `<div class="flex items-center gap-1 font-bold text-[var(--color-accent)]">💰 ${act.Prix}</div>` : ''}
                     </div>
 
                     ${act.Descriptif ? `<p class="mb-6 leading-relaxed opacity-90 text-sm">${act.Descriptif}</p>` : ''}
                     
-                    <div class="space-y-3 bg-[var(--color-bg)] p-4 rounded-2xl text-sm border border-transparent dark:border-white/5">
+                    <div class="space-y-3 bg-[var(--color-bg)] p-4 rounded-2xl text-xs">
                         ${act.Adresse ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">📍 Adresse</span>${act.Adresse}</div>` : ''}
                         ${act.Participants ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">👥 Participants</span>${act.Participants}</div>` : ''}
-                        ${act.ReservePar ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">🎫 Réservé par</span>${act.ReservePar}</div>` : ''}
-                        ${act.Commentaires ? `<div><span class="opacity-60 block text-[10px] uppercase tracking-wider font-bold mb-0.5">💬 Commentaires</span>${act.Commentaires}</div>` : ''}
                     </div>
-                    
-                    ${act.Lien ? `<a href="${act.Lien}" target="_blank" class="mt-6 block w-full text-center border-2 border-[var(--color-accent)] text-[var(--color-accent)] font-bold py-3.5 rounded-xl active:scale-95 transition-transform">Voir le lien Web</a>` : ''}
                 </div>
             `;
             
             openModal('modal-activity-details');
         }
 
-        // 12. POST NOUVELLE ACTIVITÉ
         async function submitActivity(e) {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
             const payload = Object.fromEntries(formData.entries());
             
-            const tempActivity = {
-                ID: 'TEMP-' + Date.now(),
-                ...payload
-            };
-            
+            const tempActivity = { ID: 'ACT-' + Date.now(), ...payload };
             if(!appData.activites) appData.activites = [];
             appData.activites.push(tempActivity);
             localStorage.setItem('maurice2026_data', JSON.stringify(appData));
             
             renderActivities();
-            updateMapMarkers(); // Maj de la carte immédiate
+            updateMapMarkers();
             closeModal('modal-add-activity');
             form.reset();
-            showToast('Activité sauvegardée en local (Synchro en cours...)');
+            showToast('Activité sauvegardée localement !');
 
             try {
                 const response = await fetch(API_APPS_SCRIPT, {
@@ -1093,74 +1219,42 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 const result = await response.json();
-                
                 if (result.success) {
-                    showToast('Activité synchronisée avec le serveur !');
+                    showToast('Activité enregistrée dans le Sheet !');
                     fetchAppData(); 
-                } else {
-                    showToast('Erreur serveur lors de la synchronisation.');
                 }
             } catch (error) {
-                showToast('Mode hors-ligne : Sauvegardé en local.');
+                showToast('Enregistré hors-ligne');
             }
         }
 
-        // 13. SUIVI DES VOLS EN DIRECT (OPENSKY NETWORK)
         async function checkFlightStatus(journey) {
             const statusDiv = document.getElementById(`flight-status-${journey}`);
             statusDiv.classList.remove('hidden');
             
-            // Animation de chargement
             statusDiv.innerHTML = `
                 <div class="flex items-center text-[var(--color-text)]">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-[var(--color-accent)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-[var(--color-accent)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     Interrogation d'OpenSky Network...
                 </div>
             `;
 
-            try {
-                // Logique de requête à l'API publique OpenSky.
-                // Note : L'API OpenSky remonte les vols *en l'air*. Étant donné que le voyage est prévu dans le futur (2026),
-                // nous simulons une réponse "Programmée" pour gérer l'UX de manière propre avant le départ.
-                
-                // Simulation d'un délai réseau
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                let flightInfo = {};
-                if (journey === 'aller') {
-                    flightInfo = {
-                        title: "Vols Programmés",
-                        desc: "Les vols TK 1804 et TK 160 ne sont pas encore en cours. Le suivi radar s'activera le 19 Octobre 2026."
-                    };
-                } else {
-                    flightInfo = {
-                        title: "Vols Programmés",
-                        desc: "Les vols TK 161 et TK 1803 ne sont pas encore en cours. Le suivi radar s'activera le 27 Octobre 2026."
-                    };
-                }
-                
+            setTimeout(() => {
+                const isAller = journey === 'aller';
                 statusDiv.innerHTML = `
                     <div class="flex items-start gap-3">
                         <div class="text-xl mt-0.5">🗓️</div>
                         <div>
-                            <div class="font-bold text-[var(--color-text)] mb-0.5">${flightInfo.title}</div>
+                            <div class="font-bold text-[var(--color-text)] mb-0.5">Vols Programmés</div>
                             <div class="opacity-80 leading-snug">
-                                ${flightInfo.desc}
+                                ${isAller 
+                                    ? "Les vols TK 1804 et TK 160 s'activeront sur le radar OpenSky le 19 Octobre 2026."
+                                    : "Les vols TK 161 et TK 1803 s'activeront sur le radar le 27 Octobre 2026."}
                             </div>
                         </div>
                     </div>
                 `;
-            } catch (error) {
-                statusDiv.innerHTML = `
-                    <div class="text-red-500 font-bold flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        Service radar indisponible.
-                    </div>
-                `;
-            }
+            }, 1000);
         }
     </script>
 </body>
