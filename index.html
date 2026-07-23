@@ -539,6 +539,7 @@
             renderActivities();
             renderFlights();
             renderUrgences();
+            renderTransportsLocaux();
             renderChecklist();
 
             initPullToRefresh();
@@ -725,6 +726,7 @@
                         lieux: cleanArray(rawData.lieux),
                         checklist: cleanArray(rawData.checklist).length ? cleanArray(rawData.checklist) : appData.checklist,
                         vols: rawData.vols && rawData.vols.length > 0 ? cleanArray(rawData.vols) : DEFAULT_VOLS,
+                        transportsLocaux: rawData.transportsLocaux && rawData.transportsLocaux.length > 0 ? cleanArray(rawData.transportsLocaux) : DEFAULT_TRANSPORTS_LOCAUX,
                         urgences: rawData.urgences && rawData.urgences.length > 0 ? cleanArray(rawData.urgences) : DEFAULT_URGENCES
                     };
 
@@ -733,6 +735,7 @@
                     renderActivities();
                     renderFlights();
                     renderUrgences();
+                    renderTransportsLocaux();
                     renderChecklist();
                     updateMapMarkers();
                     
@@ -945,6 +948,35 @@
                         </div>
                         <div>
                             <div class="font-bold text-sm text-[var(--color-text)]">${u.Nom || 'Urgence'}</div>
+                            <div class="text-xs opacity-60">${u.Numero || ''}</div>
+                        </div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>`;
+            });
+
+            container.innerHTML = html;
+        }
+        
+        function renderTransportsLocaux() {
+            const container = document.getElementById('transports-locaux-container');
+            if (!container) return;
+
+            const transportsLocaux = (appData.transportsLocaux && appData.transportsLocaux.length > 0) ? appData.transportsLocaux : DEFAULT_TRANSPORTS_LOCAUX;
+
+            let html = '';
+            transportsLocaux.forEach(u => {
+                const { classes: colorClass, style: colorStyle } = getEmergencyIconStyle(u);
+                const telClean = String(u.Numero || '').replace(/[^0-9+]/g, '');
+
+                html += `
+                <a href="tel:${telClean}" class="flex items-center justify-between p-2 rounded-xl active:bg-[var(--color-bg)] transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-full ${colorClass} flex items-center justify-center font-bold text-lg" style="${colorStyle}">
+                            ${u.Icone || '📞'}
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm text-[var(--color-text)]">${u.Nom || 'Transports locaux'}</div>
                             <div class="text-xs opacity-60">${u.Numero || ''}</div>
                         </div>
                     </div>
