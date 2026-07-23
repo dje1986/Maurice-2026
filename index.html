@@ -4,7 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Maurice 2026 - PWA</title>
-    
+
+    <!-- PWA : manifest, icônes, thème -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0A1128" id="meta-theme-color">
+    <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Maurice">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -508,12 +518,29 @@
             document.documentElement.classList.toggle('dark');
             const isDark = document.documentElement.classList.contains('dark');
             localStorage.setItem('maurice2026_theme', isDark ? 'dark' : 'light');
+            updateMetaThemeColor(isDark);
+        }
+
+        function updateMetaThemeColor(isDark) {
+            const meta = document.getElementById('meta-theme-color');
+            if (meta) meta.setAttribute('content', isDark ? '#004D40' : '#0A1128');
+        }
+
+        // Enregistrement du Service Worker pour le mode hors ligne
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('[PWA] Service Worker enregistré :', reg.scope))
+                    .catch(err => console.warn('[PWA] Échec enregistrement Service Worker :', err));
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('maurice2026_theme') === 'dark') {
+            const isDarkStored = localStorage.getItem('maurice2026_theme') === 'dark';
+            if (isDarkStored) {
                 document.documentElement.classList.add('dark');
             }
+            updateMetaThemeColor(isDarkStored);
 
             updateCountdown();
             setInterval(updateCountdown, 60000);
