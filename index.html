@@ -491,14 +491,14 @@
             checklist: DEFAULT_CHECKLIST,
             vols: DEFAULT_VOLS,
             urgences: DEFAULT_URGENCES,
-            transportsLocaux: DEFAULT_TRANSPORTS_LOCAUX
+            transports: DEFAULT_TRANSPORTS_LOCAUX
         };
 
         if (!appData.vols || appData.vols.length === 0) appData.vols = DEFAULT_VOLS;
         if (!appData.checklist || appData.checklist.length === 0) appData.checklist = DEFAULT_CHECKLIST;
         if (!appData.anecdotes || appData.anecdotes.length === 0) appData.anecdotes = DEFAULT_ANECDOTES;
         if (!appData.urgences || appData.urgences.length === 0) appData.urgences = DEFAULT_URGENCES;
-        if (!appData.transportsLocaux || appData.transportsLocaux.length === 0) appData.transportsLocaux = DEFAULT_TRANSPORTS_LOCAUX;
+        if (!appData.transports || appData.transports.length === 0) appData.transports = DEFAULT_TRANSPORTS_LOCAUX;
 
         let rawCurrencyRate = 50.5;
         let isMurToEur = false;
@@ -539,7 +539,7 @@
             renderActivities();
             renderFlights();
             renderUrgences();
-            renderTransportsLocaux();
+            renderTransports();
             renderChecklist();
 
             initPullToRefresh();
@@ -726,7 +726,7 @@
                         lieux: cleanArray(rawData.lieux),
                         checklist: cleanArray(rawData.checklist).length ? cleanArray(rawData.checklist) : appData.checklist,
                         vols: rawData.vols && rawData.vols.length > 0 ? cleanArray(rawData.vols) : DEFAULT_VOLS,
-                        transportsLocaux: rawData.transportsLocaux && rawData.transportsLocaux.length > 0 ? cleanArray(rawData.transportsLocaux) : DEFAULT_TRANSPORTS_LOCAUX,
+                        transports: rawData.transports && rawData.transports.length > 0 ? cleanArray(rawData.transports) : DEFAULT_TRANSPORTS_LOCAUX,
                         urgences: rawData.urgences && rawData.urgences.length > 0 ? cleanArray(rawData.urgences) : DEFAULT_URGENCES
                     };
 
@@ -735,7 +735,7 @@
                     renderActivities();
                     renderFlights();
                     renderUrgences();
-                    renderTransportsLocaux();
+                    renderTransports();
                     renderChecklist();
                     updateMapMarkers();
                     
@@ -958,14 +958,14 @@
             container.innerHTML = html;
         }
         
-        function renderTransportsLocaux() {
+        function renderTransports() {
             const container = document.getElementById('transports-locaux-container');
             if (!container) return;
 
-            const transportsLocaux = (appData.transportsLocaux && appData.transportsLocaux.length > 0) ? appData.transportsLocaux : DEFAULT_TRANSPORTS_LOCAUX;
+            const transports = (appData.transports && appData.transports.length > 0) ? appData.transports : DEFAULT_TRANSPORTS_LOCAUX;
 
             let html = '';
-            transportsLocaux.forEach(u => {
+            transports.forEach(u => {
                 const { classes: colorClass, style: colorStyle } = getEmergencyIconStyle(u);
                 const telClean = String(u.Numero || '').replace(/[^0-9+]/g, '');
 
