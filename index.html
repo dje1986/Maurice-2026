@@ -143,7 +143,7 @@
                 <!-- Widgets Météo & Devise -->
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <!-- Météo Port-Louis -->
-                    <div class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between border border-gray-100 dark:border-gray-800">
+                    <div onclick="openWeatherDetails()" class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition-transform select-none border border-gray-100 dark:border-gray-800">
                         <div class="flex items-start justify-between mb-2">
                             <span class="text-xs font-bold opacity-70">Port-Louis</span>
                             <span id="weather-icon" class="text-xl">☀️</span>
@@ -209,7 +209,7 @@
                     </button>
                 </div>
 
-                <div id="activities-container" class="space-y-4 pb-12">
+                <div id="activities-container" class="space-y-4 pb-24">
                     <!-- Activités dynamiques -->
                 </div>
             </div>
@@ -312,6 +312,48 @@
             </div>
         </div>
 
+        <!-- MODAL : MÉTÉO DÉTAILLÉE (WINDY) -->
+        <div id="modal-weather-details" class="fixed inset-0 z-[65] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
+            <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg h-[85vh] sm:h-[80vh] overflow-hidden rounded-t-3xl sm:rounded-3xl relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl flex flex-col">
+                <div class="flex items-center justify-between p-5 pb-3 shrink-0">
+                    <div>
+                        <h3 class="text-lg font-bold font-heading">Météo — Port-Louis</h3>
+                        <p class="text-xs opacity-60 mt-0.5">Prévisions détaillées (Windy.com)</p>
+                    </div>
+                    <button onclick="closeModal('modal-weather-details')" class="h-9 w-9 shrink-0 rounded-full bg-[var(--color-bg)] flex items-center justify-center active:scale-90 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="flex-1 min-h-0">
+                    <iframe id="windy-iframe" title="Prévisions météo Windy - Île Maurice" src="" width="100%" height="100%" frameborder="0" class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL : INSTALLER L'APPLICATION (iOS / Android) -->
+        <div id="modal-install-pwa" class="fixed inset-0 z-[90] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300 px-4">
+            <div class="bg-[var(--color-surface)] w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-6 relative shadow-2xl translate-y-full sm:translate-y-0 transition-transform duration-300 text-center space-y-4">
+                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[#004E7C] text-white mx-auto flex items-center justify-center text-2xl shadow-md">📲</div>
+                <h3 class="text-lg font-bold font-heading">Installer Maurice 2026</h3>
+                <p class="text-xs opacity-70 leading-relaxed">Ajoutez l'app à votre écran d'accueil pour un accès rapide, même hors ligne.</p>
+
+                <div id="install-instructions-ios" class="hidden text-left bg-[var(--color-bg)] rounded-2xl p-4 text-xs space-y-2 leading-relaxed">
+                    <p>1. Appuyez sur l'icône <strong>Partager</strong> ⬆️ en bas de Safari.</p>
+                    <p>2. Faites défiler et choisissez <strong>« Sur l'écran d'accueil »</strong>.</p>
+                    <p>3. Appuyez sur <strong>« Ajouter »</strong> en haut à droite.</p>
+                </div>
+
+                <div id="install-instructions-android" class="hidden text-left bg-[var(--color-bg)] rounded-2xl p-4 text-xs space-y-2 leading-relaxed">
+                    <p>1. Appuyez sur le menu <strong>⋮</strong> en haut à droite de Chrome.</p>
+                    <p>2. Choisissez <strong>« Installer l'application »</strong> (ou <strong>« Ajouter à l'écran d'accueil »</strong>).</p>
+                    <p>3. Confirmez en appuyant sur <strong>« Installer »</strong>.</p>
+                    <button id="btn-install-native" onclick="installNativePWA()" class="hidden w-full bg-[var(--color-accent)] text-white font-bold py-2.5 rounded-xl text-xs mt-3 active:scale-95 transition-transform">📲 Installer directement</button>
+                </div>
+
+                <button onclick="dismissInstallPrompt()" class="w-full bg-[var(--color-accent)] text-white font-bold py-3 rounded-2xl text-sm shadow-md active:scale-95 transition-transform">J'ai compris</button>
+            </div>
+        </div>
+
         <!-- MODAL : AJOUTER UNE ACTIVITÉ -->
         <div id="modal-add-activity" class="fixed inset-0 z-[60] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300">
             <div class="bg-[var(--color-surface)] w-full sm:w-11/12 max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 relative translate-y-full sm:translate-y-0 transition-transform duration-300 shadow-2xl">
@@ -375,6 +417,7 @@
                         <div class="col-span-2">
                             <label class="block text-sm font-semibold mb-1 opacity-80">Statut</label>
                             <select name="Statut" class="w-full bg-[var(--color-bg)] rounded-xl p-3 outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all text-sm">
+                                <option value="Idée">Idée</option>
                                 <option value="En attente">En attente</option>
                                 <option value="Confirmé">Confirmé</option>
                                 <option value="Annulé">Annulé</option>
@@ -390,7 +433,7 @@
 
         <!-- NAVIGATION BAR -->
         <nav class="absolute bottom-0 w-full max-w-md bg-[var(--color-surface)] border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 px-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-50">
-            <ul class="flex justify-between items-center h-16">
+            <ul class="flex justify-between items-center h-16 -translate-y-1">
                 <li class="flex-1 flex justify-center">
                     <button onclick="switchTab('page-home', this)" class="nav-btn flex flex-col items-center gap-1 opacity-100 text-[var(--color-accent)]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -514,7 +557,7 @@
 
         function updateMetaThemeColor(isDark) {
             const meta = document.getElementById('meta-theme-color');
-            if (meta) meta.setAttribute('content', isDark ? '#004D40' : '#0A1128');
+            if (meta) meta.setAttribute('content', isDark ? '#0369A1' : '#0A1128');
         }
 
         // Enregistrement du Service Worker pour le mode hors ligne
@@ -523,6 +566,60 @@
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => console.log('[PWA] Service Worker enregistré :', reg.scope))
                     .catch(err => console.warn('[PWA] Échec enregistrement Service Worker :', err));
+            });
+        }
+
+        // --- Popup "Installer l'application" (1ère visite, iOS / Android) ---
+        let deferredInstallPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            const btn = document.getElementById('btn-install-native');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        function detectPlatform() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+            const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            const isAndroid = /android/i.test(ua);
+            if (isIOS) return 'ios';
+            if (isAndroid) return 'android';
+            return 'other';
+        }
+
+        function isRunningStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+
+        function maybeShowInstallPrompt() {
+            if (localStorage.getItem('maurice2026_pwa_prompt_seen')) return;
+
+            if (isRunningStandalone()) {
+                localStorage.setItem('maurice2026_pwa_prompt_seen', '1');
+                return;
+            }
+
+            const platform = detectPlatform();
+            if (platform === 'other') return; // Pas nécessaire sur ordinateur
+
+            document.getElementById('install-instructions-ios').classList.toggle('hidden', platform !== 'ios');
+            document.getElementById('install-instructions-android').classList.toggle('hidden', platform !== 'android');
+
+            openModal('modal-install-pwa');
+        }
+
+        function dismissInstallPrompt() {
+            localStorage.setItem('maurice2026_pwa_prompt_seen', '1');
+            closeModal('modal-install-pwa');
+        }
+
+        function installNativePWA() {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            deferredInstallPrompt.userChoice.finally(() => {
+                deferredInstallPrompt = null;
+                dismissInstallPrompt();
             });
         }
 
@@ -546,6 +643,8 @@
 
             initPullToRefresh();
             fetchAppData();
+
+            setTimeout(maybeShowInstallPrompt, 1200);
 
             const mainContent = document.getElementById('main-content');
             mainContent.addEventListener('scroll', handleHomeScroll);
@@ -732,6 +831,16 @@
                         urgences: rawData.urgences && rawData.urgences.length > 0 ? cleanArray(rawData.urgences) : DEFAULT_URGENCES
                     };
 
+                    if (rawData.categories && rawData.categories.length > 0) {
+                        const mergedIcons = { ...DEFAULT_CATEGORY_ICONS };
+                        cleanArray(rawData.categories).forEach(c => {
+                            const key = String(c.Categorie || '').toLowerCase().trim();
+                            if (key && c.Icone) mergedIcons[key] = c.Icone;
+                        });
+                        categoryIconsMap = mergedIcons;
+                        localStorage.setItem('maurice2026_category_icons', JSON.stringify(categoryIconsMap));
+                    }
+
                     localStorage.setItem('maurice2026_data', JSON.stringify(appData));
                     renderAnecdote(); 
                     renderActivities();
@@ -799,6 +908,17 @@
             } catch (e) {}
             document.getElementById('weather-temp').innerText = "28°C";
             document.getElementById('weather-desc').innerText = "Ensoleillé";
+        }
+
+        function openWeatherDetails() {
+            // Chargement paresseux de l'iframe Windy (uniquement à l'ouverture, pour ne pas
+            // alourdir le chargement initial de la page d'accueil).
+            const iframe = document.getElementById('windy-iframe');
+            if (iframe && !iframe.src) {
+                const lat = -20.1609, lon = 57.5011;
+                iframe.src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&zoom=8&level=surface&overlay=rain&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1`;
+            }
+            openModal('modal-weather-details');
         }
 
         async function fetchCurrency() {
@@ -993,6 +1113,7 @@
             const s = String(status).toLowerCase();
             if (s.includes('confirm')) return 'bg-green-500/20 text-green-600 dark:text-green-400';
             if (s.includes('annul')) return 'bg-red-500/20 text-red-600 dark:text-red-400';
+            if (s.includes('idée') || s.includes('idee')) return 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400';
             return 'bg-orange-500/20 text-orange-600 dark:text-orange-400';
         }
 
@@ -1181,7 +1302,9 @@
         let map = null;
         let markersGroup = null;
 
-        const categoryIcons = {
+        // Repli utilisé tant que l'onglet "Categories" du Sheet n'a pas encore été chargé
+        // (ou si une catégorie n'y est pas définie).
+        const DEFAULT_CATEGORY_ICONS = {
             "excursion en mer": "🚤",
             "voyage en voiture": "🚗",
             "spectacle": "🎭",
@@ -1193,9 +1316,14 @@
             "hotel": "🏠"
         };
 
+        // Carte catégorie -> emoji réellement utilisée par l'app, alimentée par l'onglet
+        // "Categories" du Google Sheet (colonnes: Categorie, Icone), avec repli sur les
+        // valeurs par défaut et mise en cache locale pour le mode hors ligne.
+        let categoryIconsMap = JSON.parse(localStorage.getItem('maurice2026_category_icons')) || { ...DEFAULT_CATEGORY_ICONS };
+
         function getMarkerIcon(categorie) {
             const cat = categorie ? String(categorie).toLowerCase().trim() : "";
-            const emoji = categoryIcons[cat] || "📍";
+            const emoji = categoryIconsMap[cat] || DEFAULT_CATEGORY_ICONS[cat] || "📍";
             
             return L.divIcon({
                 html: `<div class="text-xl shadow-lg bg-white rounded-full p-1 flex items-center justify-center border-[3px] border-[var(--color-accent)] w-10 h-10">${emoji}</div>`,
