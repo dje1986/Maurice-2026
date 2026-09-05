@@ -2,7 +2,7 @@
 // Gère le mode hors ligne : coquille applicative (HTML/CSS/JS/polices/icônes)
 // + dernières données connues de l'API Google Apps Script.
 
-const CACHE_VERSION = 'v12';
+const CACHE_VERSION = 'v14';
 const STATIC_CACHE = `maurice2026-static-${CACHE_VERSION}`;
 const DATA_CACHE = `maurice2026-data-${CACHE_VERSION}`;
 
@@ -29,6 +29,12 @@ const EXTERNAL_ASSETS = [
 
 // Hôte de l'API Google Apps Script (lecture des données du voyage)
 const API_HOST = 'script.google.com';
+
+// APIs de données "live" (météo, taux de change) : jamais mises en cache par le
+// Service Worker, sinon la première valeur récupérée resterait figée pour toujours
+// (ces requêtes n'ont pas de paramètre anti-cache, donc "cacheFirst" les servirait
+// indéfiniment depuis le cache sans jamais retourner sur le réseau).
+const LIVE_DATA_HOSTS = ['api.open-meteo.com', 'open.er-api.com'];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -75,6 +81,11 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+
+  // Météo / taux de change : toujours en direct, jamais servi depuis le cache
+  if (LIVE_DATA_HOSTS.includes(url.hostname)) {
+    return; // laisse le navigateur gérer la requête normalement (réseau direct)
+  }
 
   // Données du voyage (Google Apps Script) : réseau prioritaire, cache de secours hors-ligne
   if (url.hostname === API_HOST) {
