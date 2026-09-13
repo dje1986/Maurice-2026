@@ -154,7 +154,7 @@
                         </div>
                     </div>
                     <!-- Taux de Change -->
-                    <div onclick="toggleCurrency()" class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition-transform select-none border border-gray-100 dark:border-gray-800">
+                    <div onclick="openCurrencyConverter()" class="bg-[var(--color-surface)] p-4 rounded-3xl shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition-transform select-none border border-gray-100 dark:border-gray-800">
                         <div class="flex items-start justify-between mb-2">
                             <span class="text-xs font-bold opacity-70" id="currency-title">Taux EUR/MUR</span>
                             <span class="text-xl">💰</span>
@@ -352,6 +352,30 @@
                 </div>
                 <div class="flex-1 min-h-0">
                     <iframe id="windy-iframe" title="Prévisions météo Windy - Île Maurice" width="100%" height="100%" frameborder="0" class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL : CONVERTISSEUR EUR / MUR -->
+        <div id="modal-currency-converter" class="fixed inset-0 z-[65] hidden bg-black/60 backdrop-blur-sm flex justify-center items-end sm:items-center opacity-0 transition-opacity duration-300 px-4">
+            <div class="bg-[var(--color-surface)] w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-6 relative shadow-2xl translate-y-full sm:translate-y-0 transition-transform duration-300">
+                <button onclick="closeModal('modal-currency-converter')" class="absolute top-4 right-4 h-9 w-9 rounded-full bg-[var(--color-bg)] flex items-center justify-center active:scale-90 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <h3 class="text-lg font-bold font-heading mb-1">Convertisseur EUR / MUR</h3>
+                <p id="currency-converter-rate-label" class="text-xs opacity-60 mb-5">1 € = -- Rs</p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold opacity-70 mb-1">Euros (€)</label>
+                        <input type="number" inputmode="decimal" id="converter-eur-input" oninput="handleConverterInput('eur')" placeholder="0" class="w-full bg-[var(--color-bg)] rounded-2xl p-3.5 text-xl font-bold outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                    </div>
+                    <div class="flex justify-center text-xl opacity-40">⇅</div>
+                    <div>
+                        <label class="block text-xs font-bold opacity-70 mb-1">Roupies mauriciennes (Rs)</label>
+                        <input type="number" inputmode="decimal" id="converter-mur-input" oninput="handleConverterInput('mur')" placeholder="0" class="w-full bg-[var(--color-bg)] rounded-2xl p-3.5 text-xl font-bold outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all">
+                    </div>
                 </div>
             </div>
         </div>
@@ -575,7 +599,6 @@
         if (!appData.transports || appData.transports.length === 0) appData.transports = DEFAULT_TRANSPORTS_LOCAUX;
 
         let rawCurrencyRate = 50.5;
-        let isMurToEur = false;
 
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
@@ -968,27 +991,28 @@
             updateCurrencyUI();
         }
 
-        function toggleCurrency() {
-            isMurToEur = !isMurToEur;
-            updateCurrencyUI();
-        }
-
         function updateCurrencyUI() {
             const valEl = document.getElementById('currency-rate');
-            const symEl = document.getElementById('currency-symbol');
-            const descEl = document.getElementById('currency-desc');
-            const titleEl = document.getElementById('currency-title');
+            valEl.innerText = rawCurrencyRate.toFixed(1);
+        }
 
-            if(isMurToEur) {
-                titleEl.innerText = "Taux MUR/EUR";
-                valEl.innerText = (1 / rawCurrencyRate).toFixed(3);
-                symEl.innerText = "€";
-                descEl.innerText = "Pour 1 Rs";
+        function openCurrencyConverter() {
+            document.getElementById('currency-converter-rate-label').innerText = `1 € = ${rawCurrencyRate.toFixed(2)} Rs`;
+            document.getElementById('converter-eur-input').value = '1';
+            document.getElementById('converter-mur-input').value = rawCurrencyRate.toFixed(2);
+            openModal('modal-currency-converter');
+        }
+
+        function handleConverterInput(source) {
+            const eurInput = document.getElementById('converter-eur-input');
+            const murInput = document.getElementById('converter-mur-input');
+
+            if (source === 'eur') {
+                const eurVal = parseFloat(eurInput.value);
+                murInput.value = isNaN(eurVal) ? '' : (eurVal * rawCurrencyRate).toFixed(2);
             } else {
-                titleEl.innerText = "Taux EUR/MUR";
-                valEl.innerText = rawCurrencyRate.toFixed(1);
-                symEl.innerText = "Rs";
-                descEl.innerText = "Pour 1 €";
+                const murVal = parseFloat(murInput.value);
+                eurInput.value = isNaN(murVal) ? '' : (murVal / rawCurrencyRate).toFixed(2);
             }
         }
 
